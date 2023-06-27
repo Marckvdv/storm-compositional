@@ -139,6 +139,9 @@ if (STORM_DEVELOPER)
         set(CMAKE_BUILD_TYPE "DEBUG")
     endif()
     add_definitions(-DSTORM_DEV)
+
+    # TODO remove:
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfatal-errors")
 else()
     set(STORM_LOG_DISABLE_DEBUG ON)
     if (NOT CMAKE_BUILD_TYPE)

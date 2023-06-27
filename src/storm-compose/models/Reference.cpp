@@ -11,13 +11,24 @@ Reference<ValueType>::Reference(OpenMdpManager<ValueType>& manager, std::string 
 }
 
 template<typename ValueType>
-bool Reference<ValueType>::isReference() {
+bool Reference<ValueType>::isReference() const {
     return true;
 }
 
 template<typename ValueType>
-std::string Reference<ValueType>::getReference() {
+std::string Reference<ValueType>::getReference() const {
     return reference;
+}
+
+template <typename ValueType>
+void Reference<ValueType>::accept(visitor::OpenMdpVisitor<ValueType>& visitor) {
+    visitor.visitReference(*this);
+}
+
+template <typename ValueType>
+std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> Reference<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entranceExit, typename OpenMdp<ValueType>::Scope& scope) const {
+    auto openMdp = this->manager.dereference(reference);
+    return openMdp->collectEntranceExit(entranceExit, scope);
 }
 
 template class Reference<storm::RationalNumber>;

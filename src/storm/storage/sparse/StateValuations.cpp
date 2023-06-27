@@ -312,6 +312,16 @@ std::size_t StateValuations::hash() const {
     return 0;
 }
 
+boost::optional<uint64_t> StateValuations::findState(StateValuation const& stateVal) const {
+    for (size_t i = 0; i < valuations.size(); ++i) {
+        if (valuations[i].integerValues == stateVal.integerValues) {
+            return i;
+        }
+    }
+
+    return boost::none;
+}
+
 StateValuations StateValuations::selectStates(storm::storage::BitVector const& selectedStates) const {
     return StateValuations(variableToIndexMap, storm::utility::vector::filterVector(valuations, selectedStates));
 }

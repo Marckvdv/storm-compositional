@@ -3,8 +3,10 @@
 #include <string>
 #include <boost/optional.hpp>
 #include <memory>
+#include <vector>
 
 #include "storm/adapters/RationalNumberAdapter.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "OpenMdpManager.h"
 
 /*
@@ -15,9 +17,9 @@
 
  data OpenMdp =
    ConcreteMdp([State], [State], [State], [State]) |
-   Sum([OpenMdp], Map String String) |
-   Sequence([OpenMdp], Map String String) |
-   Trace(OpenMdp, Map String String) |
+   Sum([OpenMdp]) |
+   Sequence([OpenMdp]) |
+   Trace(OpenMdp, Int, Int) |
    Reference(String)
 
  Additionally, everything can be named so that we can use references (by name)
@@ -28,6 +30,14 @@ namespace models {
 
 template<typename ValueType>
 class OpenMdpManager;
+
+template<typename ValueType>
+class ConcreteMdp;
+
+namespace visitor {
+template<typename ValueType>
+class OpenMdpVisitor;
+}
 
 //template<typename ValueType>
 //class Reference;
@@ -45,18 +55,50 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
     /// Does not check for loops
     std::shared_ptr<OpenMdp<ValueType>> followReferences();
     OpenMdpManager<ValueType>& getManager();
+    OpenMdpManager<ValueType> const& getManager() const;
 
-    virtual bool isConcreteMdp();
-    virtual bool isSum();
-    virtual bool isSequence();
-    virtual bool isTrace();
-    virtual bool isReference();
-    virtual bool isPrismModel();
+    virtual bool isConcreteMdp() const;
+    virtual bool isSum() const;
+    virtual bool isSequence() const;
+    virtual bool isTrace() const;
+    virtual bool isReference() const;
+    virtual bool isPrismModel() const;
     std::shared_ptr<OpenMdp<ValueType>> toOpenMdp();
 
-    private:
-        boost::optional<std::string> name;
-        OpenMdpManager<ValueType> &manager;
+    struct Scope {
+        std::vector<size_t> scope;
+
+        void pushScope(size_t s) {
+            scope.push_back(s);
+        }
+
+        size_t popScope() {
+            size_t r = scope.back();
+            scope.pop_back();
+            return r;
+        }
+
+        void appendScope(const Scope& other) {
+            scope.insert(std::end(scope), std::begin(other.scope), std::end(other.scope));
+        }
+    };
+
+    struct ConcreteEntranceExit {
+        ConcreteMdp<ValueType> const* mdp;
+        size_t state;
+        Scope scope;
+    };
+
+    enum EntranceExit { L_ENTRANCE, R_ENTRANCE, L_EXIT, R_EXIT };
+    static EntranceExit match(EntranceExit entranceExit);
+
+    // visitor pattern for easier recursion of the OpenMdp structure
+    virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) = 0;
+    virtual std::vector<ConcreteEntranceExit> collectEntranceExit(EntranceExit entryExit, Scope& scope) const = 0;
+
+    protected:
+    boost::optional<std::string> name;
+    OpenMdpManager<ValueType> &manager;
 };
 
 template class OpenMdp<storm::RationalNumber>;

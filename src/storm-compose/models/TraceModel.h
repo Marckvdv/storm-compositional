@@ -9,25 +9,22 @@ namespace storm {
 namespace models {
 
 namespace visitor {
-template <typename ValueType> class OpenMdpVisitor;
-template <typename ValueType> class OpenMdpToDotVisitor;
-template <typename ValueType> class OpenMdpPrintVisitor;
+template <typename ValueType>
+class OpenMdpToDotVisitor;
 }
 
 template <typename ValueType>
-class SequenceModel : public OpenMdp<ValueType> {
+class TraceModel : public OpenMdp<ValueType> {
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
-    friend class visitor::OpenMdpPrintVisitor<ValueType>;
 
     public:
-    SequenceModel(OpenMdpManager<ValueType>& manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values);
-
+    TraceModel(OpenMdpManager<ValueType>& manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right);
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
-    std::vector<std::shared_ptr<OpenMdp<ValueType>>>& getValues();
 
     private:
-    std::vector<std::shared_ptr<OpenMdp<ValueType>>> values;
+    std::shared_ptr<OpenMdp<ValueType>> value;
+    size_t left, right;
 };
 
 }

@@ -1,26 +1,23 @@
-#include "storm/utility/initialize.h"
 #include "storm/adapters/RationalNumberAdapter.h"
-
-#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 #include "storm/settings/modules/DebugSettings.h"
 #include "storm/settings/modules/GeneralSettings.h"
-
-#include "storm-compose-cli/settings/ComposeSettings.h"
 #include "storm/analysis/GraphConditions.h"
-
-#include "storm-cli-utilities/cli.h"
-#include "storm-cli-utilities/model-handling.h"
-
 #include "storm/api/storm.h"
 #include "storm/modelchecker/results/ExplicitQualitativeCheckResult.h"
+#include "storm/utility/initialize.h"
 #include "storm/utility/NumberTraits.h"
 #include "storm/utility/SignalHandler.h"
 #include "storm/utility/Stopwatch.h"
-
 #include "storm/exceptions/NotSupportedException.h"
 #include "storm/exceptions/UnexpectedException.h"
+#include "storm-cli-utilities/cli.h"
+#include "storm-cli-utilities/model-handling.h"
 
+#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm-compose-cli/settings/ComposeSettings.h"
 #include "storm-compose/parser/JsonStringDiagramParser.h"
+#include "storm-compose/models/visitor/OpenMdpPrintVisitor.h"
+#include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
 
 #include <typeinfo>
 
@@ -31,6 +28,7 @@ namespace cli {
 template<typename ValueType>
 void performModelChecking() {
     auto const& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
+    auto const& ioSettings = storm::settings::getModule<storm::settings::modules::IOSettings>();
 
     std::string fileName = composeSettings.getStringDiagramFilename();
     STORM_PRINT_AND_LOG("Reading string diagram " << fileName << "\n");
@@ -38,6 +36,18 @@ void performModelChecking() {
     storm::models::OpenMdpManager<ValueType> omdpManager;
     auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(fileName, omdpManager);
     parser.parse();
+
+    auto root = omdpManager.getRoot();
+
+    if (ioSettings.isExportDotSet()) {
+        std::ofstream dotOutFile;
+        std::string name = ioSettings.getExportDotFilename();
+        utility::openFile(name, dotOutFile);
+
+        storm::models::visitor::OpenMdpToDotVisitor<ValueType> printDot(dotOutFile);
+        omdpManager.constructConcreteMdps();
+        printDot.visitRoot(*root);
+    }
 }
 
 void processOptions() {
@@ -49,9 +59,8 @@ void processOptions() {
         return;
     }
 
-
     if (generalSettings.isExactSet()) {
-        //performModelChecking<storm::RationalNumber>();
+        performModelChecking<storm::RationalNumber>();
     } else {
         performModelChecking<double>();
     }

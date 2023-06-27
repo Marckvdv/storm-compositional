@@ -137,6 +137,9 @@ class StateValuations : public storm::models::sparse::StateAnnotation {
 
     virtual std::size_t hash() const;
 
+    /// Find the state with the given valuation (if it exists)
+    boost::optional<uint64_t> findState(StateValuation const& stateVal) const;
+
    private:
     StateValuations(std::map<storm::expressions::Variable, uint64_t> const& variableToIndexMap, std::vector<StateValuation>&& valuations);
     bool assertValuation(StateValuation const& valuation) const;

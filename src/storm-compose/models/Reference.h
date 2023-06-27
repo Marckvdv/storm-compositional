@@ -6,14 +6,24 @@ namespace storm {
 namespace models {
 
 template<typename ValueType>
+class OpenMdp;
+
+namespace visitor {
+template<typename ValueType>
+class OpenMdpVisitor;
+}
+
+template<typename ValueType>
 class Reference : public OpenMdp<ValueType> {
     public:
     Reference(OpenMdpManager<ValueType>& manager, std::string reference);
     ~Reference() override {}
 
-    bool isReference() override;
+    bool isReference() const override;
 
-    std::string getReference();
+    std::string getReference() const;
+    virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
+    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
 
     private:
     std::string reference;

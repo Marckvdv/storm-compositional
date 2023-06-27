@@ -39,38 +39,60 @@ OpenMdpManager<ValueType>& OpenMdp<ValueType>::getManager() {
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isConcreteMdp() {
+OpenMdpManager<ValueType> const& OpenMdp<ValueType>::getManager() const {
+    return manager;
+}
+
+template<typename ValueType>
+bool OpenMdp<ValueType>::isConcreteMdp() const {
     return false;
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isSum() {
+bool OpenMdp<ValueType>::isSum() const {
     return false;
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isSequence() {
+bool OpenMdp<ValueType>::isSequence() const {
     return false;
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isTrace() {
+bool OpenMdp<ValueType>::isTrace() const {
     return false;
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isReference() {
+bool OpenMdp<ValueType>::isReference() const {
     return false;
 }
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::isPrismModel() {
+bool OpenMdp<ValueType>::isPrismModel() const {
     return false;
 }
 
 template<typename ValueType>
 std::shared_ptr<OpenMdp<ValueType>> OpenMdp<ValueType>::toOpenMdp() {
     return std::dynamic_pointer_cast<OpenMdp<ValueType>>(this->shared_from_this());
+}
+
+template<typename ValueType>
+typename OpenMdp<ValueType>::EntranceExit OpenMdp<ValueType>::match(EntranceExit entranceExit) {
+    switch (entranceExit) {
+        case OpenMdp<ValueType>::L_ENTRANCE:
+            return OpenMdp<ValueType>::R_EXIT;
+
+        case OpenMdp<ValueType>::R_ENTRANCE:
+            return OpenMdp<ValueType>::L_EXIT;
+
+        case OpenMdp<ValueType>::L_EXIT:
+            return OpenMdp<ValueType>::R_ENTRANCE;
+
+        case OpenMdp<ValueType>::R_EXIT:
+            return OpenMdp<ValueType>::L_ENTRANCE;
+    }
 }
 
 }

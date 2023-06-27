@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OpenMdp.h"
+#include "storm/models/sparse/Mdp.h"
 
 #include <unordered_map>
 
@@ -15,10 +16,13 @@ class OpenMdpManager {
     public:
     OpenMdpManager();
 
-    std::shared_ptr<OpenMdp<ValueType>> dereference(const std::string& name);
+    std::shared_ptr<OpenMdp<ValueType>> dereference(const std::string& name) const;
     void setRoot(std::shared_ptr<OpenMdp<ValueType>> root);
+    std::shared_ptr<OpenMdp<ValueType>> getRoot() const;
     void setReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference);
     void addReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference);
+    void constructConcreteMdps();
+    storm::models::sparse::Mdp<ValueType> constructFlatMdp();
 
     private:
     std::shared_ptr<OpenMdp<ValueType>> root;

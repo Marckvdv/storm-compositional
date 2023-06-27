@@ -9,11 +9,17 @@
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/SequenceModel.h"
+#include "storm-compose/models/TraceModel.h"
 
 #include <sstream>
 
 namespace storm {
 namespace parser {
+
+template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::LEFT_ENTRANCE = ">|";
+template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::RIGHT_ENTRANCE = "|<";
+template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::LEFT_EXIT = "<|";
+template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::RIGHT_EXIT = "|>";
 
 template<typename ValueType>
 JsonStringDiagramParser<ValueType>::JsonStringDiagramParser(storm::json<ValueType> data, storm::models::OpenMdpManager<ValueType>& manager)
@@ -58,10 +64,14 @@ std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<Value
     std::string type = data["type"].template get<std::string>();
     if (type == "prism")
         return parsePrismModel(data);
-    if (type == "sum")
+    else if (type == "sum")
         return parseSumModel(data);
-    if (type == "sequence")
+    else if (type == "sequence")
         return parseSequenceModel(data);
+    else if (type == "trace")
+        return parseTraceModel(data);
+    else
+        STORM_LOG_THROW(false, storm::exceptions::UnexpectedException, "type not supported (yet?)");
 }
 
 template<typename ValueType>
@@ -73,7 +83,20 @@ std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<Value
 template<typename ValueType>
 std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<ValueType>::parsePrismModel(const storm::json<ValueType>& data) {
     std::string path = data["path"].template get<std::string>();
-    return std::make_shared<storm::models::PrismModel<ValueType>>(manager, path);
+
+    std::vector<std::string> lEntrance, rEntrance, lExit, rExit;
+    if (data.count(LEFT_ENTRANCE) != 0)
+        lEntrance = parseStateValuations(data[LEFT_ENTRANCE]);
+    if (data.count(RIGHT_ENTRANCE) != 0)
+        rEntrance = parseStateValuations(data[RIGHT_ENTRANCE]);
+    if (data.count(LEFT_EXIT) != 0)
+        lExit = parseStateValuations(data[LEFT_EXIT]);
+    if (data.count(RIGHT_EXIT) != 0)
+        rExit = parseStateValuations(data[RIGHT_EXIT]);
+
+    return std::static_pointer_cast<storm::models::OpenMdp<ValueType>>(
+        std::make_shared<storm::models::PrismModel<ValueType>>(manager, path,
+            lEntrance, rEntrance, lExit, rExit));
 }
 
 template<typename ValueType>
@@ -94,6 +117,31 @@ std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<Value
     }
 
     return std::make_shared<storm::models::SequenceModel<ValueType>>(manager, values);
+}
+
+template<typename ValueType>
+std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<ValueType>::parseTraceModel(const storm::json<ValueType>& data) {
+    std::shared_ptr<storm::models::OpenMdp<ValueType>> value = parseOpenMdp(data["value"]);
+    int64_t left = data.count("left") == 0 ? 0 : data["left"].template get<int64_t>();
+    int64_t right = data.count("right") == 0 ? 0 : data["right"].template get<int64_t>();
+    STORM_LOG_ASSERT(left >= 0 && right >= 0, "left and right need to be positive");
+
+    return std::make_shared<storm::models::TraceModel<ValueType>>(manager, value, left, right);
+}
+
+template<typename ValueType>
+std::string JsonStringDiagramParser<ValueType>::parseStateValuation(const storm::json<ValueType>& data) {
+    std::string str = data.template get<std::string>();
+    return str;
+}
+
+template<typename ValueType>
+std::vector<std::string> JsonStringDiagramParser<ValueType>::parseStateValuations(const storm::json<ValueType>& data) {
+    std::vector<std::string> stateValuations;
+    for (const auto &entry : data) {
+        stateValuations.push_back(parseStateValuation(entry));
+    }
+    return stateValuations;
 }
 
 template class JsonStringDiagramParser<storm::RationalNumber>;
