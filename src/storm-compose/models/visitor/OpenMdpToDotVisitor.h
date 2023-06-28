@@ -93,10 +93,10 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << "}" << std::endl;
     }
 
-    virtual void visitPrismModel(const PrismModel<ValueType>& model) override {
+    virtual void visitPrismModel(PrismModel<ValueType>& model) override {
     }
 
-    virtual void visitConcreteModel(const ConcreteMdp<ValueType>& model) override {
+    virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
         auto drawEntranceExit = [&] (auto& entranceExit, std::string text, std::string extra="") {
@@ -138,13 +138,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         clusterCount++;
     }
 
-    virtual void visitReference(const Reference<ValueType>& reference) override {
-        const auto& manager = reference.getManager();
-        auto dereferenced = manager.dereference(reference.getReference());
-        dereferenced->accept(*this);
-    }
-
-    virtual void visitSequenceModel(const SequenceModel<ValueType>& model) override {
+    virtual void visitSequenceModel(SequenceModel<ValueType>& model) override {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
         size_t i = 0;
@@ -195,7 +189,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << ";\n}" << std::endl;
     }
 
-    virtual void visitSumModel(const SumModel<ValueType>& model) override {
+    virtual void visitSumModel(SumModel<ValueType>& model) override {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
         size_t i = 0;
@@ -211,7 +205,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << ";\n}" << std::endl;
     }
 
-    virtual void visitTraceModel(const TraceModel<ValueType>& model) override {
+    virtual void visitTraceModel(TraceModel<ValueType>& model) override {
         model.value->accept(*this);
 
         auto lEntrances = model.value->collectEntranceExit(OpenMdp<ValueType>::L_ENTRANCE, scope);

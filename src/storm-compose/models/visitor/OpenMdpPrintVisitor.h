@@ -24,12 +24,12 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         }
     }
 
-    virtual void visitPrismModel(const PrismModel<ValueType>& model) override {
+    virtual void visitPrismModel(PrismModel<ValueType>& model) override {
         printIndentation(scope);
         out << "PRISM(\"" << model.getPath() << "\")" << std::endl;
     }
 
-    virtual void visitConcreteModel(const ConcreteMdp<ValueType>& model) override {
+    virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         printIndentation(scope);
         out << "CONCRETE " << model.getMdp()->getNumberOfStates() << " STATES(";
         if (model.lEntrance.size() > 0)
@@ -43,7 +43,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         out << ")";
     }
 
-    virtual void visitReference(const Reference<ValueType>& reference) override {
+    virtual void visitReference(Reference<ValueType>& reference) override {
         out << std::endl;
         printIndentation(scope);
         out << reference.getReference() << " (=";
@@ -52,7 +52,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         out << ")";
     }
 
-    virtual void visitSequenceModel(const SequenceModel<ValueType>& model) override {
+    virtual void visitSequenceModel(SequenceModel<ValueType>& model) override {
         printIndentation(scope);
         out << "SEQUENCE(";
         size_t i = 0;
@@ -64,7 +64,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         out << ")";
     }
 
-    virtual void visitSumModel(const SumModel<ValueType>& model) override {
+    virtual void visitSumModel(SumModel<ValueType>& model) override {
         printIndentation(scope);
         out << "SUM(";
         size_t i = 0;

@@ -23,12 +23,33 @@ class OpenMdpVisitor {
     public:
     virtual ~OpenMdpVisitor() = 0;
 
-    virtual void visitPrismModel(const PrismModel<ValueType>& model) {}
-    virtual void visitConcreteModel(const ConcreteMdp<ValueType>& model) {}
-    virtual void visitReference(const Reference<ValueType>& reference) {}
-    virtual void visitSequenceModel(const SequenceModel<ValueType>& model) {}
-    virtual void visitSumModel(const SumModel<ValueType>& model) {}
-    virtual void visitTraceModel(const TraceModel<ValueType>& model) {}
+    virtual void visitPrismModel(PrismModel<ValueType>& model) {
+    }
+
+    virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) {
+    }
+
+    virtual void visitReference(Reference<ValueType>& reference) {
+        const auto& manager = reference.getManager();
+        auto dereferenced = manager.dereference(reference.getReference());
+        dereferenced->accept(*this);
+    }
+
+    virtual void visitSequenceModel(SequenceModel<ValueType>& model) {
+        for (const auto& m : model.values) {
+            m->accept(*this);
+        }
+    }
+
+    virtual void visitSumModel(SumModel<ValueType>& model) {
+        for (const auto& m : model.values) {
+            m->accept(*this);
+        }
+    }
+
+    virtual void visitTraceModel(TraceModel<ValueType>& model) {
+        model.value->accept(*this);
+    }
 };
 
 template<typename ValueType>

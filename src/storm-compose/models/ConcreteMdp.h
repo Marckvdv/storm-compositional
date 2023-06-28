@@ -2,6 +2,7 @@
 
 #include "OpenMdp.h"
 #include "storm/models/sparse/Mdp.h"
+#include "visitor/FlatMdpBuilderVisitor.h"
 
 namespace storm {
 namespace models {
@@ -11,12 +12,14 @@ template<typename ValueType> class OpenMdp;
 namespace visitor {
 template<typename ValueType> class OpenMdpPrintVisitor;
 template<typename ValueType> class OpenMdpToDotVisitor;
+template<typename ValueType> class FlatMdpBuidlerVisitor;
 }
 
 template<typename ValueType>
 class ConcreteMdp : public OpenMdp<ValueType> {
     friend class visitor::OpenMdpPrintVisitor<ValueType>;
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
+    friend class visitor::FlatMdpBuilderVisitor<ValueType>;
 
     public:
     ConcreteMdp(OpenMdpManager<ValueType>& manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp,

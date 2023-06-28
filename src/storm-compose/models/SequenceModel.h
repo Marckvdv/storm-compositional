@@ -18,6 +18,7 @@ template <typename ValueType>
 class SequenceModel : public OpenMdp<ValueType> {
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
     friend class visitor::OpenMdpPrintVisitor<ValueType>;
+    friend class visitor::OpenMdpVisitor<ValueType>;
 
     public:
     SequenceModel(OpenMdpManager<ValueType>& manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values);
