@@ -47,7 +47,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         out << std::endl;
         printIndentation(scope);
         out << reference.getReference() << " (=";
-        auto pointsTo = reference.getManager().dereference(reference.getReference());
+        auto pointsTo = reference.getManager()->dereference(reference.getReference());
         pointsTo->accept(*this);
         out << ")";
     }

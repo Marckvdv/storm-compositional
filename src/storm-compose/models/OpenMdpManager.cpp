@@ -32,6 +32,7 @@ std::shared_ptr<OpenMdp<ValueType>> OpenMdpManager<ValueType>::getRoot() const {
 template<typename ValueType>
 void OpenMdpManager<ValueType>::setReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference) {
     references[name] = reference;
+    reference->setName(name);
 }
 
 template<typename ValueType>
@@ -52,21 +53,6 @@ void OpenMdpManager<ValueType>::constructConcreteMdps() {
             setReference(entry.first, std::make_shared<ConcreteMdp<ValueType>>(concreteMdp));
         }
     }
-}
-
-template<typename ValueType>
-storm::models::sparse::Mdp<ValueType> constructFlatMdp() {
-    // How to connect entrances and exits?  Construct iterators that can iterate
-    // over a OpenMdp's exits and entrances.  I.e., a Sequence only exposes the
-    // left of the first MDP and the right of the last MDP A Sum exposes
-    // entrances and exits consecutively.  Once we have these iterators, for a
-    // sequence operation we can simply connect all right exits of the first MDP
-    // with all the left entrances of the second MDP, in a zipped manner.  The
-    // iterator should return a reference to the concrete MDP together with the
-    // state index inside the concrete MDP for the given exit/entrance.
-    //
-    // Alternatively, do not use iterators and simply collect all the required
-    // entrances/exits in one sweep.
 }
 
 template class OpenMdpManager<storm::RationalNumber>;

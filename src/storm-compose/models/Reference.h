@@ -5,18 +5,17 @@
 namespace storm {
 namespace models {
 
-template<typename ValueType>
-class OpenMdp;
+template<typename ValueType> class OpenMdp;
+template<typename ValueType> class OpenMdpManager;
 
 namespace visitor {
-template<typename ValueType>
-class OpenMdpVisitor;
+template<typename ValueType> class OpenMdpVisitor;
 }
 
 template<typename ValueType>
 class Reference : public OpenMdp<ValueType> {
     public:
-    Reference(OpenMdpManager<ValueType>& manager, std::string reference);
+    Reference(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::string reference);
     ~Reference() override {}
 
     bool isReference() const override;

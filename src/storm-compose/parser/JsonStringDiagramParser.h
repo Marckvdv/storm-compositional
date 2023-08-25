@@ -6,6 +6,7 @@
 
 #include <string>
 #include <memory>
+#include <boost/filesystem/path.hpp>
 
 namespace storm {
 namespace parser {
@@ -15,9 +16,8 @@ class JsonStringDiagramParser {
     public:
     typedef std::string StateValuation;
 
-    JsonStringDiagramParser(storm::json<ValueType> data, storm::models::OpenMdpManager<ValueType>& manager);
-    static JsonStringDiagramParser<ValueType> fromString(const std::string& str, storm::models::OpenMdpManager<ValueType>& manager);
-    static JsonStringDiagramParser<ValueType> fromFilePath(const std::string& path,  storm::models::OpenMdpManager<ValueType>& manager);
+    JsonStringDiagramParser(storm::json<ValueType> data, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, boost::filesystem::path root);
+    static JsonStringDiagramParser<ValueType> fromFilePath(const std::string& path, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager);
 
     const static std::string LEFT_ENTRANCE, RIGHT_ENTRANCE, LEFT_EXIT, RIGHT_EXIT;
 
@@ -25,6 +25,8 @@ class JsonStringDiagramParser {
     void parse();
 
     private:
+    static storm::json<ValueType> parseJson(const std::string& str);
+
     std::shared_ptr<storm::models::OpenMdp<ValueType>> parseOpenMdp(const storm::json<ValueType>& data);
     std::shared_ptr<storm::models::OpenMdp<ValueType>> parseReference(const storm::json<ValueType>& data);
     std::shared_ptr<storm::models::OpenMdp<ValueType>> parsePrismModel(const storm::json<ValueType>& data);
@@ -36,7 +38,8 @@ class JsonStringDiagramParser {
     std::vector<StateValuation> parseStateValuations(const storm::json<ValueType>& data);
 
     storm::json<ValueType> data;
-    storm::models::OpenMdpManager<ValueType>& manager;
+    std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
+    boost::filesystem::path root;
 };
 
 }  // namespace exceptions

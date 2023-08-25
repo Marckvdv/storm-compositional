@@ -12,7 +12,7 @@ template<typename ValueType> class OpenMdp;
 namespace visitor {
 template<typename ValueType> class OpenMdpPrintVisitor;
 template<typename ValueType> class OpenMdpToDotVisitor;
-template<typename ValueType> class FlatMdpBuidlerVisitor;
+template<typename ValueType> class FlatMdpBuilderVisitor;
 }
 
 template<typename ValueType>
@@ -22,9 +22,13 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     friend class visitor::FlatMdpBuilderVisitor<ValueType>;
 
     public:
-    ConcreteMdp(OpenMdpManager<ValueType>& manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp,
+    ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
+    ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp,
                 std::vector<size_t> lEntrance = {}, std::vector<size_t> rEntrance = {}, std::vector<size_t> lExit = {}, std::vector<size_t> rExit = {});
+    //ConcreteMdp(ConcreteMdp const&) = default;
     ~ConcreteMdp();
+
+
     bool isConcreteMdp() const override;
     void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> getMdp();
@@ -36,9 +40,6 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;
     std::vector<size_t> lEntrance, rEntrance, lExit, rExit;
 };
-
-template class ConcreteMdp<double>;
-template class ConcreteMdp<storm::RationalNumber>;
 
 }
 }

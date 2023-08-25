@@ -28,6 +28,7 @@
 #include "storm/settings/modules/SylvanSettings.h"
 #include "storm/settings/modules/TopologicalEquationSolverSettings.h"
 #include "storm/settings/modules/TransformationSettings.h"
+#include "storm/settings/modules/MultiObjectiveSettings.h"
 
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 
@@ -62,6 +63,7 @@ void initializeComposeSettings(std::string const& name, std::string const& execu
     storm::settings::addModule<storm::settings::modules::MultiplierSettings>();
     storm::settings::addModule<storm::settings::modules::HintSettings>();
     storm::settings::addModule<storm::settings::modules::OviSolverSettings>();
+    storm::settings::addModule<storm::settings::modules::MultiObjectiveSettings>();
 }
 }  // namespace settings
 }  // namespace storm

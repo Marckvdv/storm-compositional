@@ -648,6 +648,10 @@ storm::prism::InitialConstruct const& Program::getInitialConstruct() const {
     return this->initialConstruct.get();
 }
 
+void Program::setInitialConstruct(InitialConstruct newInitialConstruct) {
+    initialConstruct = newInitialConstruct;
+}
+
 boost::optional<InitialConstruct> const& Program::getOptionalInitialConstruct() const {
     return this->initialConstruct;
 }

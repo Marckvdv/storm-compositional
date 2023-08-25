@@ -4,7 +4,7 @@ namespace storm {
 namespace models {
 
 template <typename ValueType>
-TraceModel<ValueType>::TraceModel(OpenMdpManager<ValueType>& manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right)
+TraceModel<ValueType>::TraceModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right)
     : OpenMdp<ValueType>(manager), value(value), left(left), right(right) {
 }
 

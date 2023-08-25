@@ -18,6 +18,10 @@
 #include "storm-compose/parser/JsonStringDiagramParser.h"
 #include "storm-compose/models/visitor/OpenMdpPrintVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
+#include "storm-compose/models/visitor/ParetoVisitor.h"
+
+#include "storm-parsers/parser/ExpressionParser.h"
 
 #include <typeinfo>
 
@@ -33,20 +37,50 @@ void performModelChecking() {
     std::string fileName = composeSettings.getStringDiagramFilename();
     STORM_PRINT_AND_LOG("Reading string diagram " << fileName << "\n");
 
-    storm::models::OpenMdpManager<ValueType> omdpManager;
+    auto omdpManager = std::make_shared<storm::models::OpenMdpManager<ValueType>>();
     auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(fileName, omdpManager);
     parser.parse();
 
-    auto root = omdpManager.getRoot();
+    auto root = omdpManager->getRoot();
 
+    storm::models::visitor::ParetoVisitor<ValueType> paretoVisitor(omdpManager);
+    root->accept(paretoVisitor);
+
+    //auto concurrentMdp = paretoVisitor.getCurrent();
+    //auto mdp = concurrentMdp.getMdp();
+
+    //if (ioSettings.isExportDotSet()) {
+    //    std::ofstream dotOutFile;
+    //    std::string name = ioSettings.getExportDotFilename();
+    //    utility::openFile(name, dotOutFile);
+
+    //    mdp->writeDotToStream(dotOutFile);
+    //}
+
+    omdpManager->constructConcreteMdps();
+
+    /*
     if (ioSettings.isExportDotSet()) {
         std::ofstream dotOutFile;
         std::string name = ioSettings.getExportDotFilename();
         utility::openFile(name, dotOutFile);
 
         storm::models::visitor::OpenMdpToDotVisitor<ValueType> printDot(dotOutFile);
-        omdpManager.constructConcreteMdps();
         printDot.visitRoot(*root);
+    }
+    */
+
+    storm::models::visitor::FlatMdpBuilderVisitor<ValueType> flatBuilder(omdpManager);
+    root->accept(flatBuilder);
+
+    auto flatMdp = flatBuilder.getCurrent();
+
+    if (ioSettings.isExportDotSet()) {
+        std::ofstream dotOutFile;
+        std::string name = "flat_" + ioSettings.getExportDotFilename();
+        utility::openFile(name, dotOutFile);
+
+        flatMdp.getMdp()->writeDotToStream(dotOutFile);
     }
 }
 

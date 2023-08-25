@@ -4,7 +4,7 @@ namespace storm {
 namespace models {
 
 template <typename ValueType>
-SequenceModel<ValueType>::SequenceModel(OpenMdpManager<ValueType>& manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values) : OpenMdp<ValueType>(manager), values(values) {
+SequenceModel<ValueType>::SequenceModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values) : OpenMdp<ValueType>(manager), values(values) {
 }
 
 template <typename ValueType>

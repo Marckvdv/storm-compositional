@@ -391,6 +391,8 @@ class Program : public LocatedInformation {
      */
     InitialConstruct const& getInitialConstruct() const;
 
+    void setInitialConstruct(InitialConstruct initialConstruct);
+
     /*!
      * Retrieves an optional containing the initial construct of the program if there is any and nothing otherwise.
      *

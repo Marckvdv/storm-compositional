@@ -22,33 +22,40 @@ template <typename ValueType> const std::string JsonStringDiagramParser<ValueTyp
 template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::RIGHT_EXIT = "|>";
 
 template<typename ValueType>
-JsonStringDiagramParser<ValueType>::JsonStringDiagramParser(storm::json<ValueType> data, storm::models::OpenMdpManager<ValueType>& manager)
-    : data(data), manager(manager) {
+JsonStringDiagramParser<ValueType>::JsonStringDiagramParser(storm::json<ValueType> data, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, boost::filesystem::path root)
+    : data(data), manager(manager), root(root) {
 }
 
 template<typename ValueType>
-JsonStringDiagramParser<ValueType> JsonStringDiagramParser<ValueType>::fromString(const std::string& str, storm::models::OpenMdpManager<ValueType>& manager) {
-    return JsonStringDiagramParser<ValueType>(storm::json<ValueType>::parse(str), manager);
+storm::json<ValueType> JsonStringDiagramParser<ValueType>::parseJson(const std::string& str) {
+    // TODO update JSON library to support comments
+    return storm::json<ValueType>::parse(str);
 }
 
 template<typename ValueType>
-JsonStringDiagramParser<ValueType> JsonStringDiagramParser<ValueType>::fromFilePath(const std::string& path, storm::models::OpenMdpManager<ValueType>& manager) {
+JsonStringDiagramParser<ValueType> JsonStringDiagramParser<ValueType>::fromFilePath(const std::string& path, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) {
     std::ifstream f(path);
-    storm::json<ValueType> value = storm::json<ValueType>::parse(f);
-    return JsonStringDiagramParser<ValueType>(value, manager);
+    std::stringstream buffer;
+    buffer << f.rdbuf();
+    storm::json<ValueType> value = JsonStringDiagramParser<ValueType>::parseJson(buffer.str());
+
+    boost::filesystem::path root(path);
+    root.remove_filename();
+
+    return JsonStringDiagramParser<ValueType>(value, manager, root);
 }
 
 template<typename ValueType>
 void JsonStringDiagramParser<ValueType>::parse() {
     storm::json<ValueType> rootData = data["root"];
-    manager.setRoot(parseOpenMdp(rootData));
+    manager->setRoot(parseOpenMdp(rootData));
 
     storm::json<ValueType> components = data["components"];
     for (auto it = components.begin(); it != components.end(); ++it) {
         std::string name = it.key();
         const storm::json<ValueType> value = it.value();
         auto openMdp = parseOpenMdp(value);
-        manager.addReference(name, openMdp);
+        manager->addReference(name, openMdp);
     }
 }
 
@@ -82,8 +89,6 @@ std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<Value
 
 template<typename ValueType>
 std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<ValueType>::parsePrismModel(const storm::json<ValueType>& data) {
-    std::string path = data["path"].template get<std::string>();
-
     std::vector<std::string> lEntrance, rEntrance, lExit, rExit;
     if (data.count(LEFT_ENTRANCE) != 0)
         lEntrance = parseStateValuations(data[LEFT_ENTRANCE]);
@@ -94,9 +99,11 @@ std::shared_ptr<storm::models::OpenMdp<ValueType>> JsonStringDiagramParser<Value
     if (data.count(RIGHT_EXIT) != 0)
         rExit = parseStateValuations(data[RIGHT_EXIT]);
 
+    boost::filesystem::path p(data["path"].template get<std::string>());
+    std::string fullPath = (root / p).native();
+
     return std::static_pointer_cast<storm::models::OpenMdp<ValueType>>(
-        std::make_shared<storm::models::PrismModel<ValueType>>(manager, path,
-            lEntrance, rEntrance, lExit, rExit));
+        std::make_shared<storm::models::PrismModel<ValueType>>(manager, fullPath, lEntrance, rEntrance, lExit, rExit));
 }
 
 template<typename ValueType>

@@ -4,7 +4,7 @@ namespace storm {
 namespace models {
 
 template <typename ValueType>
-SumModel<ValueType>::SumModel(OpenMdpManager<ValueType>& manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values) : OpenMdp<ValueType>(manager), values(values) {
+SumModel<ValueType>::SumModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values) : OpenMdp<ValueType>(manager), values(values) {
 }
 
 template <typename ValueType>

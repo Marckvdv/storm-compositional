@@ -213,8 +213,8 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         auto lExits = model.value->collectEntranceExit(OpenMdp<ValueType>::L_EXIT, scope);
         auto rExits = model.value->collectEntranceExit(OpenMdp<ValueType>::R_EXIT, scope);
 
-        STORM_LOG_ASSERT(model.left <= rEntrances.size() && model.left <= lExits.size(), "error");
-        STORM_LOG_ASSERT(model.right <= lEntrances.size() && model.right <= rExits.size(), "error");
+        STORM_LOG_ASSERT(model.left <= rEntrances.size() && model.left <= lExits.size(), "left greater than available entrance/exits");
+        STORM_LOG_ASSERT(model.right <= lEntrances.size() && model.right <= rExits.size(), "right greater than available entrance/exits");
 
         for (size_t i = 0; i < model.left; ++i) {
             out << printTransition(lExits[i].scope, OpenMdp<ValueType>::L_EXIT, rEntrances[i].scope, OpenMdp<ValueType>::R_ENTRANCE, true);

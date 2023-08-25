@@ -2,6 +2,7 @@
 
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
+#include "storm-compose/models/visitor/ParetoVisitor.h"
 #include "OpenMdp.h"
 #include "OpenMdpManager.h"
 #include "ConcreteMdp.h"
@@ -15,14 +16,16 @@ template<typename ValueType> class OpenMdpManager;
 namespace visitor {
 template<typename ValueType> class OpenMdpVisitor;
 template<typename ValueType> class OpenMdpToDotVisitor;
+template<typename ValueType> class ParetoVisitor;
 }
 
 template<typename ValueType>
 class PrismModel : public OpenMdp<ValueType> {
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
+    friend class visitor::ParetoVisitor<ValueType>;
 
     public:
-    PrismModel(OpenMdpManager<ValueType>& manager, std::string path,
+    PrismModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::string path,
                std::vector<std::string> lEntrance = {}, std::vector<std::string> rEntrance = {},
                std::vector<std::string> lExit = {}, std::vector<std::string> rExit = {});
     ~PrismModel();

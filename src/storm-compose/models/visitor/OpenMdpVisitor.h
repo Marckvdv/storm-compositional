@@ -1,6 +1,7 @@
 #pragma once
 
 #include "storm-compose/models/OpenMdp.h"
+#include "storm-compose/models/Reference.h"
 
 namespace storm {
 namespace models {
@@ -24,14 +25,16 @@ class OpenMdpVisitor {
     virtual ~OpenMdpVisitor() = 0;
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) {
+        // Intentionally left empty
     }
 
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) {
+        // Intentionally left empty
     }
 
     virtual void visitReference(Reference<ValueType>& reference) {
-        const auto& manager = reference.getManager();
-        auto dereferenced = manager.dereference(reference.getReference());
+        const auto manager = reference.getManager();
+        auto dereferenced = manager->dereference(reference.getReference());
         dereferenced->accept(*this);
     }
 

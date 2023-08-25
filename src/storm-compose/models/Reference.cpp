@@ -6,7 +6,7 @@ namespace storm {
 namespace models {
 
 template<typename ValueType>
-Reference<ValueType>::Reference(OpenMdpManager<ValueType>& manager, std::string reference) : OpenMdp<ValueType>(manager), reference(reference) {
+Reference<ValueType>::Reference(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::string reference) : OpenMdp<ValueType>(manager), reference(reference) {
 
 }
 
@@ -27,7 +27,7 @@ void Reference<ValueType>::accept(visitor::OpenMdpVisitor<ValueType>& visitor) {
 
 template <typename ValueType>
 std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> Reference<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entranceExit, typename OpenMdp<ValueType>::Scope& scope) const {
-    auto openMdp = this->manager.dereference(reference);
+    auto openMdp = this->manager->dereference(reference);
     return openMdp->collectEntranceExit(entranceExit, scope);
 }
 

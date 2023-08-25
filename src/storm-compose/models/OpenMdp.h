@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
 #include <boost/optional.hpp>
 #include <memory>
 #include <vector>
+#include <string>
 
 #include "storm/adapters/RationalNumberAdapter.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
@@ -46,16 +46,17 @@ template<typename ValueType>
 class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
     public:
     virtual ~OpenMdp() = 0;
-    OpenMdp(OpenMdpManager<ValueType> &manager);
+    OpenMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
 
     bool hasName();
     std::string getName();
+    void setName(std::string const& name);
 
     /// Follow references until a non-reference type is found
     /// Does not check for loops
     std::shared_ptr<OpenMdp<ValueType>> followReferences();
-    OpenMdpManager<ValueType>& getManager();
-    OpenMdpManager<ValueType> const& getManager() const;
+    std::shared_ptr<OpenMdpManager<ValueType>> getManager();
+    std::shared_ptr<OpenMdpManager<ValueType>> const getManager() const;
 
     virtual bool isConcreteMdp() const;
     virtual bool isSum() const;
@@ -98,7 +99,7 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
 
     protected:
     boost::optional<std::string> name;
-    OpenMdpManager<ValueType> &manager;
+    std::shared_ptr<OpenMdpManager<ValueType>> manager;
 };
 
 template class OpenMdp<storm::RationalNumber>;

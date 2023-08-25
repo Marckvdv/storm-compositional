@@ -22,7 +22,6 @@ class OpenMdpManager {
     void setReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference);
     void addReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference);
     void constructConcreteMdps();
-    storm::models::sparse::Mdp<ValueType> constructFlatMdp();
 
     private:
     std::shared_ptr<OpenMdp<ValueType>> root;
