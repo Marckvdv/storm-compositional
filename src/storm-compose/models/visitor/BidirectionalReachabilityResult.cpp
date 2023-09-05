@@ -25,6 +25,8 @@ size_t BidirectionalReachabilityResult<ValueType>::getIndex(size_t entrance, boo
 template<typename ValueType>
 void BidirectionalReachabilityResult<ValueType>::addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint) {
     size_t index = getIndex(entrance, leftEntrance);
+    STORM_LOG_ASSERT(index < points.size(), "sanity check" << index << " vs " << points.size());
+
     points[index].push_back(paretoOptimalPoint);
 }
 
@@ -34,10 +36,9 @@ const std::vector<typename BidirectionalReachabilityResult<ValueType>::point>& B
 }
 
 template<typename ValueType>
-std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueType>::toConcreteMdp()  {
+std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueType>::toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager)  {
     // Constructing a concrete MDP from a ParetoReachabilityResult is simply turning each point into an action,
     // e.g. the second point for entrance 0 is the second action for state 0, reaching the exits with the probabilities described by the point.
-    storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
 
     // Order of the states is as follows:
     // [0, lEntrances-1] left entrances
@@ -50,14 +51,25 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
         rEntrancesStart = lEntrancesStart + lEntrances,
         lExitsStart = rEntrancesStart + rEntrances,
         rExitsStart = lExitsStart + lExits,
-        entrances = lEntrances + rEntrances;
+        entrances = lEntrances + rEntrances,
+        totalStateCount = lEntrances + rEntrances + lExits + rExits;
 
-    size_t currentRow = 0;
+    storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
+    storm::models::sparse::StateLabeling labeling(totalStateCount);
+    labeling.addLabel("init");
+
+    size_t currentRow = 0, currentState = 0;
     auto buildTransitions = [&](bool leftEntrance) {
         size_t entranceCount = leftEntrance ? lEntrances : rEntrances;
 
         for (size_t entrance = 0; entrance < entranceCount; ++entrance) {
             builder.newRowGroup(currentRow);
+            size_t index = getIndex(entrance, leftEntrance);
+
+            std::string label = (leftEntrance ? "len" : "ren") + std::to_string(entrance);
+            labeling.addLabel(label);
+            labeling.addLabelToState(label, currentState);
+
             const auto& points = getPoints(entrance, leftEntrance);
             for (const auto& point : points) {
                 STORM_LOG_ASSERT(point.size() == lExits + rExits, "expected point size to line up with amount of exits");
@@ -66,25 +78,13 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
                 }
                 ++currentRow;
             }
+            ++currentState;
         }
-    //    for (size_t entrance = 0; entrance < entrances; ++entrance) {
-    //        builder.newRowGroup(currentRow);
-
-    //        const auto& points = getPoints(entrance);
-    //        for (size_t j = 0; j < points.size(); ++j) {
-    //            const auto& point = points[j];
-    //            for (size_t k = 0; k < point.size(); ++k) {
-    //                builder.addNextValue(currentRow, entrances + k, point[k]);
-    //            }
-    //            ++currentRow;
-    //        }
-    //    }
     };
 
     buildTransitions(true); // left entrances
     buildTransitions(false); // right entrances
 
-    const size_t totalStateCount = lEntrances + rEntrances + lExits + rExits;
     for (size_t i = builder.getCurrentRowGroupCount(); i < totalStateCount; ++i) {
         builder.newRowGroup(currentRow);
         builder.addNextValue(currentRow, i, 1);
@@ -92,27 +92,77 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     }
 
     std::vector<size_t> lEntrance, rEntrance, lExit, rExit;
-    size_t currentState = 0;
-    auto pushEntrancesExits = [&] (auto &entranceExit, const size_t count) {
+    currentState = 0;
+    auto pushEntrancesExits = [&] (auto &entranceExit, const size_t count, bool exit, bool leftExit) {
         for (size_t i = 0; i < count; ++i, ++currentState) {
             entranceExit.push_back(currentState);
+            if (exit) {
+                std::string label = (leftExit ? "lex" : "rex") + std::to_string(i);
+                labeling.addLabel(label);
+                labeling.addLabelToState(label, currentState);
+            }
         }
     };
-    pushEntrancesExits(lEntrance, lEntrances);
-    pushEntrancesExits(rEntrance, rEntrances);
-    pushEntrancesExits(lExit, lExits);
-    pushEntrancesExits(rExit, rExits);
+    pushEntrancesExits(lEntrance, lEntrances, false, false);
+    pushEntrancesExits(rEntrance, rEntrances, false, false);
+    pushEntrancesExits(lExit, lExits, true, true);
+    pushEntrancesExits(rExit, rExits, true, false);
 
-    /*
     auto matrix = builder.build();
-    storm::models::sparse::StateLabeling labeling(matrix.getRowGroupCount());
     auto newMdp = std::make_shared<Mdp<ValueType>>(matrix, labeling);
-    this->current = ConcreteMdp<ValueType>(this->manager, newMdp, lEntrance, rEntrance, lExit, rExit);
-    */
+    return std::make_shared<ConcreteMdp<ValueType>>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
+}
+
+template <typename ValueType>
+std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<ValueType> const& result) {
+    os << "Bidirectional reachability result:" << std::endl;
+
+    auto printPoint = [&] (const auto& point) {
+        for (size_t lExit = 0; lExit < result.lExits; ++lExit) {
+            auto value = point[lExit];
+            if (value > 0) {
+                os << "lExit " << lExit << ": " << value << std::endl;
+            }
+        }
+
+        for (size_t rExit = 0; rExit < result.rExits; ++rExit) {
+            auto value = point[result.lExits + rExit];
+            if (value > 0) {
+                os << "rExit " << rExit << ": " << value << std::endl;
+            }
+        }
+    };
+
+    for (size_t lEntrance = 0; lEntrance < result.lEntrances; ++lEntrance) {
+        os << "lEntrance " << lEntrance << ":" << std::endl;
+        size_t idx = 0;
+        for (const auto& point : result.getPoints(lEntrance, true)) {
+            os << "point " << idx << ":" << std::endl;
+            printPoint(point);
+            os << std::endl;
+            ++idx;
+        }
+        os << std::endl;
+    }
+    for (size_t rEntrance = 0; rEntrance < result.rEntrances; ++rEntrance) {
+        os << "rEntrance " << rEntrance << ":" << std::endl;
+        size_t idx = 0;
+        for (const auto& point : result.getPoints(rEntrance, false)) {
+            os << "point " << idx;
+            printPoint(point);
+            os << std::endl;
+            ++idx;
+        }
+        os << std::endl;
+    }
+    return os;
 }
 
 template class BidirectionalReachabilityResult<double>;
 template class BidirectionalReachabilityResult<storm::RationalNumber>;
+
+template std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<double> const& result);
+template std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<storm::RationalNumber> const& result);
 
 }
 }

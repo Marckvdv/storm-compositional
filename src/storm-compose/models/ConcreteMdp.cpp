@@ -59,6 +59,13 @@ std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> ConcreteMdp<Value
     return entries;
 }
 
+template<typename ValueType>
+void ConcreteMdp<ValueType>::exportToDot(std::string path) {
+    std::ofstream outputFile;
+    outputFile.open(path);
+    mdp->writeDotToStream(outputFile);
+}
+
 template class ConcreteMdp<double>;
 template class ConcreteMdp<storm::RationalNumber>;
 

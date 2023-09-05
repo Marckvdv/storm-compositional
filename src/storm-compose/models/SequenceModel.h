@@ -13,6 +13,7 @@ namespace visitor {
 template <typename ValueType> class OpenMdpVisitor;
 template <typename ValueType> class OpenMdpToDotVisitor;
 template <typename ValueType> class OpenMdpPrintVisitor;
+template <typename ValueType> class FlatMdpBuilderVisitor;
 }
 
 template <typename ValueType>

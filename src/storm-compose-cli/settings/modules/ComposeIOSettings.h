@@ -23,11 +23,21 @@ class ComposeIOSettings : public ModuleSettings {
     void finalize() override;
 
     bool isStringDiagramSet() const;
+    bool isEntranceSet() const;
+    bool isExitSet() const;
+    bool isApproachSet() const;
+
     std::string getStringDiagramFilename() const;
+    std::string getEntrance() const;
+    std::string getExit() const;
+    std::string getApproach() const;
 
     // The name of the module.
     static const std::string moduleName;
     static const std::string stringDiagramOption;
+    static const std::string entranceName;
+    static const std::string exitName;
+    static const std::string approachName;
 };
 
 }  // namespace modules

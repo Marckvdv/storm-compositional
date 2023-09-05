@@ -32,6 +32,11 @@ std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> SumModel<ValueTyp
     return entries;
 }
 
+template <typename ValueType>
+std::vector<std::shared_ptr<OpenMdp<ValueType>>> SumModel<ValueType>::getValues() {
+    return values;
+}
+
 template class SumModel<storm::RationalNumber>;
 template class SumModel<double>;
 

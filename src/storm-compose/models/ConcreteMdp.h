@@ -3,6 +3,7 @@
 #include "OpenMdp.h"
 #include "storm/models/sparse/Mdp.h"
 #include "visitor/FlatMdpBuilderVisitor.h"
+#include "visitor/ParetoVisitor.h"
 
 namespace storm {
 namespace models {
@@ -13,13 +14,16 @@ namespace visitor {
 template<typename ValueType> class OpenMdpPrintVisitor;
 template<typename ValueType> class OpenMdpToDotVisitor;
 template<typename ValueType> class FlatMdpBuilderVisitor;
+template<typename ValueType> class ParetoVisitor;
 }
 
 template<typename ValueType>
 class ConcreteMdp : public OpenMdp<ValueType> {
+    // TODO remove these friend classes
     friend class visitor::OpenMdpPrintVisitor<ValueType>;
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
     friend class visitor::FlatMdpBuilderVisitor<ValueType>;
+    friend class visitor::ParetoVisitor<ValueType>;
 
     public:
     ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
@@ -35,6 +39,7 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     const std::shared_ptr<storm::models::sparse::Mdp<ValueType>> getMdp() const;
 
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
+    void exportToDot(std::string path);
 
     private:
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;

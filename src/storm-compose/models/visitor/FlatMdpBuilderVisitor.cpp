@@ -34,10 +34,12 @@ void FlatMdpBuilderVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>
 template <typename ValueType>
 void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
     // Obtain concrete MDPs
+    size_t totalStateCount = 0;
     std::vector<ConcreteMdp<ValueType>> concreteMdps;
     for (auto& m : model.values) {
         m->accept(*this);
         concreteMdps.push_back(current); // TODO remove redundant copying
+        totalStateCount += current.getMdp()->getNumberOfStates();
     }
 
     // Stitch them together.
@@ -53,6 +55,8 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
     //    first MDP. The right entrances and exists are exactly that of the
     //    last MDP + offset.
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
+    storm::models::sparse::StateLabeling labeling(totalStateCount);
+    labeling.addLabel("init");
     size_t offset = 0;
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
 
@@ -60,9 +64,15 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
 
     for (size_t v : concreteMdps[0].lEntrance) {
         lEntrance.push_back(v);
+        //labeling.addLabelToState("init", v);
     }
+    size_t currentExit = 0;
     for (size_t v : concreteMdps[0].lExit) {
         lExit.push_back(v);
+        std::string exitLabel = "lex" + std::to_string(currentExit);
+        labeling.addLabel(exitLabel);
+        labeling.addLabelToState(exitLabel, v);
+        ++currentExit;
     }
 
     for (size_t i = 0; i < concreteMdps.size(); ++i) {
@@ -120,12 +130,17 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
     size_t lastOffset = offset - concreteMdps[lastIndex].getMdp()->getNumberOfStates();
     for (size_t v : concreteMdps[lastIndex].rEntrance) {
         rEntrance.push_back(lastOffset + v);
+        //labeling.addLabelToState("init", lastOffset + v);
     }
+    currentExit = 0;
     for (size_t v : concreteMdps[lastIndex].rExit) {
         rExit.push_back(lastOffset + v);
+        std::string exitLabel = "rex" + std::to_string(currentExit);
+        labeling.addLabel(exitLabel);
+        labeling.addLabelToState(exitLabel, lastOffset + v);
+        ++currentExit;
     }
 
-    storm::models::sparse::StateLabeling labeling(builder.getCurrentRowGroupCount());
     auto newMdp = std::make_shared<Mdp<ValueType>>(builder.build(), labeling);
     current = ConcreteMdp<ValueType>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }
@@ -134,16 +149,21 @@ template <typename ValueType>
 void FlatMdpBuilderVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
     // Obtain concrete MDPs
     std::vector<ConcreteMdp<ValueType>> concreteMdps;
+    size_t totalStateCount = 0;
     for (auto& m : model.values) {
         m->accept(*this);
         concreteMdps.push_back(current); // TODO remove redundant copying
+        totalStateCount += current.getMdp()->getNumberOfStates();
     }
 
     // Stitch them together.
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
+    storm::models::sparse::StateLabeling labeling(totalStateCount);
+
     size_t offset = 0;
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
 
+    size_t leftExitCount = 0, rightExitCount = 0;
     size_t currentRow = 0;
     for (const auto& c : concreteMdps) {
         const auto& transitionMatrix = c.getMdp()->getTransitionMatrix();
@@ -167,15 +187,26 @@ void FlatMdpBuilderVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
             }
         }
 
-        for (size_t v : c.lEntrance) lEntrance.push_back(offset + v);
-        for (size_t v : c.rEntrance) rEntrance.push_back(offset + v);
-        for (size_t v : c.lExit) lExit.push_back(offset + v);
-        for (size_t v : c.rExit) rExit.push_back(offset + v);
+        for (size_t v : c.lEntrance) {
+            lEntrance.push_back(offset + v);
+        } 
+        for (size_t v : c.rEntrance) {
+            rEntrance.push_back(offset + v);
+        }
+        for (size_t v : c.lExit) {
+            lExit.push_back(offset + v);
+            std::string exitLabel = "lex" + std::to_string(leftExitCount);
+            labeling.addLabel(exitLabel);
+            
+            ++leftExitCount;
+        }
+        for (size_t v : c.rExit) {
+            rExit.push_back(offset + v);
+        }
 
         offset += stateCount;
     }
 
-    storm::models::sparse::StateLabeling labeling(builder.getCurrentRowGroupCount());
     auto newMdp = std::make_shared<Mdp<ValueType>>(builder.build(), labeling);
     current = ConcreteMdp<ValueType>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }
@@ -191,7 +222,6 @@ void FlatMdpBuilderVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
     size_t currentRow = 0;
-
 
     const auto& transitionMatrix = current.getMdp()->getTransitionMatrix();
     // Iterate over all states
@@ -244,10 +274,18 @@ void FlatMdpBuilderVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
     }
 
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
-    for (size_t i = model.left; i < current.rEntrance.size(); ++i) rEntrance.push_back(current.rEntrance[i]);
-    for (size_t i = model.right; i < current.lEntrance.size(); ++i) lEntrance.push_back(current.lEntrance[i]);
-    for (size_t i = model.left; i < current.lExit.size(); ++i) lExit.push_back(current.lExit[i]);
-    for (size_t i = model.right; i < current.rExit.size(); ++i) rExit.push_back(current.rExit[i]);
+    for (size_t i = model.left; i < current.rEntrance.size(); ++i) {
+        rEntrance.push_back(current.rEntrance[i]);
+    }
+    for (size_t i = model.right; i < current.lEntrance.size(); ++i) {
+        lEntrance.push_back(current.lEntrance[i]);
+    }
+    for (size_t i = model.left; i < current.lExit.size(); ++i) {
+        lExit.push_back(current.lExit[i]);
+    }
+    for (size_t i = model.right; i < current.rExit.size(); ++i) {
+        rExit.push_back(current.rExit[i]);
+    }
 
     storm::models::sparse::StateLabeling labeling(builder.getCurrentRowGroupCount());
     auto newMdp = std::make_shared<Mdp<ValueType>>(builder.build(), labeling);

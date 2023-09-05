@@ -17,18 +17,18 @@ public:
     BidirectionalReachabilityResult(size_t lEntrances, size_t rEntrances, size_t lExits, size_t rExits);
     void addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint);
     const std::vector<point>& getPoints(size_t entrance, bool leftEntrance) const;
-    std::shared_ptr<ConcreteMdp<ValueType>> toConcreteMdp();
-
-    // TODO later
-    //void setReward(size_t entrance, size_t exit, ValueType value);
-    //ValueType getReward(size_t entrance, size_t exit);
+    std::shared_ptr<ConcreteMdp<ValueType>> toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
 
 private:
     size_t getIndex(size_t entrance, bool leftEntrance) const;
 
+    template <typename T>
+    friend std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<T> const& result);
+
     size_t lEntrances, rEntrances, lExits, rExits;
     std::vector<std::vector<point>> points;
 };
+
 
 }
 }

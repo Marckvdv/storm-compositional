@@ -29,84 +29,106 @@ namespace storm {
 namespace compose {
 namespace cli {
 
-template<typename ValueType>
-void performModelChecking() {
+enum ReachabilityCheckingApproach {
+    MONOLITHIC,
+    NAIVE,
+    WEIGHTED,
+};
+
+template <typename ValueType>
+struct ReachabilityCheckingOptions {
+    ReachabilityCheckingOptions() = default;
+
+    std::shared_ptr<storm::models::OpenMdpManager<ValueType>> omdpManager;
+    std::pair<bool, size_t> entrance {false, 0}, exit {true, 0};
+    ReachabilityCheckingApproach approach = MONOLITHIC;
+};
+
+boost::optional<std::pair<bool, size_t>> parseEntranceExit(std::string text) {
+    if (text.length() < 2) return boost::none;
+
+    bool left = false;
+    if (text[0] == 'l') left = true;
+    else if (text[0] != 'r') return boost::none;
+
+    return boost::optional<std::pair<bool, size_t>>({ left, std::stoi(text.substr(1)) });
+}
+
+
+template <typename ValueType>
+boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
+    ReachabilityCheckingOptions<ValueType> options;
+
     auto const& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
     auto const& ioSettings = storm::settings::getModule<storm::settings::modules::IOSettings>();
+
+    auto entrance = parseEntranceExit(composeSettings.getEntrance());
+    auto exit = parseEntranceExit(composeSettings.getExit());
+    if (!entrance || !exit) return boost::none;
+    options.entrance = *entrance;
+    options.exit = *exit;
+
+    if (composeSettings.isApproachSet()) {
+        std::string approach = composeSettings.getApproach();
+        if (approach == "monolithic") options.approach = MONOLITHIC;
+        else if (approach == "naive") options.approach = NAIVE;
+        else if (approach == "weighted") options.approach = WEIGHTED;
+        else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, approach << "is not supported");
+    }
 
     std::string fileName = composeSettings.getStringDiagramFilename();
     STORM_PRINT_AND_LOG("Reading string diagram " << fileName << "\n");
 
-    auto omdpManager = std::make_shared<storm::models::OpenMdpManager<ValueType>>();
-    auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(fileName, omdpManager);
+    options.omdpManager = std::make_shared<storm::models::OpenMdpManager<ValueType>>();
+    auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(fileName, options.omdpManager);
     parser.parse();
 
-    auto root = omdpManager->getRoot();
+    return options;
+}
 
-    storm::models::visitor::ParetoVisitor<ValueType> paretoVisitor(omdpManager);
-    root->accept(paretoVisitor);
-
-    //auto concurrentMdp = paretoVisitor.getCurrent();
-    //auto mdp = concurrentMdp.getMdp();
-
-    //if (ioSettings.isExportDotSet()) {
-    //    std::ofstream dotOutFile;
-    //    std::string name = ioSettings.getExportDotFilename();
-    //    utility::openFile(name, dotOutFile);
-
-    //    mdp->writeDotToStream(dotOutFile);
-    //}
-
-    omdpManager->constructConcreteMdps();
-
-    /*
-    if (ioSettings.isExportDotSet()) {
-        std::ofstream dotOutFile;
-        std::string name = ioSettings.getExportDotFilename();
-        utility::openFile(name, dotOutFile);
-
-        storm::models::visitor::OpenMdpToDotVisitor<ValueType> printDot(dotOutFile);
-        printDot.visitRoot(*root);
-    }
-    */
-
-    storm::models::visitor::FlatMdpBuilderVisitor<ValueType> flatBuilder(omdpManager);
-    root->accept(flatBuilder);
-
-    auto flatMdp = flatBuilder.getCurrent();
-
-    if (ioSettings.isExportDotSet()) {
-        std::ofstream dotOutFile;
-        std::string name = "flat_" + ioSettings.getExportDotFilename();
-        utility::openFile(name, dotOutFile);
-
-        flatMdp.getMdp()->writeDotToStream(dotOutFile);
+template <typename ValueType>
+void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    switch (options.approach) {
+        case MONOLITHIC:
+            performMonolithicModelChecking(options);
+            break;
+        case NAIVE:
+            performNaiveModelChecking(options);
+            break;
+        case WEIGHTED:
+            performWeightedModelChecking(options);
+            break;
     }
 }
 
-void processOptions() {
-    auto const& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
-    auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
+template <typename ValueType>
+void performMonolithicModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    auto root = options.omdpManager->getRoot();
+    options.omdpManager->constructConcreteMdps();
+    storm::models::visitor::FlatMdpBuilderVisitor visitor(options.omdpManager);
+    root->accept(visitor);
 
-    if (!composeSettings.isStringDiagramSet()) {
-        STORM_PRINT_AND_LOG("No (string diagram) input model given\n");
-        return;
-    }
-
-    if (generalSettings.isExactSet()) {
-        performModelChecking<storm::RationalNumber>();
-    } else {
-        performModelChecking<double>();
-    }
+    auto mdp = visitor.getCurrent();
 }
 
+template <typename ValueType>
+void performNaiveModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    auto root = options.omdpManager->getRoot();
+    storm::models::visitor::ParetoVisitor visitor(options.omdpManager);
+    root->accept(visitor);
+}
+
+template <typename ValueType>
+void performWeightedModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "currently not supported");
+}
 
 }  // namespace cli
 }  // namespace compose
 }  // namespace storm
 
 /*!
- * Entry point for the pomdp backend.
+ * Entry point for the compose backend.
  *
  * @param argc The argc argument of main().
  * @param argv The argv argument of main().
@@ -126,7 +148,23 @@ int main(const int argc, const char** argv) {
     storm::cli::setUrgentOptions();
 
     // Invoke storm-compose with obtained settings
-    storm::compose::cli::processOptions();
+    auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
+
+    if (generalSettings.isExactSet()) {
+        auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
+        if (!options) {
+            std::cout << "failed parsing options" << std::endl;
+            return 1;
+        }
+        performModelChecking(*options);
+    } else {
+        auto options = storm::compose::cli::processOptions<double>();
+        if (!options) {
+            std::cout << "failed parsing options" << std::endl;
+            return 1;
+        }
+        performModelChecking(*options);
+    }
 
     totalTimer.stop();
     if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
@@ -136,11 +174,4 @@ int main(const int argc, const char** argv) {
     // All operations have now been performed, so we clean up everything and terminate.
     storm::utility::cleanUp();
     return 0;
-    // } catch (storm::exceptions::BaseException const &exception) {
-    //    STORM_LOG_ERROR("An exception caused Storm-pomdp to terminate. The message of the exception is: " << exception.what());
-    //    return 1;
-    //} catch (std::exception const &exception) {
-    //    STORM_LOG_ERROR("An unexpected exception occurred and caused Storm-pomdp to terminate. The message of this exception is: " << exception.what());
-    //    return 2;
-    //}
 }

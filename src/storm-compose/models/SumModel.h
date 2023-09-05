@@ -27,6 +27,7 @@ class SumModel : public OpenMdp<ValueType> {
     SumModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::vector<std::shared_ptr<OpenMdp<ValueType>>> values);
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
+    std::vector<std::shared_ptr<OpenMdp<ValueType>>> getValues();
 
     private:
     std::vector<std::shared_ptr<OpenMdp<ValueType>>> values;
