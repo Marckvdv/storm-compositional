@@ -21,6 +21,10 @@
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
 
+#include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
+#include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
+#include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
+
 #include "storm-parsers/parser/ExpressionParser.h"
 
 #include <typeinfo>
@@ -73,7 +77,7 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
         if (approach == "monolithic") options.approach = MONOLITHIC;
         else if (approach == "naive") options.approach = NAIVE;
         else if (approach == "weighted") options.approach = WEIGHTED;
-        else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, approach << "is not supported");
+        else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << "is not supported");
     }
 
     std::string fileName = composeSettings.getStringDiagramFilename();
@@ -88,39 +92,26 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
 
 template <typename ValueType>
 void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    std::unique_ptr<storm::modelchecker::AbstractOpenMdpChecker<ValueType>> checker;
     switch (options.approach) {
         case MONOLITHIC:
-            performMonolithicModelChecking(options);
+            checker = std::make_unique<storm::modelchecker::MonolithicOpenMdpChecker<ValueType>>(options.omdpManager);
             break;
         case NAIVE:
-            performNaiveModelChecking(options);
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager);
             break;
         case WEIGHTED:
-            performWeightedModelChecking(options);
+            STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "weighted is currently not supported");
+            // TODO
+            //performWeightedModelChecking(options);
             break;
     }
-}
 
-template <typename ValueType>
-void performMonolithicModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
-    auto root = options.omdpManager->getRoot();
-    options.omdpManager->constructConcreteMdps();
-    storm::models::visitor::FlatMdpBuilderVisitor visitor(options.omdpManager);
-    root->accept(visitor);
+    storm::modelchecker::OpenMdpReachabilityTask task(options.entrance, options.exit);
+    auto result = checker->check(task);
 
-    auto mdp = visitor.getCurrent();
-}
-
-template <typename ValueType>
-void performNaiveModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
-    auto root = options.omdpManager->getRoot();
-    storm::models::visitor::ParetoVisitor visitor(options.omdpManager);
-    root->accept(visitor);
-}
-
-template <typename ValueType>
-void performWeightedModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
-    STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "currently not supported");
+    std::cout << "Checking for reachability from entrance " << task.getEntranceLabel() << " to exit " << task.getExitLabel() << std::endl;
+    std::cout << "Result: " << result << std::endl;
 }
 
 }  // namespace cli

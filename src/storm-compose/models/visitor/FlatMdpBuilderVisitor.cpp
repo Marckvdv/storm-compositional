@@ -61,12 +61,16 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
 
     size_t currentRow = 0;
+    size_t currentEntrance = 0;
+    size_t currentExit = 0;
 
     for (size_t v : concreteMdps[0].lEntrance) {
         lEntrance.push_back(v);
-        //labeling.addLabelToState("init", v);
+        std::string entranceLabel = "len" + std::to_string(currentEntrance);
+        labeling.addLabel(entranceLabel);
+        labeling.addLabelToState(entranceLabel, v);
+        ++currentEntrance;
     }
-    size_t currentExit = 0;
     for (size_t v : concreteMdps[0].lExit) {
         lExit.push_back(v);
         std::string exitLabel = "lex" + std::to_string(currentExit);
@@ -120,7 +124,6 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
                     ++currentRow;
                 }
             }
-
         }
 
         offset += stateCount;
@@ -128,9 +131,13 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
 
     size_t lastIndex = concreteMdps.size() - 1;
     size_t lastOffset = offset - concreteMdps[lastIndex].getMdp()->getNumberOfStates();
+    currentEntrance = 0;
     for (size_t v : concreteMdps[lastIndex].rEntrance) {
         rEntrance.push_back(lastOffset + v);
-        //labeling.addLabelToState("init", lastOffset + v);
+        std::string entranceLabel = "ren" + std::to_string(currentEntrance);
+        labeling.addLabel(entranceLabel);
+        labeling.addLabelToState(entranceLabel, lastOffset + v);
+        ++currentEntrance;
     }
     currentExit = 0;
     for (size_t v : concreteMdps[lastIndex].rExit) {

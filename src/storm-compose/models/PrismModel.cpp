@@ -47,6 +47,7 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     storm::builder::ExplicitModelBuilder<ValueType> mdpBuilder(generator);
 
     auto mdp = std::dynamic_pointer_cast<storm::models::sparse::Mdp<ValueType>>(mdpBuilder.build());
+    auto& labeling = mdp->getStateLabeling();
 
     // 2) resolve entrances and exits
     const auto& stateValuations = mdp->getStateValuations();
@@ -55,21 +56,26 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     storm::parser::StateValuationParser valuationParser(stateValuations);
     std::vector<uint64_t> lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx;
 
-    auto processEntranceExit = [&](auto& source, auto& dest) {
+    auto processEntranceExit = [&](auto& source, auto& dest, bool entrance, bool left) {
+        size_t count = 0;
         for (auto& entry : source) {
             auto stateVal = valuationParser.parseStateValuation(entry);
             auto optionalIndex = stateValuations.findState(stateVal);
             if (optionalIndex) {
                 dest.push_back(*optionalIndex);
+                std::string label = (std::string() + (left ? "l" : "r")) + (entrance ? "en" : "ex") + std::to_string(count);
+                labeling.addLabel(label);
+                labeling.addLabelToState(label, *optionalIndex);
             } else {
                 STORM_LOG_ASSERT(false, "Could not find state valuation ");
             }
+            ++count;
         }
     };
-    processEntranceExit(lEntrance, lEntranceIdx);
-    processEntranceExit(rEntrance, rEntranceIdx);
-    processEntranceExit(lExit, lExitIdx);
-    processEntranceExit(rExit, rExitIdx);
+    processEntranceExit(lEntrance, lEntranceIdx, true, true);
+    processEntranceExit(rEntrance, rEntranceIdx, true, false);
+    processEntranceExit(lExit, lExitIdx, false, true);
+    processEntranceExit(rExit, rExitIdx, false, false);
 
     return ConcreteMdp<ValueType>(this->manager, mdp, lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx);
 }

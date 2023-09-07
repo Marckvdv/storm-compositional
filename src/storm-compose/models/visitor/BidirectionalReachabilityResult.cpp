@@ -114,6 +114,23 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
 }
 
 template <typename ValueType>
+ValueType BidirectionalReachabilityResult<ValueType>::getLowerBound(size_t entrance, bool leftEntrance, size_t exit, bool leftExit) {
+    const auto& points = getPoints(entrance, leftEntrance);
+    const size_t exitIndex = exit + (leftExit ? 0 : lExits);
+
+    ValueType maxReach = storm::utility::zero<ValueType>();
+    // Find point that maximizes our target
+    for (const auto& point : points) {
+        ValueType reachProb = point[exitIndex];
+        if (reachProb > maxReach) {
+            maxReach = reachProb;
+        }
+    }
+
+    return maxReach;
+}
+
+template <typename ValueType>
 std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<ValueType> const& result) {
     os << "Bidirectional reachability result:" << std::endl;
 

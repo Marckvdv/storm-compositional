@@ -18,6 +18,7 @@ public:
     void addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint);
     const std::vector<point>& getPoints(size_t entrance, bool leftEntrance) const;
     std::shared_ptr<ConcreteMdp<ValueType>> toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
+    ValueType getLowerBound(size_t entrance, bool leftEntrance, size_t exit, bool leftExit);
 
 private:
     size_t getIndex(size_t entrance, bool leftEntrance) const;

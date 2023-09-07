@@ -1,0 +1,51 @@
+#include "MonolithicOpenMdpChecker.h"
+
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
+#include "storm-parsers/api/storm-parsers.h"
+#include "storm-parsers/parser/FormulaParser.h"
+#include "storm/modelchecker/prctl/SparseMdpPrctlModelChecker.h"
+#include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
+
+namespace storm {
+namespace modelchecker {
+
+template <typename ValueType>
+MonolithicOpenMdpChecker<ValueType>::MonolithicOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) 
+    : AbstractOpenMdpChecker<ValueType>(manager) {
+}
+
+template <typename ValueType>
+ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
+    this->manager->constructConcreteMdps();
+
+    storm::models::visitor::FlatMdpBuilderVisitor<ValueType> flatVisitor(this->manager);
+    this->manager->getRoot()->accept(flatVisitor);
+    auto concreteMdp = flatVisitor.getCurrent();
+    auto mdp = concreteMdp.getMdp();
+
+    std::string formulaString = "Pmax=? [F ( \"" + task.getExitLabel() + "\" )]";
+    storm::parser::FormulaParser formulaParser;
+    auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
+    std::cout << "Formula: " << *formula << std::endl;
+
+    storm::models::sparse::StateLabeling& labeling = mdp->getStateLabeling();
+    size_t entranceState = *labeling.getStates(task.getEntranceLabel()).begin();
+    labeling.addLabelToState("init", entranceState);
+    std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;
+
+    CheckTask<storm::logic::Formula, ValueType> checkTask(*formula, false);
+
+    storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> checker(*mdp);
+    storm::Environment env;
+    auto sparseResult = checker.check(env, checkTask);
+    storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& explicitResult = sparseResult->template asExplicitQuantitativeCheckResult<ValueType>();
+    ValueType& exactValue = explicitResult[entranceState];
+
+    return ApproximateReachabilityResult<ValueType>(exactValue);
+}
+
+template class MonolithicOpenMdpChecker<storm::RationalNumber>;
+template class MonolithicOpenMdpChecker<double>;
+
+}
+}
