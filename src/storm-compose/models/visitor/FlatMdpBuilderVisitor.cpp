@@ -228,6 +228,9 @@ void FlatMdpBuilderVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
     // probability 0.
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
+    const size_t totalStateCount = current.getMdp()->getNumberOfStates();
+    storm::models::sparse::StateLabeling labeling(totalStateCount);
+    labeling.addLabel("init");
     size_t currentRow = 0;
 
     const auto& transitionMatrix = current.getMdp()->getTransitionMatrix();
@@ -243,27 +246,29 @@ void FlatMdpBuilderVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
 
         bool isExit = false;
         if (lExitPos != current.lExit.end()) {
+            isExit = true;
+
             // State is a left exit
             size_t exit = lExitPos - current.lExit.begin();
-            if (exit >= model.left) continue;
+            if (exit >= model.left) {
+                builder.addNextValue(currentRow++, state, 1);
+            } else {
+                size_t entranceState = current.rEntrance[exit];
+                builder.addNextValue(currentRow++, entranceState, 1);
+            }
+        } else if (rExitPos != current.rExit.end()) {
             isExit = true;
 
-            size_t entranceState = current.rEntrance[exit];
-
-            builder.addNextValue(currentRow++, entranceState, 1);
-        } else if (rExitPos != current.rExit.end()) {
             // State is a right exit
             size_t exit = rExitPos - current.rExit.begin();
-            if (exit >= model.right) continue;
-            isExit = true;
-
-            size_t entranceState = current.lEntrance[exit];
-
-            builder.addNextValue(currentRow++, entranceState, 1);
+            if (exit >= model.right) {
+                builder.addNextValue(currentRow++, state, 1);
+            } else {
+                size_t entranceState = current.lEntrance[exit];
+                builder.addNextValue(currentRow++, entranceState, 1);
+            }
         }
         if (isExit) continue;
-        // TODO fix controflow hell above
-
         // State is not an exit
 
         // Iterate over all actions
@@ -280,21 +285,53 @@ void FlatMdpBuilderVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
         }
     }
 
+    for (size_t i = builder.getCurrentRowGroupCount(); i < totalStateCount; ++i) {
+        builder.newRowGroup(currentRow);
+        builder.addNextValue(currentRow, i, 1);
+        ++currentRow;
+    }
+
+    size_t currentEntrance = 0;
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
     for (size_t i = model.left; i < current.rEntrance.size(); ++i) {
         rEntrance.push_back(current.rEntrance[i]);
-    }
-    for (size_t i = model.right; i < current.lEntrance.size(); ++i) {
-        lEntrance.push_back(current.lEntrance[i]);
-    }
-    for (size_t i = model.left; i < current.lExit.size(); ++i) {
-        lExit.push_back(current.lExit[i]);
-    }
-    for (size_t i = model.right; i < current.rExit.size(); ++i) {
-        rExit.push_back(current.rExit[i]);
+
+        std::string label = "ren" + std::to_string(currentEntrance);
+        labeling.addLabel(label);
+        labeling.addLabelToState(label, current.rEntrance[i]);
+        ++currentEntrance;
     }
 
-    storm::models::sparse::StateLabeling labeling(builder.getCurrentRowGroupCount());
+    currentEntrance = 0;
+    for (size_t i = model.right; i < current.lEntrance.size(); ++i) {
+        lEntrance.push_back(current.lEntrance[i]);
+
+        std::string label = "len" + std::to_string(currentEntrance);
+        labeling.addLabel(label);
+        labeling.addLabelToState(label, current.lEntrance[i]);
+        ++currentEntrance;
+    }
+
+    size_t currentExit = 0;
+    for (size_t i = model.left; i < current.lExit.size(); ++i) {
+        lExit.push_back(current.lExit[i]);
+
+        std::string label = "lex" + std::to_string(currentExit);
+        labeling.addLabel(label);
+        labeling.addLabelToState(label, current.lExit[i]);
+        ++currentExit;
+    }
+
+    currentExit = 0;
+    for (size_t i = model.right; i < current.rExit.size(); ++i) {
+        rExit.push_back(current.rExit[i]);
+
+        std::string label = "rex" + std::to_string(currentExit);
+        labeling.addLabel(label);
+        labeling.addLabelToState(label, current.rExit[i]);
+        ++currentExit;
+    }
+
     auto newMdp = std::make_shared<Mdp<ValueType>>(builder.build(), labeling);
     current = ConcreteMdp<ValueType>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }

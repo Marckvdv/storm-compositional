@@ -42,9 +42,8 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     parser.setIdentifierMapping(getIdentifierMapping(manager));
 
     BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
-    //std::vector<std::unique_ptr<storm::modelchecker::CheckResult>> leftParetoResults, rightParetoResults;
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
-        // TODO find away we do not have to rebuild the MDP each time.
+        // TODO find away we do not have to rebuild the MDP for each entrance.
         // This should be possible by setting multiple initial states during generation,
         // and then selecting only a single initial state during model checking.
         size_t entranceNumber = 0;
@@ -96,20 +95,14 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
     std::string formulaString = getFormula(model);
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
-    //std::vector<std::shared_ptr<storm::logic::Formula const>> formulas =
-    //    storm::api::extractFormulasFromProperties(storm::api::parsePropertiesForPrismProgram(formulaString, program));
-    std::cout << "Formula: " << *formula << std::endl;
-    std::cout << "Initial states 2: " << model.getMdp()->getStateLabeling() << std::endl;
-    std::cout << "Initial states: " << model.getMdp()->getInitialStates() << std::endl;
 
     BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
     size_t entranceNumber = 0;
 
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
         for (auto const& entrance : entrances) {
-            // TODO set initial state
-            
             model.getMdp()->getStateLabeling().addLabelToState("init", entranceNumber);
+
             std::unique_ptr<storm::modelchecker::CheckResult> result =
                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *model.getMdp(), formula->asMultiObjectiveFormula());
             model.getMdp()->getStateLabeling().removeLabelFromState("init", entranceNumber);
@@ -123,16 +116,12 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
                     results.addPoint(entranceNumber, leftEntrance, point);
                 }
             } else {
-                STORM_LOG_ASSERT(false, "TODO");
-                /*
-                STORM_LOG_ASSERT(paretoResults[i]->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
+                STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
                 STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
-                auto quantitativeResult = paretoResults[i]->template asExplicitQuantitativeCheckResult<ValueType>();
+                auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 
-                // TODO below we assume that the initial state is 0, but this may not be the case (?)
-                builder.addNextValue(currentRow, exitOffset, quantitativeResult[0]);
-                ++currentRow;
-                */
+                std::vector<ValueType> point {quantitativeResult[0]};
+                results.addPoint(entranceNumber, leftEntrance, point);
             }
 
             entranceNumber++;
@@ -141,6 +130,8 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
 
     checkEntrances(model.lEntrance, true);
     checkEntrances(model.rEntrance, false);
+
+    currentPareto = results;
 }
 
 template<typename ValueType>

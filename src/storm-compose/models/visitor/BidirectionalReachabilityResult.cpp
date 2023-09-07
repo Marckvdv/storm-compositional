@@ -52,7 +52,8 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
         lExitsStart = rEntrancesStart + rEntrances,
         rExitsStart = lExitsStart + lExits,
         entrances = lEntrances + rEntrances,
-        totalStateCount = lEntrances + rEntrances + lExits + rExits;
+        totalStateCount = lEntrances + rEntrances + lExits + rExits + 1,
+        sinkState = totalStateCount - 1;
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
     storm::models::sparse::StateLabeling labeling(totalStateCount);
@@ -70,11 +71,19 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
             labeling.addLabel(label);
             labeling.addLabelToState(label, currentState);
 
+            // Keep track of total probability mass
+            ValueType probabilitySum = storm::utility::zero<ValueType>();
             const auto& points = getPoints(entrance, leftEntrance);
             for (const auto& point : points) {
                 STORM_LOG_ASSERT(point.size() == lExits + rExits, "expected point size to line up with amount of exits");
                 for (size_t k = 0; k < point.size(); ++k) {
                     builder.addNextValue(currentRow, entrances + k, point[k]);
+                    probabilitySum += point[k];
+                }
+
+                ValueType remainingProbability = storm::utility::one<ValueType>() - probabilitySum;
+                if (remainingProbability > storm::utility::zero<ValueType>()) {
+                    builder.addNextValue(currentRow, sinkState, remainingProbability);
                 }
                 ++currentRow;
             }
