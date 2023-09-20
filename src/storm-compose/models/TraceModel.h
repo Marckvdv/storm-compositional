@@ -21,12 +21,14 @@ class TraceModel : public OpenMdp<ValueType> {
     friend class visitor::FlatMdpBuilderVisitor<ValueType>;
     friend class visitor::ParetoVisitor<ValueType>;
 
-    public:
+public:
     TraceModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right);
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
 
-    private:
+    bool isRightward() const override;
+
+private:
     std::shared_ptr<OpenMdp<ValueType>> value;
     size_t left, right;
 };

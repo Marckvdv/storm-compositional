@@ -35,6 +35,7 @@ class PrismModel : public OpenMdp<ValueType> {
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
     ConcreteMdp<ValueType> toConcreteMdp();
+    bool isRightward() const override;
 
     private:
     std::string path;

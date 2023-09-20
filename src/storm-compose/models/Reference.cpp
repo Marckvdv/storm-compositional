@@ -31,6 +31,12 @@ std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> Reference<ValueTy
     return openMdp->collectEntranceExit(entranceExit, scope);
 }
 
+template <typename ValueType>
+bool Reference<ValueType>::isRightward() const {
+    auto openMdp = this->manager->dereference(reference);
+    return openMdp->isRightward();
+}
+
 template class Reference<storm::RationalNumber>;
 template class Reference<double>;
 

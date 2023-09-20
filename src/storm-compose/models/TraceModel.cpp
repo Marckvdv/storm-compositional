@@ -41,6 +41,15 @@ std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> TraceModel<ValueT
     return entries;
 }
 
+template <typename ValueType>
+bool TraceModel<ValueType>::isRightward() const {
+    if (left > 0) {
+        return false;
+    }
+
+    return value->isRightward();
+}
+
 template class TraceModel<storm::RationalNumber>;
 template class TraceModel<double>;
 

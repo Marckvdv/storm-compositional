@@ -37,6 +37,16 @@ std::vector<std::shared_ptr<OpenMdp<ValueType>>> SumModel<ValueType>::getValues(
     return values;
 }
 
+template <typename ValueType>
+bool SumModel<ValueType>::isRightward() const {
+    for (const auto& value : values) {
+        if (!value->isRightward()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 template class SumModel<storm::RationalNumber>;
 template class SumModel<double>;
 

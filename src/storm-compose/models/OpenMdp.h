@@ -44,7 +44,7 @@ class OpenMdpVisitor;
 
 template<typename ValueType>
 class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
-    public:
+public:
     virtual ~OpenMdp() = 0;
     OpenMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
 
@@ -64,7 +64,9 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
     virtual bool isTrace() const;
     virtual bool isReference() const;
     virtual bool isPrismModel() const;
+
     std::shared_ptr<OpenMdp<ValueType>> toOpenMdp();
+    virtual bool isRightward() const = 0;
 
     struct Scope {
         std::vector<size_t> scope;
@@ -95,9 +97,9 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
 
     // visitor pattern for easier recursion of the OpenMdp structure
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) = 0;
-    virtual std::vector<ConcreteEntranceExit> collectEntranceExit(EntranceExit entryExit, Scope& scope) const = 0;
+    virtual std::vector<ConcreteEntranceExit> collectEntranceExit(EntranceExit entryExit, Scope& scope = {}) const = 0;
 
-    protected:
+protected:
     boost::optional<std::string> name;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
 };

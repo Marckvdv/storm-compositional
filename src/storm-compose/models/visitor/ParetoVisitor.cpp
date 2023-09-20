@@ -23,9 +23,15 @@ using storm::models::sparse::Mdp;
 
 template<typename ValueType>
 ParetoVisitor<ValueType>::ParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
-    env.modelchecker().multi().setMethod(storm::modelchecker::multiobjective::MultiObjectiveMethod::Pcaa);
+    auto& multiObjectiveOptions = env.modelchecker().multi();
+    multiObjectiveOptions.setMethod(storm::modelchecker::multiobjective::MultiObjectiveMethod::Pcaa);
+    //multiObjectiveOptions.setPrecision(0.1);
+    //multiObjectiveOptions.setPrecisionType(storm::MultiObjectiveModelCheckerEnvironment::ABSOLUTE);
 }
 
+// TODO merge visitPrismModel and visitConcreteModel so that the code can be
+// reused for example, by making it so the visitPrismModel simply constructs the
+// concreteModel and then calls visitConcreteModel on it.
 template<typename ValueType>
 void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     auto program = storm::api::parseProgram(model.getPath(), false, false);
@@ -40,6 +46,12 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     const auto& manager = program.getManager();
     storm::parser::ExpressionParser parser(manager);
     parser.setIdentifierMapping(getIdentifierMapping(manager));
+
+    std::cout << "Path: " << model.getPath() << std::endl;
+    std::cout << "lEntrance: " << model.lEntrance.size() << std::endl;
+    std::cout << "rEntrance: " << model.rEntrance.size() << std::endl;
+    std::cout << "lExit: " << model.lExit.size() << std::endl;
+    std::cout << "rExit: " << model.rExit.size() << std::endl;
 
     BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
@@ -68,16 +80,13 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
                     results.addPoint(entranceNumber, leftEntrance, point);
                 }
             } else {
-                STORM_LOG_ASSERT(false, "TODO");
-                /*
-                STORM_LOG_ASSERT(paretoResults[i]->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
+                STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
                 STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
-                auto quantitativeResult = paretoResults[i]->template asExplicitQuantitativeCheckResult<ValueType>();
+                auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 
+                std::cout << "Warning: Still need to fix this!!! (a)" << std::endl;
                 // TODO below we assume that the initial state is 0, but this may not be the case (?)
-                builder.addNextValue(currentRow, exitOffset, quantitativeResult[0]);
-                ++currentRow;
-                */
+                results.addPoint(entranceNumber, leftEntrance, {quantitativeResult[0]});
             }
 
             entranceNumber++;
@@ -96,16 +105,27 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
 
+    std::cout << "Path: <concrete>" << std::endl;
+    std::cout << "lEntrance: " << model.lEntrance.size() << std::endl;
+    std::cout << "rEntrance: " << model.rEntrance.size() << std::endl;
+    std::cout << "lExit: " << model.lExit.size() << std::endl;
+    std::cout << "rExit: " << model.rExit.size() << std::endl;
+
     BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
     size_t entranceNumber = 0;
 
+    auto& stateLabeling = model.getMdp()->getStateLabeling();
+    if (!stateLabeling.containsLabel("init")) {
+        stateLabeling.addLabel("init");
+    }
+
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
         for (auto const& entrance : entrances) {
-            model.getMdp()->getStateLabeling().addLabelToState("init", entranceNumber);
+            stateLabeling.addLabelToState("init", entrance);
 
             std::unique_ptr<storm::modelchecker::CheckResult> result =
                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *model.getMdp(), formula->asMultiObjectiveFormula());
-            model.getMdp()->getStateLabeling().removeLabelFromState("init", entranceNumber);
+            stateLabeling.removeLabelFromState("init", entrance);
 
             if (result->isExplicitParetoCurveCheckResult()) {
                 auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
@@ -119,6 +139,7 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
                 STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
                 STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
+                std::cout << "Warning: Still need to fix this!!! (b)" << std::endl;
 
                 std::vector<ValueType> point {quantitativeResult[0]};
                 results.addPoint(entranceNumber, leftEntrance, point);
@@ -136,12 +157,16 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
 
 template<typename ValueType>
 void ParetoVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
+    // Perform caching if possible
     const auto& referenceName = reference.getReference();
     auto it = paretoResults.find(referenceName);
     if (it != paretoResults.end()) {
         // TODO avoid copying
         currentPareto = it->second;
+        std::cout << "used cached result!" << std::endl;
     } else {
+        std::cout << "fresh computation required!" << std::endl;
+        // Result is not yet cached so we need to compute it ourself
         const auto manager = reference.getManager();
         auto dereferenced = manager->dereference(referenceName);
         dereferenced->accept(*this); // after this currentPareto should be set
@@ -182,6 +207,7 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
     // 3) Stitch them together, using code in the FlatMDP builder.
 
     // 1)
+    size_t count = 0;
     std::vector<std::shared_ptr<OpenMdp<ValueType>>> concreteMdps;
     for (const auto& openMdp : model.getValues()) {
         openMdp->accept(*this);
@@ -189,6 +215,14 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
         // 2)
         std::shared_ptr<ConcreteMdp<ValueType>> concreteMdp = currentPareto.toConcreteMdp(manager);
         concreteMdps.push_back(std::static_pointer_cast<OpenMdp<ValueType>>(concreteMdp));
+
+        bool exportToDot = true; // TODO remove me
+        if (exportToDot) {
+            std::string name = "model" + std::to_string(count) + ".dot";
+            std::ofstream out(name);
+            concreteMdp->getMdp()->writeDotToStream(out);
+        }
+        ++count;
     }
 
     // 3)
@@ -197,6 +231,13 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
     newSequenceModel.accept(flatBuilder);
 
     ConcreteMdp<ValueType> stitchedMdp = flatBuilder.getCurrent();
+
+    bool exportToDot = true; // TODO remove me
+    if (exportToDot) {
+        std::ofstream out("sum.dot");
+        stitchedMdp.getMdp()->writeDotToStream(out);
+    }
+
     visitConcreteModel(stitchedMdp);
 }
 
@@ -227,7 +268,7 @@ BidirectionalReachabilityResult<ValueType> ParetoVisitor<ValueType>::getCurrentP
 }
 
 template<typename ValueType>
-std::string ParetoVisitor<ValueType>::getFormula(PrismModel<ValueType>& model, bool rewards) {
+std::string ParetoVisitor<ValueType>::getFormula(PrismModel<ValueType> const& model, bool rewards) {
     std::stringstream formulaBuffer;
     formulaBuffer << "multi(\n";
 
@@ -257,7 +298,7 @@ std::string ParetoVisitor<ValueType>::getFormula(PrismModel<ValueType>& model, b
 }
 
 template<typename ValueType>
-std::string ParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType>& model, bool rewards) {
+std::string ParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType> const& model, bool rewards) {
     std::stringstream formulaBuffer;
     formulaBuffer << "multi(\n";
 

@@ -29,6 +29,8 @@ class SumModel : public OpenMdp<ValueType> {
     std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const override;
     std::vector<std::shared_ptr<OpenMdp<ValueType>>> getValues();
 
+    bool isRightward() const override;
+
     private:
     std::vector<std::shared_ptr<OpenMdp<ValueType>>> values;
 };

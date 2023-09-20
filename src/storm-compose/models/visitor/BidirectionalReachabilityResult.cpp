@@ -94,6 +94,7 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     buildTransitions(true); // left entrances
     buildTransitions(false); // right entrances
 
+    // Turn exits and sink state into self-loop states
     for (size_t i = builder.getCurrentRowGroupCount(); i < totalStateCount; ++i) {
         builder.newRowGroup(currentRow);
         builder.addNextValue(currentRow, i, 1);
@@ -137,6 +138,20 @@ ValueType BidirectionalReachabilityResult<ValueType>::getLowerBound(size_t entra
     }
 
     return maxReach;
+}
+
+template <typename ValueType>
+bool BidirectionalReachabilityResult<ValueType>::isEmpty() {
+    return points.empty();
+}
+
+template <typename ValueType>
+bool BidirectionalReachabilityResult<ValueType>::hasEntrance(size_t entrance, bool leftEntrance) {
+    if (leftEntrance) {
+        return entrance < lEntrances;
+    } else {
+        return entrance < rEntrances;
+    }
 }
 
 template <typename ValueType>

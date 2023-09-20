@@ -170,7 +170,7 @@ void FlatMdpBuilderVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
     size_t offset = 0;
     std::vector<size_t> lEntrance, lExit, rEntrance, rExit;
 
-    size_t leftExitCount = 0, rightExitCount = 0;
+    size_t leftExitCount = 0, rightExitCount = 0, leftEntranceCount = 0, rightEntranceCount = 0;
     size_t currentRow = 0;
     for (const auto& c : concreteMdps) {
         const auto& transitionMatrix = c.getMdp()->getTransitionMatrix();
@@ -196,19 +196,38 @@ void FlatMdpBuilderVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
 
         for (size_t v : c.lEntrance) {
             lEntrance.push_back(offset + v);
+
+            std::string label = "len" + std::to_string(leftEntranceCount);
+            labeling.addLabel(label);
+            labeling.addLabelToState(label, offset+v);
+            ++leftEntranceCount;
         } 
+
         for (size_t v : c.rEntrance) {
             rEntrance.push_back(offset + v);
+
+            std::string label = "ren" + std::to_string(rightEntranceCount);
+            labeling.addLabel(label);
+            labeling.addLabelToState(label, offset+v);
+            ++rightEntranceCount;
         }
+
         for (size_t v : c.lExit) {
             lExit.push_back(offset + v);
-            std::string exitLabel = "lex" + std::to_string(leftExitCount);
-            labeling.addLabel(exitLabel);
-            
+
+            std::string label = "lex" + std::to_string(leftExitCount);
+            labeling.addLabel(label);
+            labeling.addLabelToState(label, offset+v);
             ++leftExitCount;
         }
+
         for (size_t v : c.rExit) {
             rExit.push_back(offset + v);
+
+            std::string label = "rex" + std::to_string(rightExitCount);
+            labeling.addLabel(label);
+            labeling.addLabelToState(label, offset+v);
+            ++rightExitCount;
         }
 
         offset += stateCount;

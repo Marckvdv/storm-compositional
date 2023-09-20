@@ -1271,6 +1271,12 @@ std::string toString(std::vector<ValueType> const& vector) {
     stream << " ]";
     return stream.str();
 }
+
+template<typename ValueType>
+void normalizeInPlace(std::vector<ValueType>& target) {
+    scaleVectorInPlace(target, 1/carl::sqrt(dotProduct(target, target)));
+}
+
 }  // namespace vector
 }  // namespace utility
 }  // namespace storm

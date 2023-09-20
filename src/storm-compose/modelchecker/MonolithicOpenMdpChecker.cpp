@@ -23,12 +23,22 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     auto concreteMdp = flatVisitor.getCurrent();
     auto mdp = concreteMdp.getMdp();
 
+    bool exportToDot = true;
+    if (exportToDot) {
+        std::ofstream out("test.dot");
+        mdp->writeDotToStream(out);
+    }
+
     std::string formulaString = "Pmax=? [F ( \"" + task.getExitLabel() + "\" )]";
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
     std::cout << "Formula: " << *formula << std::endl;
 
     storm::models::sparse::StateLabeling& labeling = mdp->getStateLabeling();
+    if (!labeling.containsLabel("init")) {
+        labeling.addLabel("init");
+    }
+
     size_t entranceState = *labeling.getStates(task.getEntranceLabel()).begin();
     labeling.addLabelToState("init", entranceState);
     std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;

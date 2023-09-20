@@ -42,9 +42,12 @@ public:
 
     BidirectionalReachabilityResult<ValueType> getCurrentPareto();
 
+    // TODO Functions below are public because it is also being used in PropertyDrivenVisitor
+    // Need to find some common place to store this instead.
+    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards=false);
+    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards=false);
+
 private:
-    std::string getFormula(PrismModel<ValueType>& model, bool rewards=false);
-    std::string getFormula(ConcreteMdp<ValueType>& model, bool rewards=false);
     static std::unordered_map<std::string, storm::expressions::Expression> getIdentifierMapping(storm::expressions::ExpressionManager const& manager);
 
     std::unordered_map<std::string, BidirectionalReachabilityResult<ValueType>> paretoResults;

@@ -81,6 +81,11 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
 }
 
 template <typename ValueType>
+bool PrismModel<ValueType>::isRightward() const {
+    return rEntrance.size() == 0 && lExit.size() == 0;
+}
+
+template <typename ValueType>
 std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> PrismModel<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const {
     STORM_LOG_ASSERT(false, "Concretize all OpenMdps before calling this function");
     return {};

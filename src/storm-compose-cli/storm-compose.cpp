@@ -24,6 +24,7 @@
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
+#include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
 
@@ -101,7 +102,8 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager);
             break;
         case WEIGHTED:
-            STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "weighted is currently not supported");
+            STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
+            checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager);
             // TODO
             //performWeightedModelChecking(options);
             break;

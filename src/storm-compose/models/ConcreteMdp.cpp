@@ -66,6 +66,30 @@ void ConcreteMdp<ValueType>::exportToDot(std::string path) {
     mdp->writeDotToStream(outputFile);
 }
 
+template<typename ValueType>
+bool ConcreteMdp<ValueType>::isRightward() const {
+    return rEntrance.size() == 0 && lExit.size() == 0;
+}
+
+template <typename ValueType>
+std::vector<ValueType> ConcreteMdp<ValueType>::weightedReachability(std::vector<ValueType> const& weights) {
+    //if (!isPreparedForWeightedReachability) {
+    //    prepareForWeightedReachability();
+    //}
+}
+
+template <typename ValueType>
+void ConcreteMdp<ValueType>::prepareForWeightedReachability() {
+    // We prepare this concrete MDP for weighted reachability by doing the following.
+
+    isPreparedForWeightedReachability = true;
+}
+
+template <typename ValueType>
+void ConcreteMdp<ValueType>::setWeights(std::vector<ValueType> const& weights) {
+
+}
+
 template class ConcreteMdp<double>;
 template class ConcreteMdp<storm::RationalNumber>;
 

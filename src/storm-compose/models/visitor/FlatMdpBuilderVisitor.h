@@ -14,15 +14,15 @@ class FlatMdpBuilderVisitor : public OpenMdpVisitor<ValueType> {
 public:
     FlatMdpBuilderVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager);
 
-    virtual void visitPrismModel(PrismModel<ValueType>& model) override;
-    virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
+    void visitPrismModel(PrismModel<ValueType>& model) override;
+    void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
 
     // We use the default implementation which simply dereferences and visits that
     //virtual void visitReference(Reference<ValueType>& reference) override;
 
-    virtual void visitSequenceModel(SequenceModel<ValueType>& model) override;
-    virtual void visitSumModel(SumModel<ValueType>& model) override;
-    virtual void visitTraceModel(TraceModel<ValueType>& model) override;
+    void visitSequenceModel(SequenceModel<ValueType>& model) override;
+    void visitSumModel(SumModel<ValueType>& model) override;
+    void visitTraceModel(TraceModel<ValueType>& model) override;
 
     ConcreteMdp<ValueType> getCurrent();
 

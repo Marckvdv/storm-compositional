@@ -44,6 +44,16 @@ std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> SequenceModel<Val
     return entries;
 }
 
+template <typename ValueType>
+bool SequenceModel<ValueType>::isRightward() const {
+    for (const auto& value : values) {
+        if (!value->isRightward()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 template class SequenceModel<storm::RationalNumber>;
 template class SequenceModel<double>;
 

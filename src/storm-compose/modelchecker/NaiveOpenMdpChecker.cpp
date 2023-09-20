@@ -18,6 +18,8 @@ ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker<ValueType>::check(O
 
     auto currentPareto = paretoVisitor.getCurrentPareto();
 
+    STORM_LOG_ASSERT(currentPareto.hasEntrance(task.getEntranceId(), task.isLeftEntrance()), "Pareto curve not defined for the requested entrance");
+
     // TODO replace with OpenMdpReachabilityTask
     ValueType lowerBound = currentPareto.getLowerBound(task.getEntranceId(), task.isLeftEntrance(), task.getExitId(), task.isLeftExit());
     return ApproximateReachabilityResult<ValueType>(lowerBound, storm::utility::one<ValueType>());
