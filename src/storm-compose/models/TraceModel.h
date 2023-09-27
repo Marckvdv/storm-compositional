@@ -12,6 +12,7 @@ namespace visitor {
 template <typename ValueType> class OpenMdpToDotVisitor;
 template <typename ValueType> class FlatMdpBuilderVisitor;
 template <typename ValueType> class ParetoVisitor;
+template <typename ValueType> class LowerUpperParetoVisitor;
 }
 
 template <typename ValueType>
@@ -20,6 +21,7 @@ class TraceModel : public OpenMdp<ValueType> {
     friend class visitor::OpenMdpVisitor<ValueType>;
     friend class visitor::FlatMdpBuilderVisitor<ValueType>;
     friend class visitor::ParetoVisitor<ValueType>;
+    friend class visitor::LowerUpperParetoVisitor<ValueType>;
 
 public:
     TraceModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right);

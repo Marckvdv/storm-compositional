@@ -2,8 +2,9 @@
 
 #include "OpenMdp.h"
 #include "storm/models/sparse/Mdp.h"
-#include "visitor/FlatMdpBuilderVisitor.h"
-#include "visitor/ParetoVisitor.h"
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
+#include "storm-compose/models/visitor/ParetoVisitor.h"
+#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 
 namespace storm {
 namespace models {
@@ -16,16 +17,18 @@ template<typename ValueType> class OpenMdpToDotVisitor;
 template<typename ValueType> class FlatMdpBuilderVisitor;
 template<typename ValueType> class ParetoVisitor;
 template<typename ValueType> class PropertyDrivenVisitor;
+template<typename ValueType> class LowerUpperParetoVisitor;
 }
 
 template<typename ValueType>
 class ConcreteMdp : public OpenMdp<ValueType> {
-    // TODO remove these friend classes
+    // TODO remove these friend classes and introduce getter/setters instead
     friend class visitor::OpenMdpPrintVisitor<ValueType>;
     friend class visitor::OpenMdpToDotVisitor<ValueType>;
     friend class visitor::FlatMdpBuilderVisitor<ValueType>;
     friend class visitor::ParetoVisitor<ValueType>;
     friend class visitor::PropertyDrivenVisitor<ValueType>;
+    friend class visitor::LowerUpperParetoVisitor<ValueType>;
 
 public:
     ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);

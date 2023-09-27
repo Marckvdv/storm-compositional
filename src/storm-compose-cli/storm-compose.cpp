@@ -24,6 +24,7 @@
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
+#include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
 #include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
@@ -37,6 +38,7 @@ namespace cli {
 enum ReachabilityCheckingApproach {
     MONOLITHIC,
     NAIVE,
+    NAIVE2,
     WEIGHTED,
 };
 
@@ -77,6 +79,7 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
         std::string approach = composeSettings.getApproach();
         if (approach == "monolithic") options.approach = MONOLITHIC;
         else if (approach == "naive") options.approach = NAIVE;
+        else if (approach == "naive2") options.approach = NAIVE2;
         else if (approach == "weighted") options.approach = WEIGHTED;
         else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << "is not supported");
     }
@@ -87,6 +90,15 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
     options.omdpManager = std::make_shared<storm::models::OpenMdpManager<ValueType>>();
     auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(fileName, options.omdpManager);
     parser.parse();
+
+    // TODO find better place for this
+    if (composeSettings.isExportStringDiagramSet()) {
+        std::ofstream out(composeSettings.getExportStringDiagramFilename());
+        storm::models::visitor::OpenMdpToDotVisitor<ValueType> visitor(out);
+        options.omdpManager->constructConcreteMdps();
+        visitor.visitRoot(*options.omdpManager->getRoot());
+        out.close();
+    }
 
     return options;
 }
@@ -101,11 +113,12 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
         case NAIVE:
             checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager);
             break;
+        case NAIVE2:
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager);
+            break;
         case WEIGHTED:
             STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
             checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager);
-            // TODO
-            //performWeightedModelChecking(options);
             break;
     }
 

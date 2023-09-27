@@ -120,12 +120,14 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(st
 
     setWeight(weights);
     std::string formulaString = ParetoVisitor<ValueType>::getFormula(concreteMdp);
-    for (const auto& v : weights) {
-        std::cout << v << std::endl;
-    }
 
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
+    std::cout << "Formula: " << formulaString << std::endl;
+    std::cout << "with weights: " << std::endl;
+    for (const auto& v : weights) {
+        std::cout << v << std::endl;
+    }
 
     auto mdp = concreteMdp.getMdp();
 
@@ -141,9 +143,11 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(st
         checker.check(this->env, weights);
         auto underApprox = checker.getUnderApproximationOfInitialStateResults();
 
+        std::cout << "intermediate result for entrance state " << entrance << ":" << std::endl;
         ValueType sum = 0;
         for (size_t i = 0; i < weights.size(); ++i) {
             sum += weights[i] * underApprox[i];
+            std::cout << underApprox[i] << std::endl;
         }
 
         newWeights.push_back(sum);

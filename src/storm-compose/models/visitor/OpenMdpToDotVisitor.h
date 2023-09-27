@@ -23,6 +23,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
 
     std::string printScope(const typename OpenMdp<ValueType>::Scope& scope) {
         std::stringstream result;
+        result << "s";
         if (scope.scope.size() > 0) {
             result << scope.scope[0];
             for (size_t i = 1; i < scope.scope.size(); ++i) {
