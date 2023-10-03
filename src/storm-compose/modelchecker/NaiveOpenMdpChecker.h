@@ -8,7 +8,7 @@ namespace modelchecker {
 template <typename ValueType>
 class NaiveOpenMdpChecker : public AbstractOpenMdpChecker<ValueType> {
 public:
-    NaiveOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager);
+    NaiveOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
     ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) override;
 
 private:

@@ -18,6 +18,7 @@ const std::string ComposeIOSettings::entranceName = "entrance";
 const std::string ComposeIOSettings::exitName = "exit";
 const std::string ComposeIOSettings::approachName = "approach";
 const std::string ComposeIOSettings::exportStringDiagramName = "exportStringDiagram";
+const std::string ComposeIOSettings::benchmarkDataName = "benchmarkData";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     this->addOption(
@@ -39,6 +40,10 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     this->addOption(
         storm::settings::OptionBuilder(moduleName, exportStringDiagramName, false, "export the string diagram to a dot file")
             .addArgument(storm::settings::ArgumentBuilder::createStringArgument("filename", "The name of the file to write the dot file").build())
+            .build());
+    this->addOption(
+        storm::settings::OptionBuilder(moduleName, benchmarkDataName, false, "write benchmark results")
+            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("filename", "The path to store the benchmark results").build())
             .build());
 }
 
@@ -67,6 +72,10 @@ bool ComposeIOSettings::isApproachSet() const {
 
 bool ComposeIOSettings::isExportStringDiagramSet() const {
     return this->getOption(exportStringDiagramName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isBenchmarkDataSet() const {
+    return this->getOption(benchmarkDataName).getHasOptionBeenSet();
 }
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {
@@ -99,6 +108,10 @@ std::string ComposeIOSettings::getApproach() const {
 
 std::string ComposeIOSettings::getExportStringDiagramFilename() const {
     return this->getOption(exportStringDiagramName).getArgumentByName("filename").getValueAsString();
+}
+
+std::string ComposeIOSettings::getBenchmarkDataFilename() const {
+    return this->getOption(benchmarkDataName).getArgumentByName("filename").getValueAsString();
 }
 
 }  // namespace modules

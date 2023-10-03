@@ -50,6 +50,21 @@ bool TraceModel<ValueType>::isRightward() const {
     return value->isRightward();
 }
 
+template <typename ValueType>
+std::shared_ptr<OpenMdp<ValueType>> TraceModel<ValueType>::getValue() {
+    return value;
+}
+
+template <typename ValueType>
+size_t TraceModel<ValueType>::getLeft() {
+    return left;
+}
+
+template <typename ValueType>
+size_t TraceModel<ValueType>::getRight() {
+    return right;
+}
+
 template class TraceModel<storm::RationalNumber>;
 template class TraceModel<double>;
 

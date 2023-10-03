@@ -27,12 +27,14 @@ class ComposeIOSettings : public ModuleSettings {
     bool isExitSet() const;
     bool isApproachSet() const;
     bool isExportStringDiagramSet() const;
+    bool isBenchmarkDataSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
     std::string getExit() const;
     std::string getApproach() const;
     std::string getExportStringDiagramFilename() const;
+    std::string getBenchmarkDataFilename() const;
 
     // The name of the module.
     static const std::string moduleName;
@@ -41,6 +43,7 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string exitName;
     static const std::string approachName;
     static const std::string exportStringDiagramName;
+    static const std::string benchmarkDataName;
 };
 
 }  // namespace modules

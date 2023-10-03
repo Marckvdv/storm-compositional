@@ -7,7 +7,7 @@ namespace storm {
 namespace modelchecker {
 
 template <typename ValueType>
-NaiveOpenMdpChecker2<ValueType>::NaiveOpenMdpChecker2(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) : AbstractOpenMdpChecker<ValueType>(manager) {
+NaiveOpenMdpChecker2<ValueType>::NaiveOpenMdpChecker2(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : AbstractOpenMdpChecker<ValueType>(manager, stats) {
 
 }
 

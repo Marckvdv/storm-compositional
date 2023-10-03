@@ -114,7 +114,7 @@ class NativePolytope : public Polytope<ValueType> {
 
     /*!
      * Finds an optimal point inside this polytope w.r.t. the given direction, i.e.,
-     * a point that maximizes dotPorduct(point, direction).
+     * a point that maximizes dotProduct(point, direction).
      * If such a point does not exist, the returned bool is false. There are two reasons for this:
      * - The polytope is empty
      * - The polytope is not bounded in the given direction

@@ -10,8 +10,8 @@ namespace storm {
 namespace modelchecker {
 
 template <typename ValueType>
-MonolithicOpenMdpChecker<ValueType>::MonolithicOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) 
-    : AbstractOpenMdpChecker<ValueType>(manager) {
+MonolithicOpenMdpChecker<ValueType>::MonolithicOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) 
+    : AbstractOpenMdpChecker<ValueType>(manager, stats) {
 }
 
 template <typename ValueType>
@@ -23,11 +23,11 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     auto concreteMdp = flatVisitor.getCurrent();
     auto mdp = concreteMdp.getMdp();
 
-    bool exportToDot = true;
-    if (exportToDot) {
-        std::ofstream out("test.dot");
-        mdp->writeDotToStream(out);
-    }
+    //bool exportToDot = false;
+    //if (exportToDot) {
+    //    std::ofstream out("test.dot");
+    //    mdp->writeDotToStream(out);
+    //}
 
     std::string formulaString = "Pmax=? [F ( \"" + task.getExitLabel() + "\" )]";
     storm::parser::FormulaParser formulaParser;

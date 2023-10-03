@@ -1,6 +1,7 @@
 #pragma once
 
 #include "storm-compose/models/OpenMdpManager.h"
+#include "storm-compose/benchmark/BenchmarkStats.h"
 
 #include "ApproximateReachabilityResult.h"
 
@@ -48,15 +49,14 @@ private:
 template <typename ValueType>
 class AbstractOpenMdpChecker {
 public:
-    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) : manager(manager) {
+    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats = {}) : manager(manager), stats(stats) {
     }
 
     virtual ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) = 0;
 
 protected:
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
-
-private:
+    storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 };
 
 }

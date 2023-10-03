@@ -208,12 +208,12 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
         std::shared_ptr<ConcreteMdp<ValueType>> concreteMdp = currentPareto.toConcreteMdp(manager);
         concreteMdps.push_back(std::static_pointer_cast<OpenMdp<ValueType>>(concreteMdp));
 
-        bool exportToDot = true; // TODO remove me
-        if (exportToDot) {
-            std::string name = "model" + std::to_string(count) + ".dot";
-            std::ofstream out(name);
-            concreteMdp->getMdp()->writeDotToStream(out);
-        }
+        //bool exportToDot = false; // TODO remove me
+        //if (exportToDot) {
+        //    std::string name = "model" + std::to_string(count) + ".dot";
+        //    std::ofstream out(name);
+        //    concreteMdp->getMdp()->writeDotToStream(out);
+        //}
         ++count;
     }
 
@@ -224,11 +224,11 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
     ConcreteMdp<ValueType> stitchedMdp = flatBuilder.getCurrent();
 
-    bool exportToDot = true; // TODO remove me
-    if (exportToDot) {
-        std::ofstream out("sum.dot");
-        stitchedMdp.getMdp()->writeDotToStream(out);
-    }
+    //bool exportToDot = fals; // TODO remove me
+    //if (exportToDot) {
+    //    std::ofstream out("sum.dot");
+    //    stitchedMdp.getMdp()->writeDotToStream(out);
+    //}
 
     visitConcreteModel(stitchedMdp);
 }

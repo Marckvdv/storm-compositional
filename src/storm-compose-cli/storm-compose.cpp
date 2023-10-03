@@ -20,12 +20,14 @@
 #include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
+#include "storm-compose/models/visitor/BenchmarkStatsVisitor.h"
 
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
 #include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
+#include "storm-compose/benchmark/BenchmarkStats.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
 
@@ -49,6 +51,7 @@ struct ReachabilityCheckingOptions {
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> omdpManager;
     std::pair<bool, size_t> entrance {false, 0}, exit {true, 0};
     ReachabilityCheckingApproach approach = MONOLITHIC;
+    boost::optional<std::string> benchmarkStatsPath;
 };
 
 boost::optional<std::pair<bool, size_t>> parseEntranceExit(std::string text) {
@@ -100,30 +103,49 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
         out.close();
     }
 
+    if (composeSettings.isBenchmarkDataSet()) {
+        options.benchmarkStatsPath = composeSettings.getBenchmarkDataFilename();
+    }
+
     return options;
 }
 
 template <typename ValueType>
 void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
+    storm::compose::benchmark::BenchmarkStats<ValueType> stats;
+
+    stats.totalTime.start();
     std::unique_ptr<storm::modelchecker::AbstractOpenMdpChecker<ValueType>> checker;
     switch (options.approach) {
         case MONOLITHIC:
-            checker = std::make_unique<storm::modelchecker::MonolithicOpenMdpChecker<ValueType>>(options.omdpManager);
+            checker = std::make_unique<storm::modelchecker::MonolithicOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
         case NAIVE:
-            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager);
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
         case NAIVE2:
-            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager);
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager, stats);
             break;
         case WEIGHTED:
             STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
-            checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager);
+            checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
     }
 
     storm::modelchecker::OpenMdpReachabilityTask task(options.entrance, options.exit);
     auto result = checker->check(task);
+    stats.totalTime.stop();
+
+    if (options.benchmarkStatsPath) {
+        storm::models::visitor::BenchmarkStatsVisitor<ValueType> statsVisitor(options.omdpManager, stats);
+        options.omdpManager->constructConcreteMdps();
+        options.omdpManager->getRoot()->accept(statsVisitor);
+
+        std::ofstream out(*options.benchmarkStatsPath);
+        storm::json<ValueType> statsAsJson = stats.toJson();
+        out << statsAsJson.dump(4);
+        out.close();
+    }
 
     std::cout << "Checking for reachability from entrance " << task.getEntranceLabel() << " to exit " << task.getExitLabel() << std::endl;
     std::cout << "Result: " << result << std::endl;

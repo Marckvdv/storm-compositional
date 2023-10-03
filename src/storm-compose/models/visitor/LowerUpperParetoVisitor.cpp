@@ -116,6 +116,10 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
         for (auto const& entrance : entrances) {
             stateLabeling.addLabelToState("init", entrance);
 
+            std::ofstream f("final.dot");
+            model.getMdp()->writeDotToStream(f);
+            f.close();
+
             std::unique_ptr<storm::modelchecker::CheckResult> result =
                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *model.getMdp(), formula->asMultiObjectiveFormula());
             stateLabeling.removeLabelFromState("init", entrance);

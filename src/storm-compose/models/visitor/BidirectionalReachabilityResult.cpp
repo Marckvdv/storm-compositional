@@ -119,6 +119,8 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     pushEntrancesExits(rExit, rExits, true, false);
 
     auto matrix = builder.build();
+    std::cout << "built this matrix: " << std::endl << matrix << std::endl;
+
     auto newMdp = std::make_shared<Mdp<ValueType>>(matrix, labeling);
     return std::make_shared<ConcreteMdp<ValueType>>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }
