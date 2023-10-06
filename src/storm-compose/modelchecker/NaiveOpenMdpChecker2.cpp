@@ -17,10 +17,11 @@ ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker2<ValueType>::check(
     this->manager->constructConcreteMdps();
     this->manager->getRoot()->accept(paretoVisitor);
 
-    // TODO
     auto currentPareto = paretoVisitor.getCurrentPareto();
 
     //STORM_LOG_ASSERT(currentPareto.hasEntrance(task.getEntranceId(), task.isLeftEntrance()), "Pareto curve not defined for the requested entrance");
+    //std::cout << "lower pareto: " << std::endl << currentPareto.first << std::endl;
+    //std::cout << "upper pareto: " << std::endl << currentPareto.second << std::endl;
 
     // TODO check that below is correct
     // TODO replace with: find point on polytope that maximizes the weight vector indicated by the chosen exit.

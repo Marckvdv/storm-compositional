@@ -19,31 +19,34 @@ const std::string ComposeIOSettings::exitName = "exit";
 const std::string ComposeIOSettings::approachName = "approach";
 const std::string ComposeIOSettings::exportStringDiagramName = "exportStringDiagram";
 const std::string ComposeIOSettings::benchmarkDataName = "benchmarkData";
+const std::string ComposeIOSettings::paretoPrecisionName = "paretoPrecision";
+const std::string ComposeIOSettings::paretoPrecisionTypeName = "paretoPrecisionType";
+const std::string ComposeIOSettings::paretoStepsName = "paretoSteps";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
+    auto addStringOption = [&](std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
+        this->addOption(
+            storm::settings::OptionBuilder(moduleName, optionName, false, description)
+                .addArgument(storm::settings::ArgumentBuilder::createStringArgument(fieldName, fieldDescription).build())
+                .build());
+    };
+
+    addStringOption(stringDiagramOption, "model check the given string diagram", "filename", "The name of the file to model check (json).");
+    addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance", "<l|r><number> e.g. l5 is left entrance 5, default: l0");
+    addStringOption(exitName, "exit to consider as the target state of the string diagram", "exit", "<l|r><number> e.g. r3 is right exit 3, default: r0");
+    addStringOption(approachName, "approach to use for computing reachability in the string diagram", "approach", "(choose from {monolithic, naive, weight}, default: monolithic");
+    addStringOption(exportStringDiagramName, "export the string diagram to a dot file", "filename", "The name of the file to write the dot file");
+    addStringOption(benchmarkDataName, "write benchmark results", "filename", "The path to store the benchmark results");
+    addStringOption(paretoPrecisionTypeName, "multi objective computation precision type", "type", "In: {absolute, relative}");
+
     this->addOption(
-        storm::settings::OptionBuilder(moduleName, stringDiagramOption, false, "model check the given string diagram")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("filename", "The name of the file to model check (json).").build())
+        storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false, "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
+            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
             .build());
+
     this->addOption(
-        storm::settings::OptionBuilder(moduleName, entranceName, false, "entrance to consider as the initial state of the string diagram")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("entrance", "<l|r><number> e.g. l5 is left entrance 5, default: l0").build())
-            .build());
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, exitName, false, "exit to consider as the target state of the string diagram")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("exit", "<l|r><number> e.g. r3 is right exit 3, default: r0").build())
-            .build());
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, approachName, false, "approach to use for computing reachability in the string diagram")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("approach", "(choose from {monolithic, naive, weight}, default: monolithic").build())
-            .build());
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, exportStringDiagramName, false, "export the string diagram to a dot file")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("filename", "The name of the file to write the dot file").build())
-            .build());
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, benchmarkDataName, false, "write benchmark results")
-            .addArgument(storm::settings::ArgumentBuilder::createStringArgument("filename", "The path to store the benchmark results").build())
+        storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
+            .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())
             .build());
 }
 
@@ -76,6 +79,18 @@ bool ComposeIOSettings::isExportStringDiagramSet() const {
 
 bool ComposeIOSettings::isBenchmarkDataSet() const {
     return this->getOption(benchmarkDataName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isParetoPrecisionSet() const {
+    return this->getOption(paretoPrecisionName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isParetoPrecisionTypeSet() const {
+    return this->getOption(paretoPrecisionTypeName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isParetoStepsSet() const {
+    return this->getOption(paretoStepsName).getHasOptionBeenSet();
 }
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {
@@ -112,6 +127,18 @@ std::string ComposeIOSettings::getExportStringDiagramFilename() const {
 
 std::string ComposeIOSettings::getBenchmarkDataFilename() const {
     return this->getOption(benchmarkDataName).getArgumentByName("filename").getValueAsString();
+}
+
+double ComposeIOSettings::getParetoPrecision() const {
+    return this->getOption(paretoPrecisionName).getArgumentByName("precision").getValueAsDouble();
+}
+
+std::string ComposeIOSettings::getParetoPrecisionType() const {
+    return this->getOption(paretoPrecisionTypeName).getArgumentByName("type").getValueAsString();
+}
+
+size_t ComposeIOSettings::getParetoSteps() const {
+    return this->getOption(paretoStepsName).getArgumentByName("steps").getValueAsUnsignedInteger();
 }
 
 }  // namespace modules

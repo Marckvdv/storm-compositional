@@ -43,10 +43,8 @@ void OpenMdpManager<ValueType>::addReference(const std::string& name, std::share
 
 template<typename ValueType>
 void OpenMdpManager<ValueType>::constructConcreteMdps() {
-    // TODO this is not sufficient when Prism models are not directly assigned to a reference
     for (auto& entry : references) {
         auto openMdp = entry.second;
-        std::cout << "model " << entry.first << std::endl;
         if (openMdp->isPrismModel()) {
             auto prismModel = std::dynamic_pointer_cast<storm::models::PrismModel<ValueType>>(openMdp);
             auto concreteMdp = prismModel->toConcreteMdp();

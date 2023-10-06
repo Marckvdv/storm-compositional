@@ -72,9 +72,16 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
             labeling.addLabelToState(label, currentState);
 
             // Keep track of total probability mass
-            ValueType probabilitySum = storm::utility::zero<ValueType>();
             const auto& points = getPoints(entrance, leftEntrance);
+            //std::cout << "size of points: " << points.size() << std::endl;
+            //std::cout << (leftEntrance ? "left " : "right ") << "entrance " << entrance << std::endl;
+            if (points.empty()) {
+                std::cout << "WARN: Points was empty (?)" << std::endl;
+                throw 1;
+            }
+
             for (const auto& point : points) {
+                ValueType probabilitySum = storm::utility::zero<ValueType>();
                 STORM_LOG_ASSERT(point.size() == lExits + rExits, "expected point size to line up with amount of exits");
                 for (size_t k = 0; k < point.size(); ++k) {
                     builder.addNextValue(currentRow, entrances + k, point[k]);
@@ -119,8 +126,6 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     pushEntrancesExits(rExit, rExits, true, false);
 
     auto matrix = builder.build();
-    std::cout << "built this matrix: " << std::endl << matrix << std::endl;
-
     auto newMdp = std::make_shared<Mdp<ValueType>>(matrix, labeling);
     return std::make_shared<ConcreteMdp<ValueType>>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }
@@ -199,6 +204,21 @@ std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<Value
         os << std::endl;
     }
     return os;
+}
+
+template <typename ValueType>
+size_t BidirectionalReachabilityResult<ValueType>::getPointDimension() const {
+    return lExits + rExits;
+}
+
+template <typename ValueType>
+size_t BidirectionalReachabilityResult<ValueType>::getLeftEntrances() const {
+    return lEntrances;
+}
+
+template <typename ValueType>
+size_t BidirectionalReachabilityResult<ValueType>::getRightEntrances() const {
+    return rEntrances;
 }
 
 template class BidirectionalReachabilityResult<double>;

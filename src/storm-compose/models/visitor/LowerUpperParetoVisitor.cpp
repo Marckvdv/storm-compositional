@@ -9,6 +9,7 @@
 #include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
 #include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
 #include "storm-parsers/parser/FormulaParser.h"
+#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 
 #include <memory>
 
@@ -23,10 +24,28 @@ using storm::models::sparse::Mdp;
 
 template<typename ValueType>
 LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
+    using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
+
     auto& multiObjectiveOptions = env.modelchecker().multi();
     multiObjectiveOptions.setMethod(storm::modelchecker::multiobjective::MultiObjectiveMethod::Pcaa);
-    //multiObjectiveOptions.setPrecision(0.1);
-    //multiObjectiveOptions.setPrecisionType(storm::MultiObjectiveModelCheckerEnvironment::ABSOLUTE);
+
+    auto const& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
+    if (composeSettings.isParetoPrecisionSet()) {
+        multiObjectiveOptions.setPrecision(composeSettings.getParetoPrecision());
+    }
+    auto newPrecisionType = PT::Absolute;
+    if (composeSettings.isParetoPrecisionTypeSet()) {
+        std::string precisionType = composeSettings.getParetoPrecisionType();
+        if (precisionType == "absolute") {
+            newPrecisionType = PT::Absolute;
+        } else if (precisionType == "relative") {
+            newPrecisionType = PT::RelativeToDiff;
+        } else {
+            STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "unknown precision type");
+        }
+    }
+    multiObjectiveOptions.setPrecisionType(newPrecisionType);
+    if (composeSettings.isParetoStepsSet()) multiObjectiveOptions.setMaxSteps(composeSettings.getParetoSteps());
 }
 
 // TODO merge visitPrismModel and visitConcreteModel so that the code can be
@@ -34,69 +53,13 @@ LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<Open
 // concreteModel and then calls visitConcreteModel on it.
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
-    /*
-    auto program = storm::api::parseProgram(model.getPath(), false, false);
-
-    std::string formulaString = getFormula(model);
-    std::vector<std::shared_ptr<storm::logic::Formula const>> formulas =
-        storm::api::extractFormulasFromProperties(storm::api::parsePropertiesForPrismProgram(formulaString, program));
-    STORM_LOG_ASSERT(formulas.size() == 1, "sanity check");
-    auto formula = formulas.at(0);
-
-    const auto& manager = program.getManager();
-    storm::parser::ExpressionParser parser(manager);
-    parser.setIdentifierMapping(getIdentifierMapping(manager));
-
-    BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
-    auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
-        // TODO find away we do not have to rebuild the MDP for each entrance.
-        // This should be possible by setting multiple initial states during generation,
-        // and then selecting only a single initial state during model checking.
-        size_t entranceNumber = 0;
-        for (auto const& entrance : entrances) {
-            auto initialStatesExpression = parser.parseFromString(entrance);
-            std::cout << initialStatesExpression << std::endl;
-
-            storm::prism::InitialConstruct initialConstruct(initialStatesExpression);
-            program.setInitialConstruct(initialConstruct);
-
-            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp =
-                storm::api::buildSparseModel<ValueType>(program, formulas)->template as<storm::models::sparse::Mdp<ValueType>>();
-            std::unique_ptr<storm::modelchecker::CheckResult> result =
-                storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *mdp, formula->asMultiObjectiveFormula());
-
-            if (result->isExplicitParetoCurveCheckResult()) {
-                auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
-                const auto& points = paretoResult.getPoints();
-
-                for (size_t j = 0; j < points.size(); ++j) {
-                    const auto& point = points[j];
-                    results.addPoint(entranceNumber, leftEntrance, point);
-                }
-            } else {
-                STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
-                STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
-                auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
-
-                std::cout << "Warning: Still need to fix this!!! (a)" << std::endl;
-                // TODO below we assume that the initial state is 0, but this may not be the case (?)
-                results.addPoint(entranceNumber, leftEntrance, {quantitativeResult[0]});
-            }
-
-            entranceNumber++;
-        }
-    };
-
-    checkEntrances(model.lEntrance, true);
-    checkEntrances(model.rEntrance, false);
-
-    currentPareto = results;
-    */
    STORM_LOG_ASSERT(false, "concretize MDPs first!");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
+    //std::cout << "Visiting ConcreteModel" << std::endl;
+
     std::string formulaString = getFormula(model);
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
@@ -115,10 +78,6 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
         for (auto const& entrance : entrances) {
             stateLabeling.addLabelToState("init", entrance);
-
-            std::ofstream f("final.dot");
-            model.getMdp()->writeDotToStream(f);
-            f.close();
 
             std::unique_ptr<storm::modelchecker::CheckResult> result =
                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *model.getMdp(), formula->asMultiObjectiveFormula());
@@ -146,9 +105,9 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
                 STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
-                std::cout << "Warning: Still need to fix this!!! (b)" << std::endl;
 
-                std::vector<ValueType> point {quantitativeResult[0]};
+                // TODO double check below
+                std::vector<ValueType> point {quantitativeResult[entrance]};
                 lowerResults.addPoint(entranceNumber, leftEntrance, point);
                 upperResults.addPoint(entranceNumber, leftEntrance, point);
             }
@@ -165,6 +124,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
+    //std::cout << "Visiting Reference" << std::endl;
+
     // Perform caching if possible
     const auto& referenceName = reference.getReference();
     auto it = paretoResults.find(referenceName);
@@ -183,6 +144,8 @@ void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& re
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
+    //std::cout << "Visiting SequenceModel" << std::endl;
+
     // 1) Get Pareto result for each child
     // 2) Turn each Pareto result into a MDP
     // 3) Stitch them together, using code in the FlatMDP builder.
@@ -224,62 +187,72 @@ void LowerUpperParetoVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueT
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
-    // 1) Get Pareto result for each child
-    // 2) Turn each Pareto result into a MDP
-    // 3) Stitch them together, using code in the FlatMDP builder.
+    //std::cout << "Visiting SumModel" << std::endl;
 
-    // 1)
-    size_t count = 0;
-    std::vector<std::shared_ptr<OpenMdp<ValueType>>> concreteMdpsLower, concreteMdpsUpper;
+    // The sum of two pareto curves is simply extending each point with zeroes
+    // for the entries that do not belong to the child
+
+    typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
+    size_t lEntrances = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::L_ENTRANCE, emptyScope).size();
+    size_t rEntrances = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::R_ENTRANCE, emptyScope).size();
+    size_t lExits = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::L_EXIT, emptyScope).size();
+    size_t rExits = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::R_EXIT, emptyScope).size();
+
+    std::vector<decltype(currentPareto)> paretoCurves;
     for (const auto& openMdp : model.getValues()) {
         openMdp->accept(*this);
-
-        // 2)
-        auto concreteMdpLower = currentPareto.first.toConcreteMdp(manager);
-        auto concreteMdpUpper = currentPareto.second.toConcreteMdp(manager);
-
-        concreteMdpsLower.push_back(std::static_pointer_cast<OpenMdp<ValueType>>(concreteMdpLower));
-        concreteMdpsUpper.push_back(std::static_pointer_cast<OpenMdp<ValueType>>(concreteMdpUpper));
-
-        //bool exportToDot = true; // TODO remove me
-        //if (exportToDot) {
-        //    std::string name = "model" + std::to_string(count) + ".dot";
-        //    std::ofstream out(name);
-        //    concreteMdp.first->getMdp()->writeDotToStream(out);
-        //}
-        ++count;
+        paretoCurves.push_back(currentPareto);
     }
 
-    // 3)
-    SumModel<ValueType> lowerSum(manager, concreteMdpsLower), upperSum(manager, concreteMdpsUpper);
+    size_t pointDimension = lExits+rExits;
+    BidirectionalReachabilityResult<ValueType> 
+        lower(lEntrances, rEntrances, lExits, rExits),
+        upper(lEntrances, rEntrances, lExits, rExits);
 
-    FlatMdpBuilderVisitor<ValueType> flatBuilderLower(manager);
-    lowerSum.accept(flatBuilderLower);
-    ConcreteMdp<ValueType> stitchedLower = flatBuilderLower.getCurrent();
+    size_t entranceOffset = 0, exitOffset = 0;
+    for (const auto &curve : paretoCurves) {
+        auto processPoints = [&](const auto& result, bool leftEntrance, auto& target) {
+            size_t entranceCount = leftEntrance ? result.getLeftEntrances() : result.getRightEntrances();
+            for (size_t entrance = 0; entrance < entranceCount; ++entrance) {
+                const auto& points = result.getPoints(entrance, leftEntrance);
+                for (const auto &point : points) {
+                    std::vector<ValueType> newPoint;
+                    for (size_t i = 0; i < exitOffset; ++i) {
+                        newPoint.push_back(storm::utility::zero<ValueType>());
+                    }
 
-    FlatMdpBuilderVisitor<ValueType> flatBuilderUpper(manager);
-    upperSum.accept(flatBuilderUpper);
-    ConcreteMdp<ValueType> stitchedUpper = flatBuilderUpper.getCurrent();
+                    for (const auto& v : point) {
+                        newPoint.push_back(v);
+                    }
 
-    //bool exportToDot = true; // TODO remove me
-    //if (exportToDot) {
-    //    std::ofstream out("sum.dot");
-    //    stitchedMdp.getMdp()->writeDotToStream(out);
-    //}
+                    for (size_t i = newPoint.size(); i < pointDimension; ++i) {
+                        newPoint.push_back(storm::utility::zero<ValueType>());
+                    }
 
-    // TODO combine two results below
-    visitConcreteModel(stitchedLower);
-    auto lowerResult = currentPareto;
+                    target.addPoint(entranceOffset + entrance, leftEntrance, newPoint);
+                }
+            }
+        };
 
-    visitConcreteModel(stitchedUpper);
-    auto upperResult = currentPareto;
+        // TODO deal with right entrances too
+        processPoints(curve.first, true, lower);
+        //processPoints(curve.first, false, lower);
+        processPoints(curve.second, true, upper);
+        //processPoints(curve.second, false, upper);
 
-    // Update new lower and upper bound to (lower.lower, upper.upper)
-    currentPareto = {lowerResult.first, upperResult.second};
+        STORM_LOG_ASSERT(curve.first.getLeftEntrances() == curve.second.getLeftEntrances(), "sanity check");
+        STORM_LOG_ASSERT(curve.first.getPointDimension() == curve.second.getPointDimension(), "sanity check");
+
+        entranceOffset += curve.first.getLeftEntrances();
+        exitOffset += curve.first.getPointDimension();
+    }
+
+    currentPareto = {lower, upper};
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
+    //std::cout << "Visiting TraceModel" << std::endl;
     // 1) Get Pareto result for the child
     // 2) Turn Pareto result into a MDP
     // 3) Stitch them together, using code in the FlatMDP builder.

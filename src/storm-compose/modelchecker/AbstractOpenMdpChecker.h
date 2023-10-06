@@ -49,11 +49,10 @@ private:
 template <typename ValueType>
 class AbstractOpenMdpChecker {
 public:
-    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats = {}) : manager(manager), stats(stats) {
+    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : manager(manager), stats(stats) {
     }
 
     virtual ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) = 0;
-
 protected:
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
     storm::compose::benchmark::BenchmarkStats<ValueType>& stats;

@@ -21,6 +21,9 @@ public:
     ValueType getLowerBound(size_t entrance, bool leftEntrance, size_t exit, bool leftExit);
     bool isEmpty();
     bool hasEntrance(size_t entrance, bool leftEntrance);
+    size_t getPointDimension() const;
+    size_t getLeftEntrances() const;
+    size_t getRightEntrances() const;
 
 private:
     size_t getIndex(size_t entrance, bool leftEntrance) const;
