@@ -16,10 +16,13 @@ MonolithicOpenMdpChecker<ValueType>::MonolithicOpenMdpChecker(std::shared_ptr<st
 
 template <typename ValueType>
 ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
+    this->stats.modelBuildingTime.start();
     this->manager->constructConcreteMdps();
 
     storm::models::visitor::FlatMdpBuilderVisitor<ValueType> flatVisitor(this->manager);
     this->manager->getRoot()->accept(flatVisitor);
+    this->stats.modelBuildingTime.stop();
+    
     auto concreteMdp = flatVisitor.getCurrent();
     auto mdp = concreteMdp.getMdp();
 
@@ -45,9 +48,11 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
 
     CheckTask<storm::logic::Formula, ValueType> checkTask(*formula, false);
 
+    this->stats.reachabilityComputationTime.start();
     storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> checker(*mdp);
     storm::Environment env;
     auto sparseResult = checker.check(env, checkTask);
+    this->stats.reachabilityComputationTime.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& explicitResult = sparseResult->template asExplicitQuantitativeCheckResult<ValueType>();
     ValueType& exactValue = explicitResult[entranceState];
 

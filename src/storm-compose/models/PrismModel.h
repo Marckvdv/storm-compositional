@@ -28,7 +28,7 @@ class PrismModel : public OpenMdp<ValueType> {
     friend class visitor::LowerUpperParetoVisitor<ValueType>;
 
     public:
-    PrismModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::string path,
+    PrismModel(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::string path,
                std::vector<std::string> lEntrance = {}, std::vector<std::string> rEntrance = {},
                std::vector<std::string> lExit = {}, std::vector<std::string> rExit = {});
     ~PrismModel();

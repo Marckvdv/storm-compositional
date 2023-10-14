@@ -13,8 +13,10 @@ NaiveOpenMdpChecker2<ValueType>::NaiveOpenMdpChecker2(std::shared_ptr<storm::mod
 
 template <typename ValueType>
 ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker2<ValueType>::check(OpenMdpReachabilityTask task) {
-    storm::models::visitor::LowerUpperParetoVisitor<ValueType> paretoVisitor(this->manager);
+    storm::models::visitor::LowerUpperParetoVisitor<ValueType> paretoVisitor(this->manager, this->stats);
+    this->stats.modelBuildingTime.start();
     this->manager->constructConcreteMdps();
+    this->stats.modelBuildingTime.stop();
     this->manager->getRoot()->accept(paretoVisitor);
 
     auto currentPareto = paretoVisitor.getCurrentPareto();

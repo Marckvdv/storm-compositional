@@ -10,6 +10,7 @@
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
+#include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/environment/Environment.h"
 
@@ -32,7 +33,7 @@ template<typename ValueType>
 class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::pair<BidirectionalReachabilityResult<ValueType>, BidirectionalReachabilityResult<ValueType>> ParetoType;
 public:
-    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager);
+    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
@@ -54,6 +55,7 @@ private:
     std::unordered_map<std::string, ParetoType> paretoResults;
     ParetoType currentPareto;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
+    storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 
     storm::Environment env;
 };

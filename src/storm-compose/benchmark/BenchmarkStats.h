@@ -11,9 +11,10 @@ template <class ValueType>
 struct BenchmarkStats {
     BenchmarkStats() = default;
 
-    storm::utility::Stopwatch totalTime;
+    storm::utility::Stopwatch totalTime, modelBuildingTime, reachabilityComputationTime;
     size_t stateCount = 0, stringDiagramDepth = 0, uniqueLeaves = 0, leafStates = 0;
     size_t sequenceCount = 0, sumCount = 0, traceCount = 0;
+    size_t paretoPoints = 0;
     ValueType lowerBound = storm::utility::zero<ValueType>(), upperBound = storm::utility::one<ValueType>();
     storm::RationalNumber leafSchedulerCount = storm::utility::zero<storm::RationalNumber>();
 
@@ -23,6 +24,9 @@ struct BenchmarkStats {
         storm::json<ValueType> result;
 
         result["totalTime"] = totalTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+        result["modelBuildingTime"] = modelBuildingTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+        result["reachabilityComputationTime"] = reachabilityComputationTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+
         result["stateCount"] = stateCount;
         result["stringDiagramDepth"] = stringDiagramDepth;
         result["uniqueLeaves"] = uniqueLeaves;
@@ -34,6 +38,10 @@ struct BenchmarkStats {
 
         result["lowerBound"] = lowerBound;
         result["upperBound"] = upperBound;
+        ValueType gap = upperBound - lowerBound;
+        result["gap"] = gap;
+
+        result["paretoPoints"] = paretoPoints;
 
         storm::RationalNumber schedulerLimit = storm::utility::pow(storm::RationalNumber(2), 64);
         if (leafSchedulerCount > schedulerLimit) {

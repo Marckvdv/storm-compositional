@@ -14,7 +14,6 @@ StateValuationParser::StateValuationParser(const storm::storage::sparse::StateVa
     for (auto it = stateValuations.at(0).begin(); it != stateValuations.at(0).end(); ++it) {
         if (it.isInteger()) {
             integerOrder.push_back(it.getName());
-            std::cout << it.getName() << std::endl;
         }
     }
 }

@@ -4,12 +4,12 @@ namespace storm {
 namespace models {
 
 template<typename ValueType>
-ConcreteMdp<ValueType>::ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager)
+ConcreteMdp<ValueType>::ConcreteMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager)
     : OpenMdp<ValueType>(manager), mdp(nullptr) {
 }
 
 template<typename ValueType>
-ConcreteMdp<ValueType>::ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp, std::vector<size_t> lEntrance, std::vector<size_t> rEntrance, std::vector<size_t> lExit, std::vector<size_t> rExit)
+ConcreteMdp<ValueType>::ConcreteMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp, std::vector<size_t> lEntrance, std::vector<size_t> rEntrance, std::vector<size_t> lExit, std::vector<size_t> rExit)
     : OpenMdp<ValueType>(manager), mdp(mdp), lEntrance(lEntrance), rEntrance(rEntrance), lExit(lExit), rExit(rExit) {
 }
 

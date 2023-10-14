@@ -27,13 +27,13 @@ void Reference<ValueType>::accept(visitor::OpenMdpVisitor<ValueType>& visitor) {
 
 template <typename ValueType>
 std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> Reference<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entranceExit, typename OpenMdp<ValueType>::Scope& scope) const {
-    auto openMdp = this->manager->dereference(reference);
+    auto openMdp = this->getManager()->dereference(reference);
     return openMdp->collectEntranceExit(entranceExit, scope);
 }
 
 template <typename ValueType>
 bool Reference<ValueType>::isRightward() const {
-    auto openMdp = this->manager->dereference(reference);
+    auto openMdp = this->getManager()->dereference(reference);
     return openMdp->isRightward();
 }
 

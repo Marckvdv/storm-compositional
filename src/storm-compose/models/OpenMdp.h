@@ -46,7 +46,7 @@ template<typename ValueType>
 class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
 public:
     virtual ~OpenMdp() = 0;
-    OpenMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
+    OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager);
 
     bool hasName();
     std::string getName();
@@ -101,7 +101,7 @@ public:
 
 protected:
     boost::optional<std::string> name;
-    std::shared_ptr<OpenMdpManager<ValueType>> manager;
+    std::weak_ptr<OpenMdpManager<ValueType>> manager;
 };
 
 template class OpenMdp<storm::RationalNumber>;

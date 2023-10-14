@@ -9,7 +9,7 @@ namespace storm {
 namespace models {
 
 template<typename ValueType>
-PrismModel<ValueType>::PrismModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::string path,
+PrismModel<ValueType>::PrismModel(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::string path,
                std::vector<std::string> lEntrance, std::vector<std::string> rEntrance,
                std::vector<std::string> lExit, std::vector<std::string> rExit
 ) : OpenMdp<ValueType>(manager), path(path), lEntrance(lEntrance), rEntrance(rEntrance), lExit(lExit), rExit(rExit) {

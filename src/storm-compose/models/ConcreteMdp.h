@@ -31,8 +31,8 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     friend class visitor::LowerUpperParetoVisitor<ValueType>;
 
 public:
-    ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);
-    ConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp,
+    ConcreteMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager);
+    ConcreteMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp,
                 std::vector<size_t> lEntrance = {}, std::vector<size_t> rEntrance = {}, std::vector<size_t> lExit = {}, std::vector<size_t> rExit = {});
     //ConcreteMdp(ConcreteMdp const&) = default;
     ~ConcreteMdp();

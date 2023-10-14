@@ -10,7 +10,7 @@ OpenMdp<ValueType>::~OpenMdp() {
 }
 
 template<typename ValueType>
-OpenMdp<ValueType>::OpenMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
+OpenMdp<ValueType>::OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
 }
 
 template<typename ValueType>
@@ -33,19 +33,19 @@ std::shared_ptr<OpenMdp<ValueType>> OpenMdp<ValueType>::followReferences() {
     if (isReference()) {
         Reference<ValueType>* reference = dynamic_cast<Reference<ValueType>*>(this);
         std::string name = reference->getReference();
-        return manager->dereference(name)->followReferences();
+        return getManager()->dereference(name)->followReferences();
     }
     return this->shared_from_this();
 }
 
 template<typename ValueType>
 std::shared_ptr<OpenMdpManager<ValueType>> OpenMdp<ValueType>::getManager() {
-    return manager;
+    return manager.lock();
 }
 
 template<typename ValueType>
 std::shared_ptr<OpenMdpManager<ValueType>> const OpenMdp<ValueType>::getManager() const {
-    return manager;
+    return manager.lock();
 }
 
 template<typename ValueType>

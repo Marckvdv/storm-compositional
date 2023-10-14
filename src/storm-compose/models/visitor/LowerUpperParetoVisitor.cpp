@@ -23,7 +23,7 @@ using storm::storage::SparseMatrix;
 using storm::models::sparse::Mdp;
 
 template<typename ValueType>
-LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
+LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : manager(manager), stats(stats) {
     using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
 
     auto& multiObjectiveOptions = env.modelchecker().multi();
@@ -79,8 +79,10 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
         for (auto const& entrance : entrances) {
             stateLabeling.addLabelToState("init", entrance);
 
+            stats.reachabilityComputationTime.start();
             std::unique_ptr<storm::modelchecker::CheckResult> result =
                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(this->env, *model.getMdp(), formula->asMultiObjectiveFormula());
+            stats.reachabilityComputationTime.stop();
             stateLabeling.removeLabelFromState("init", entrance);
 
             if (result->isExplicitParetoCurveCheckResult()) {
@@ -91,6 +93,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
                 const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
                 const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
+                this->stats.paretoPoints += lowerPoints.size();
+                this->stats.paretoPoints += upperPoints.size();
 
                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
                     const auto& point = lowerPoints[j];
@@ -234,11 +238,10 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
             }
         };
 
-        // TODO deal with right entrances too
         processPoints(curve.first, true, lower);
-        //processPoints(curve.first, false, lower);
+        processPoints(curve.first, false, lower);
         processPoints(curve.second, true, upper);
-        //processPoints(curve.second, false, upper);
+        processPoints(curve.second, false, upper);
 
         STORM_LOG_ASSERT(curve.first.getLeftEntrances() == curve.second.getLeftEntrances(), "sanity check");
         STORM_LOG_ASSERT(curve.first.getPointDimension() == curve.second.getPointDimension(), "sanity check");
