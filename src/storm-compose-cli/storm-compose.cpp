@@ -172,7 +172,7 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
  * @return Return code, 0 if successfull, not 0 otherwise.
  */
 int main(const int argc, const char** argv) {
-    try {
+    //try {
         storm::utility::setUp();
         storm::cli::printHeader("Storm-compose", argc, argv);
         storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
@@ -207,16 +207,16 @@ int main(const int argc, const char** argv) {
         if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
             storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
         }
-    } catch(std::bad_alloc e) {
-        std::cout << "Got an exception: " << e.what() << std::endl;
-        return 23;
-    } catch(std::exception e) {
-        std::cerr << "Got an exception " << e.what() << std::endl;
-        return -1;
-    } catch(...) {
-        std::cerr << "Got an unknown exception." << std::endl;
-        return -1;
-    }
+    //} catch(std::bad_alloc e) {
+    //    std::cout << "Got an exception: " << e.what() << std::endl;
+    //    return 23;
+    //} catch(std::exception e) {
+    //    std::cerr << "Got an exception " << e.what() << std::endl;
+    //    return -1;
+    //} catch(...) {
+    //    std::cerr << "Got an unknown exception." << std::endl;
+    //    return -1;
+    //}
 
     // All operations have now been performed, so we clean up everything and terminate.
     storm::utility::cleanUp();

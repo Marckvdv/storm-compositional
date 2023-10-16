@@ -26,7 +26,7 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     auto concreteMdp = flatVisitor.getCurrent();
     auto mdp = concreteMdp.getMdp();
 
-    //bool exportToDot = false;
+    //bool exportToDot = true;
     //if (exportToDot) {
     //    std::ofstream out("test.dot");
     //    mdp->writeDotToStream(out);

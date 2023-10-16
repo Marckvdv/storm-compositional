@@ -66,7 +66,6 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
     BidirectionalReachabilityResult<ValueType> lowerResults(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size()),
         upperResults(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
-    size_t entranceNumber = 0;
 
     auto& stateLabeling = model.getMdp()->getStateLabeling();
     if (!stateLabeling.containsLabel("init")) {
@@ -76,6 +75,7 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
     }
 
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
+        size_t entranceNumber = 0;
         for (auto const& entrance : entrances) {
             stateLabeling.addLabelToState("init", entrance);
 
@@ -106,6 +106,7 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                     upperResults.addPoint(entranceNumber, leftEntrance, point);
                 }
             } else {
+                std::cout << "got here" << std::endl;
                 STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
                 STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
@@ -128,7 +129,6 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
-    //std::cout << "Visiting Reference" << std::endl;
 
     // Perform caching if possible
     const auto& referenceName = reference.getReference();
@@ -156,7 +156,7 @@ void LowerUpperParetoVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueT
 
     // 1)
     std::vector<std::shared_ptr<OpenMdp<ValueType>>> concreteMdpsLower, concreteMdpsUpper;
-    for (const auto& openMdp : model.getValues()) {
+    for (auto& openMdp : model.getValues()) {
         openMdp->accept(*this);
 
         // 2)
@@ -213,10 +213,11 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
         lower(lEntrances, rEntrances, lExits, rExits),
         upper(lEntrances, rEntrances, lExits, rExits);
 
-    size_t entranceOffset = 0, exitOffset = 0;
+    size_t entranceOffsetLeft = 0, entranceOffsetRight = 0, exitOffset = 0;
     for (const auto &curve : paretoCurves) {
         auto processPoints = [&](const auto& result, bool leftEntrance, auto& target) {
             size_t entranceCount = leftEntrance ? result.getLeftEntrances() : result.getRightEntrances();
+            size_t entranceOffset = leftEntrance ? entranceOffsetLeft : entranceOffsetRight;
             for (size_t entrance = 0; entrance < entranceCount; ++entrance) {
                 const auto& points = result.getPoints(entrance, leftEntrance);
                 for (const auto &point : points) {
@@ -244,9 +245,11 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
         processPoints(curve.second, false, upper);
 
         STORM_LOG_ASSERT(curve.first.getLeftEntrances() == curve.second.getLeftEntrances(), "sanity check");
+        STORM_LOG_ASSERT(curve.first.getRightEntrances() == curve.second.getRightEntrances(), "sanity check");
         STORM_LOG_ASSERT(curve.first.getPointDimension() == curve.second.getPointDimension(), "sanity check");
 
-        entranceOffset += curve.first.getLeftEntrances();
+        entranceOffsetLeft += curve.first.getLeftEntrances();
+        entranceOffsetRight += curve.first.getRightEntrances();
         exitOffset += curve.first.getPointDimension();
     }
 
@@ -271,13 +274,11 @@ void LowerUpperParetoVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& 
     TraceModel<ValueType> newTraceModelLower(manager, concreteMdpLower, model.left, model.right);
     FlatMdpBuilderVisitor<ValueType> flatBuilderLower(manager);
     newTraceModelLower.accept(flatBuilderLower);
-
     ConcreteMdp<ValueType> stitchedMdpLower = flatBuilderLower.getCurrent();
 
     TraceModel<ValueType> newTraceModelUpper(manager, concreteMdpUpper, model.left, model.right);
     FlatMdpBuilderVisitor<ValueType> flatBuilderUpper(manager);
     newTraceModelUpper.accept(flatBuilderUpper);
-
     ConcreteMdp<ValueType> stitchedMdpUpper = flatBuilderUpper.getCurrent();
 
     visitConcreteModel(stitchedMdpLower);

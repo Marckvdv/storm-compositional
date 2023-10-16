@@ -26,6 +26,10 @@ template<typename ValueType>
 void BidirectionalReachabilityResult<ValueType>::addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint) {
     size_t index = getIndex(entrance, leftEntrance);
     STORM_LOG_ASSERT(index < points.size(), "sanity check" << index << " vs " << points.size());
+    for (auto& v : paretoOptimalPoint) {
+        STORM_LOG_ASSERT(v >= 0, "negative point value");
+        //STORM_LOG_THROW(v >= 0, storm::exceptions::InvalidOperationException, "negative point value");
+    }
 
     points[index].push_back(paretoOptimalPoint);
 }
@@ -75,10 +79,10 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
             const auto& points = getPoints(entrance, leftEntrance);
             //std::cout << "size of points: " << points.size() << std::endl;
             //std::cout << (leftEntrance ? "left " : "right ") << "entrance " << entrance << std::endl;
-            if (points.empty()) {
-                std::cout << "WARN: Points was empty (?)" << std::endl;
-                throw 1;
-            }
+            //if (points.empty()) {
+            //    std::cout << "WARN: Points was empty (?)" << std::endl;
+            //    throw 1;
+            //}
 
             for (const auto& point : points) {
                 ValueType probabilitySum = storm::utility::zero<ValueType>();
@@ -89,6 +93,7 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
                 }
 
                 ValueType remainingProbability = storm::utility::one<ValueType>() - probabilitySum;
+                //std::cout << "remaining prob: " << remainingProbability << std::endl;
                 if (remainingProbability > storm::utility::zero<ValueType>()) {
                     builder.addNextValue(currentRow, sinkState, remainingProbability);
                 }
@@ -166,19 +171,25 @@ std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<Value
     os << "Bidirectional reachability result:" << std::endl;
 
     auto printPoint = [&] (const auto& point) {
+        ValueType sum = 0;
         for (size_t lExit = 0; lExit < result.lExits; ++lExit) {
             auto value = point[lExit];
-            if (value > 0) {
+            if (value != 0) {
                 os << "lExit " << lExit << ": " << value << std::endl;
             }
+            sum += value;
         }
+        os << "Sum: " << sum << std::endl;
 
+        sum = 0;
         for (size_t rExit = 0; rExit < result.rExits; ++rExit) {
             auto value = point[result.lExits + rExit];
-            if (value > 0) {
+            if (value != 0) {
                 os << "rExit " << rExit << ": " << value << std::endl;
             }
+            sum += value;
         }
+        os << "Sum: " << sum << std::endl;
     };
 
     for (size_t lEntrance = 0; lEntrance < result.lEntrances; ++lEntrance) {
