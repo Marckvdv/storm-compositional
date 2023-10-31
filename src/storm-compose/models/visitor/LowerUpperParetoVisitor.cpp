@@ -58,7 +58,7 @@ void LowerUpperParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& 
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
-    //std::cout << "Visiting ConcreteModel" << std::endl;
+    STORM_LOG_DEBUG("[COMPOSE] Visiting ConcreteModel");
 
     std::string formulaString = getFormula(model);
     storm::parser::FormulaParser formulaParser;
@@ -88,8 +88,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
             if (result->isExplicitParetoCurveCheckResult()) {
                 auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
 
-                STORM_LOG_ASSERT(paretoResult.hasUnderApproximation(), "expected under approximation");
-                STORM_LOG_ASSERT(paretoResult.hasOverApproximation(), "expected over approximation");
+                STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
+                STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 
                 const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
                 const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
@@ -106,9 +106,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                     upperResults.addPoint(entranceNumber, leftEntrance, point);
                 }
             } else {
-                std::cout << "got here" << std::endl;
-                STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
-                STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
+                STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException, "result was not pareto nor quantitative");
+                STORM_LOG_THROW(model.lExit.size() + model.rExit.size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 
                 // TODO double check below
@@ -125,13 +124,16 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
     checkEntrances(model.rEntrance, false);
 
     currentPareto = {lowerResults, upperResults};
+
+    STORM_LOG_DEBUG("[COMPOSE] Existing ConcreteModel");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
-
     // Perform caching if possible
     const auto& referenceName = reference.getReference();
+    STORM_LOG_DEBUG("[COMPOSE] Visiting Reference " << referenceName);
+
     auto it = paretoResults.find(referenceName);
     if (it != paretoResults.end()) {
         // TODO avoid copying
@@ -144,11 +146,13 @@ void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& re
 
         paretoResults[referenceName] = currentPareto;
     }
+
+    STORM_LOG_DEBUG("[COMPOSE] Exiting Reference " << referenceName);
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
-    //std::cout << "Visiting SequenceModel" << std::endl;
+    STORM_LOG_DEBUG("[COMPOSE] Visiting SequenceModel");
 
     // 1) Get Pareto result for each child
     // 2) Turn each Pareto result into a MDP
@@ -187,11 +191,13 @@ void LowerUpperParetoVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueT
     const auto resultUpper = currentPareto;
 
     currentPareto = {resultLower.first, resultUpper.second};
+
+    STORM_LOG_DEBUG("[COMPOSE] Exiting SequenceModel");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
-    //std::cout << "Visiting SumModel" << std::endl;
+    STORM_LOG_DEBUG("[COMPOSE] Visiting SumModel");
 
     // The sum of two pareto curves is simply extending each point with zeroes
     // for the entries that do not belong to the child
@@ -254,11 +260,13 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
     }
 
     currentPareto = {lower, upper};
+
+    STORM_LOG_DEBUG("[COMPOSE] Exiting SumModel");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
-    //std::cout << "Visiting TraceModel" << std::endl;
+    STORM_LOG_DEBUG("[COMPOSE] Visiting TraceModel");
     // 1) Get Pareto result for the child
     // 2) Turn Pareto result into a MDP
     // 3) Stitch them together, using code in the FlatMDP builder.
@@ -288,6 +296,7 @@ void LowerUpperParetoVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& 
     const auto upperResult = currentPareto;
 
     currentPareto = {lowerResult.first, upperResult.second};
+    STORM_LOG_DEBUG("[COMPOSE] Exiting TraceModel");
 }
 
 template<typename ValueType>

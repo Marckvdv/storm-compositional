@@ -67,7 +67,7 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
                 labeling.addLabel(label);
                 labeling.addLabelToState(label, *optionalIndex);
             } else {
-                STORM_LOG_ASSERT(false, "Could not find state valuation " << entry << " in prism file " << getPath());
+                STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "Could not find state valuation " << entry << " in prism file " << getPath());
             }
             ++count;
         }

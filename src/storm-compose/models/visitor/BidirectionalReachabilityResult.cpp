@@ -27,8 +27,8 @@ void BidirectionalReachabilityResult<ValueType>::addPoint(size_t entrance, bool 
     size_t index = getIndex(entrance, leftEntrance);
     STORM_LOG_ASSERT(index < points.size(), "sanity check" << index << " vs " << points.size());
     for (auto& v : paretoOptimalPoint) {
-        STORM_LOG_ASSERT(v >= 0, "negative point value");
-        //STORM_LOG_THROW(v >= 0, storm::exceptions::InvalidOperationException, "negative point value");
+        //STORM_LOG_ASSERT(v >= 0, "negative point value");
+        STORM_LOG_THROW(v >= 0, storm::exceptions::InvalidOperationException, "negative point value");
     }
 
     points[index].push_back(paretoOptimalPoint);
@@ -45,7 +45,7 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     // e.g. the second point for entrance 0 is the second action for state 0, reaching the exits with the probabilities described by the point.
 
     // Order of the states is as follows:
-    // [0, lEntrances-1] left entrances
+    // [0, lEntrances - 1] left entrances
     // [+1, +rEntrances - 1] right entrances
     // [+1, +lExits - 1] left exits
     // [+1, +rExits - 1] right exits
