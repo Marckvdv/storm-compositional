@@ -23,6 +23,34 @@ using storm::storage::SparseMatrix;
 using storm::models::sparse::Mdp;
 
 template<typename ValueType>
+std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getPositivityPolytope(size_t dimension) {
+    std::vector<storm::storage::geometry::Halfspace<ValueType>> halfSpaces;
+    for (size_t i = 0; i < dimension; ++i) {
+        std::vector<ValueType> normal(dimension, 0);
+        normal[i] = -1;
+        halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 0));
+    }
+
+    return storm::storage::geometry::Polytope<ValueType>::create(halfSpaces);
+}
+
+template<typename ValueType>
+std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getProbabilitySimplex(size_t dimension) {
+    std::vector<storm::storage::geometry::Halfspace<ValueType>> halfSpaces;
+    // each value must be greater or equal to zero
+    for (size_t i = 0; i < dimension; ++i) {
+        std::vector<ValueType> normal(dimension, 0);
+        normal[i] = -1;
+        halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 0));
+    }
+    // the sum cannot be more than 1
+    std::vector<ValueType> normal(dimension, 1);
+    halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 1));
+
+    return storm::storage::geometry::Polytope<ValueType>::create(halfSpaces);
+}
+
+template<typename ValueType>
 LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : manager(manager), stats(stats) {
     using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
 
@@ -53,12 +81,16 @@ LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<Open
 // concreteModel and then calls visitConcreteModel on it.
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
-   STORM_LOG_ASSERT(false, "concretize MDPs first!");
+   STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "concretize MDPs first!");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     STORM_LOG_DEBUG("[COMPOSE] Visiting ConcreteModel");
+
+    //std::ofstream f("m.dot");
+    //model.getMdp()->writeDotToStream(f);
+    //f.close();
 
     std::string formulaString = getFormula(model);
     storm::parser::FormulaParser formulaParser;
@@ -91,10 +123,33 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
                 STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 
-                const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
-                const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
+                //std::cout << "Upper verts before intersection: " << std::endl;
+                //for (auto &p : paretoResult.getOverApproximation()->getVertices()) {
+                //    for (auto& v : p) {
+                //        std::cout << v << ", ";
+                //    }
+                //    std::cout << std::endl;
+                //}
+
+                auto probabilisticSimplex = getProbabilitySimplex<ValueType>(lowerResults.getPointDimension());
+                auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(probabilisticSimplex);
+                const auto& lowerPoints = lowerPolytope->getVertices();
+
+                auto upperPolytope = paretoResult.getOverApproximation()->intersection(probabilisticSimplex);
+                const auto& upperPoints = upperPolytope->getVertices();
+
                 this->stats.paretoPoints += lowerPoints.size();
                 this->stats.paretoPoints += upperPoints.size();
+
+                //std::cout << "Lower verts after intersection: " << std::endl;
+                //for (auto &p : lowerPoints) {
+                //    for (auto& v : p) {
+                //        std::cout << v << ", ";
+                //    }
+                //    std::cout << std::endl;
+                //}
+                //const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
+                //const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
 
                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
                     const auto& point = lowerPoints[j];

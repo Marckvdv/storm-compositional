@@ -6,7 +6,9 @@
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
+#include "storm-compose/models/ConcreteMdp.h"
 #include <utility>
+
 
 namespace storm {
 namespace models {

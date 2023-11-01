@@ -26,10 +26,14 @@ template<typename ValueType>
 void BidirectionalReachabilityResult<ValueType>::addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint) {
     size_t index = getIndex(entrance, leftEntrance);
     STORM_LOG_ASSERT(index < points.size(), "sanity check" << index << " vs " << points.size());
+    //ValueType sum = 0;
     for (auto& v : paretoOptimalPoint) {
-        //STORM_LOG_ASSERT(v >= 0, "negative point value");
-        STORM_LOG_THROW(v >= 0, storm::exceptions::InvalidOperationException, "negative point value");
+        //STORM_LOG_THROW(v > -1e-8, storm::exceptions::InvalidOperationException, "negative point value: " << v);
+        if (v < 0) v = 0;
+        //STORM_LOG_THROW(v < 1.0001, storm::exceptions::InvalidOperationException, "point greather than 1: " << v);
+        //sum += v;
     }
+    //STORM_LOG_THROW(sum > 0.999 && sum < 1.0001, storm::exceptions::InvalidOperationException, "sum not 1: " << sum);
 
     points[index].push_back(paretoOptimalPoint);
 }
@@ -93,7 +97,6 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
                 }
 
                 ValueType remainingProbability = storm::utility::one<ValueType>() - probabilitySum;
-                //std::cout << "remaining prob: " << remainingProbability << std::endl;
                 if (remainingProbability > storm::utility::zero<ValueType>()) {
                     builder.addNextValue(currentRow, sinkState, remainingProbability);
                 }
