@@ -10,6 +10,7 @@
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/environment/Environment.h"
 

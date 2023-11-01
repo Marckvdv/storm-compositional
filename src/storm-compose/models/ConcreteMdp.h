@@ -2,9 +2,6 @@
 
 #include "OpenMdp.h"
 #include "storm/models/sparse/Mdp.h"
-#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
-#include "storm-compose/models/visitor/ParetoVisitor.h"
-#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 
 namespace storm {
 namespace models {

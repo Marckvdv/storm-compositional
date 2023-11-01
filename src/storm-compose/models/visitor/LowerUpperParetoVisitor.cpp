@@ -10,6 +10,7 @@
 #include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 
 #include <memory>
 

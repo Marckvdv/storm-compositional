@@ -1,7 +1,6 @@
 #pragma once
 
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
-#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "OpenMdp.h"
 #include "OpenMdpManager.h"
 #include <vector>

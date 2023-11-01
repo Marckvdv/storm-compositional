@@ -5,6 +5,7 @@
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/modelchecker/prctl/SparseMdpPrctlModelChecker.h"
 #include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
+#include "storm/environment/Environment.h"
 
 namespace storm {
 namespace modelchecker {

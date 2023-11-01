@@ -1,9 +1,5 @@
 #pragma once
 
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
-#include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
-#include "storm-compose/models/visitor/ParetoVisitor.h"
-#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 #include "OpenMdp.h"
 #include "OpenMdpManager.h"
 #include "ConcreteMdp.h"
@@ -13,6 +9,7 @@ namespace models {
 
 template<typename ValueType> class OpenMdp;
 template<typename ValueType> class OpenMdpManager;
+template<typename ValueType> class ConcreteMdp;
 
 namespace visitor {
 template<typename ValueType> class OpenMdpVisitor;

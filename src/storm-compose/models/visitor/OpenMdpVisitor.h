@@ -2,6 +2,11 @@
 
 #include "storm-compose/models/OpenMdp.h"
 #include "storm-compose/models/Reference.h"
+#include "storm-compose/models/SequenceModel.h"
+#include "storm-compose/models/SumModel.h"
+#include "storm-compose/models/PrismModel.h"
+#include "storm-compose/models/TraceModel.h"
+#include "storm-compose/models/ConcreteMdp.h"
 
 namespace storm {
 namespace models {
