@@ -1,19 +1,18 @@
 #include "NaiveOpenMdpChecker2.h"
 
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
-#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 
 namespace storm {
 namespace modelchecker {
 
 template <typename ValueType>
-NaiveOpenMdpChecker2<ValueType>::NaiveOpenMdpChecker2(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : AbstractOpenMdpChecker<ValueType>(manager, stats) {
+NaiveOpenMdpChecker2<ValueType>::NaiveOpenMdpChecker2(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, models::visitor::LowerUpperParetoSettings settings) : AbstractOpenMdpChecker<ValueType>(manager, stats), settings(settings) {
 
 }
 
 template <typename ValueType>
 ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker2<ValueType>::check(OpenMdpReachabilityTask task) {
-    storm::models::visitor::LowerUpperParetoVisitor<ValueType> paretoVisitor(this->manager, this->stats);
+    storm::models::visitor::LowerUpperParetoVisitor<ValueType> paretoVisitor(this->manager, this->stats, settings);
     this->stats.modelBuildingTime.start();
     this->manager->constructConcreteMdps();
     this->stats.modelBuildingTime.stop();

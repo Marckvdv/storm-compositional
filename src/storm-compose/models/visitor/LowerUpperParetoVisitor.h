@@ -20,6 +20,13 @@ namespace visitor {
 
 template<typename ValueType> class BidirectionalReachabilityResult;
 
+struct LowerUpperParetoSettings {
+    double precision;
+    std::string precisionType;
+
+    boost::optional<size_t> steps;
+};
+
 /*
 Current workflow:
 After visiting any node, a Pareto result is stored.
@@ -33,7 +40,7 @@ template<typename ValueType>
 class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::pair<BidirectionalReachabilityResult<ValueType>, BidirectionalReachabilityResult<ValueType>> ParetoType;
 public:
-    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
+    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
@@ -58,6 +65,7 @@ private:
     storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 
     storm::Environment env;
+    LowerUpperParetoSettings settings;
 };
 
 }

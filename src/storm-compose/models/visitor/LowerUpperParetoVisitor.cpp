@@ -52,29 +52,23 @@ std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getProbabilitySim
 }
 
 template<typename ValueType>
-LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : manager(manager), stats(stats) {
+LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings) : manager(manager), stats(stats), settings(settings) {
     using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
 
     auto& multiObjectiveOptions = env.modelchecker().multi();
     multiObjectiveOptions.setMethod(storm::modelchecker::multiobjective::MultiObjectiveMethod::Pcaa);
 
-    auto const& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
-    if (composeSettings.isParetoPrecisionSet()) {
-        multiObjectiveOptions.setPrecision(composeSettings.getParetoPrecision());
-    }
+    multiObjectiveOptions.setPrecision(settings.precision);
     auto newPrecisionType = PT::Absolute;
-    if (composeSettings.isParetoPrecisionTypeSet()) {
-        std::string precisionType = composeSettings.getParetoPrecisionType();
-        if (precisionType == "absolute") {
-            newPrecisionType = PT::Absolute;
-        } else if (precisionType == "relative") {
-            newPrecisionType = PT::RelativeToDiff;
-        } else {
-            STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "unknown precision type");
-        }
+    if (settings.precisionType == "absolute") {
+        newPrecisionType = PT::Absolute;
+    } else if (settings.precisionType == "relative") {
+        newPrecisionType = PT::RelativeToDiff;
+    } else {
+        STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "unknown precision type");
     }
     multiObjectiveOptions.setPrecisionType(newPrecisionType);
-    if (composeSettings.isParetoStepsSet()) multiObjectiveOptions.setMaxSteps(composeSettings.getParetoSteps());
+    if (settings.steps) multiObjectiveOptions.setMaxSteps(*settings.steps);
 }
 
 // TODO merge visitPrismModel and visitConcreteModel so that the code can be

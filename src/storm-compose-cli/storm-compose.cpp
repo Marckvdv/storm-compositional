@@ -117,6 +117,25 @@ template <typename ValueType>
 void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
     storm::compose::benchmark::BenchmarkStats<ValueType> stats;
 
+    auto& composeSettings = storm::settings::getModule<storm::settings::modules::ComposeIOSettings>();
+    models::visitor::LowerUpperParetoSettings settings;
+    if (composeSettings.isParetoPrecisionSet()) {
+        settings.precision = composeSettings.getParetoPrecision();
+    } else {
+        settings.precision = 1e-3;
+    }
+    if (composeSettings.isParetoPrecisionTypeSet()) {
+        settings.precisionType = composeSettings.getParetoPrecisionType();
+    } else {
+        settings.precisionType = "absolute";
+    }
+    if (composeSettings.isParetoStepsSet()) {
+        settings.steps = composeSettings.getParetoSteps();
+    } else {
+        settings.steps = boost::none;
+    }
+
+
     stats.totalTime.start();
     std::unique_ptr<storm::modelchecker::AbstractOpenMdpChecker<ValueType>> checker;
     switch (options.approach) {
@@ -127,7 +146,7 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
         case NAIVE2:
-            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager, stats);
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager, stats, settings);
             break;
         case WEIGHTED:
             STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
