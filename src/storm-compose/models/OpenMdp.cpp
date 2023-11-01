@@ -100,5 +100,8 @@ typename OpenMdp<ValueType>::EntranceExit OpenMdp<ValueType>::match(EntranceExit
     }
 }
 
+template class OpenMdp<double>;
+template class OpenMdp<storm::RationalNumber>;
+
 }
 }

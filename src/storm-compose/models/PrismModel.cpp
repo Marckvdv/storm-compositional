@@ -54,7 +54,7 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     // TODO make efficient
 
     storm::parser::StateValuationParser valuationParser(stateValuations);
-    std::vector<uint64_t> lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx;
+    std::vector<size_t> lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx;
 
     auto processEntranceExit = [&](auto& source, auto& dest, bool entrance, bool left) {
         size_t count = 0;

@@ -104,8 +104,5 @@ protected:
     std::weak_ptr<OpenMdpManager<ValueType>> manager;
 };
 
-template class OpenMdp<storm::RationalNumber>;
-template class OpenMdp<double>;
-
 }
 }
