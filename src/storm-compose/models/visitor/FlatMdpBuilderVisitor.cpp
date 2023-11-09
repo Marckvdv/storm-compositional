@@ -1,5 +1,3 @@
-#pragma once
-
 #include "FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"

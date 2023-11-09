@@ -8,12 +8,12 @@ namespace settings {
 namespace modules {
 
 /*!
- * This class represents the settings for POMDP model checking.
+ * This class represents the settings for compositional model checking.
  */
 class ComposeIOSettings : public ModuleSettings {
    public:
     /*!
-     * Creates a new set of POMDP settings.
+     * Creates a new set of compositional settings.
      */
     ComposeIOSettings();
 

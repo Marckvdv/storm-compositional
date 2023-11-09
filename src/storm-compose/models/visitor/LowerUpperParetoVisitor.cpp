@@ -52,6 +52,30 @@ std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getProbabilitySim
 }
 
 template<typename ValueType>
+bool isDominating(std::vector<ValueType>& a, std::vector<ValueType>& b) {
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (a[i] < b[i]) return false;
+    }
+    return true;
+}
+
+template<typename ValueType>
+void removeDominatedPoints(std::vector<std::vector<ValueType>>& points) {
+    for (int64_t i = 0; i < points.size(); ++i) {
+        for (int64_t j = 0; j < points.size(); ++j) {
+            if (i == j) continue;
+
+            if (isDominating(points[j], points[i])) {
+                points.erase(points.begin()+i);
+                --i;
+                goto nextpoint;
+            }
+        }
+        nextpoint:;
+    }
+}
+
+template<typename ValueType>
 LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings) : manager(manager), stats(stats), settings(settings) {
     using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
 
@@ -128,10 +152,13 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
                 auto probabilisticSimplex = getProbabilitySimplex<ValueType>(lowerResults.getPointDimension());
                 auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(probabilisticSimplex);
-                const auto& lowerPoints = lowerPolytope->getVertices();
+                auto lowerPoints = lowerPolytope->getVertices();
 
                 auto upperPolytope = paretoResult.getOverApproximation()->intersection(probabilisticSimplex);
-                const auto& upperPoints = upperPolytope->getVertices();
+                auto upperPoints = upperPolytope->getVertices();
+
+                removeDominatedPoints<ValueType>(lowerPoints);
+                removeDominatedPoints<ValueType>(upperPoints);
 
                 this->stats.paretoPoints += lowerPoints.size();
                 this->stats.paretoPoints += upperPoints.size();
