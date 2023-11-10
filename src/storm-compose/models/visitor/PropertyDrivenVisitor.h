@@ -31,6 +31,7 @@ private:
     WeightType currentWeight;
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
+    WeightType getOptimalWeight(WeightType weights, WeightType currentValues);
 };
 
 }

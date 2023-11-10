@@ -92,9 +92,49 @@ void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
     currentWeight = finalWeight;
 }
 
+// we only deal with rightward oMDPs and restricted trace tr_{1;m,n}. 
+// the function only returns current weights, but we also need upper-bound. This can be achieved by the ideal of optimistic value iteration. 
 template <typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
-    STORM_LOG_ASSERT(false, "currently not implemented!");
+    ValueType error;
+    // initialize weights
+    std::vector<ValueType> initWeight = currentWeight;
+    int weightSize = currentWeight.size();
+    // here we assume the trace looks tr_{1;m,n}
+    std::vector<ValueType> optimalWeight(weightSize+1);
+    for (int i = 0; i < weightSize; ++i) {
+        optimalWeight[i+1] = currentWeight[i];
+    }
+    bool isInitialLoop = true;
+    ValueType stopping_creterion = 0.001;
+    // if the relative error is smaller than the threshold, then we break the loop. 
+    int entranceSize;
+    std::vector<ValueType> previousWeight;
+    while (true) {
+        setWeight(optimalWeight);
+        model.getValue()->accept(*this);
+        if (isInitialLoop) {
+            entranceSize = currentWeight.size();
+            for (int i = 0; i < entranceSize; ++i) {
+                previousWeight.push_back(currentWeight[i]);
+            } 
+            isInitialLoop = false;
+        } else {
+            // check the stopping_creterion. 
+            error = 0;
+            for (int i = 0; i < entranceSize; ++i) {
+                if (currentWeight[i] > 0) {
+                    ValueType relative_error = (currentWeight[i]-previousWeight[i])/currentWeight[i];
+                    if (relative_error > error) error = relative_error;
+                }
+                previousWeight[i] = currentWeight[i];
+            }
+            std::cout << "Current Error" << error << std::endl;
+            if (error < stopping_creterion) break;
+        }
+        // compute the next weight
+        optimalWeight = getOptimalWeight(initWeight,currentWeight);
+    }
 }
 
 template <typename ValueType>
@@ -159,6 +199,20 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(st
 template <typename ValueType>
 std::vector<ValueType> PropertyDrivenVisitor<ValueType>::getCurrentWeight() {
     return currentWeight;
+}
+
+// we assume that the trace is the form tr_{1;m,n}
+// TODO: extend it more general form like tr_{l;m,n}
+template <typename ValueType>
+std::vector<ValueType> PropertyDrivenVisitor<ValueType>::getOptimalWeight(WeightType weights, WeightType currentValues){
+    int weight_size = weights.size();
+    // here we assume that the trace looks like tr_{1;m,n}
+    WeightType nextWeights(weight_size+1);
+    nextWeights[0] = currentValues[0];
+    for (size_t i = 0; i < weight_size; ++i) {
+        nextWeights[i+1] = weights[i];
+    }
+    return nextWeights;
 }
 
 template class PropertyDrivenVisitor<storm::RationalNumber>;

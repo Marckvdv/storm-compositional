@@ -1,5 +1,6 @@
 #include "PropertyDrivenOpenMdpChecker.h"
 
+#include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
 namespace storm {
 namespace modelchecker {
 
@@ -17,23 +18,44 @@ void PropertyDrivenOpenMdpChecker<ValueType>::initializeParetoCurves() {
 
 template <typename ValueType>
 ApproximateReachabilityResult<ValueType> PropertyDrivenOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
-    do {
-        auto rootPareto = paretoCurves.at(this->manager->getRoot()->getName());
+    typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
 
-        // find where to optimize. Ideally, all pareto curves are initialized to the complete probabilistic simplex.
-        // we traverse the string diagram until we find some candidate which seems applicable for refinement.
-        //
-        // Any refinement step will ultimately always go down to the leaf nodes,
-        // as the only way to refine sequence, sum, trace is by refining their
-        // children.
-        //
-        // In other words, we could simply call some refine function on the root node repeatedly.
-        // (Although it may be more efficient to call refine multiple times on other nodes instead)
-        //
-        // 
+    this->manager->constructConcreteMdps();
+    auto exits = this->manager->getRoot()->collectEntranceExit(storm::models::OpenMdp<ValueType>::R_EXIT, emptyScope);
 
-    //} while(distance between rootPareto.lower and rootPareto.upper is smaller than epsilon);
-    } while(1);
+    storm::models::visitor::PropertyDrivenVisitor<ValueType> propertyDrivenVisitor(this->manager);
+    STORM_LOG_ASSERT(!task.isLeftExit(), "must be right exit");
+    propertyDrivenVisitor.setTargetExit(exits.size(), task.getExitId(), false);
+
+    this->manager->getRoot()->accept(propertyDrivenVisitor);
+
+    auto currentWeight = propertyDrivenVisitor.getCurrentWeight();
+    std::cout << "final weight vector: " << std::endl;
+    for (const auto& v : currentWeight) {
+        std::cout << v << std::endl;
+    }
+
+    STORM_LOG_ASSERT(task.isLeftEntrance(), "must be left entrance");
+    ApproximateReachabilityResult<ValueType> result { currentWeight[task.getEntranceId()], 1 };
+
+    return result;
+    // do {
+    //     auto rootPareto = paretoCurves.at(this->manager->getRoot()->getName());
+
+    //     // find where to optimize. Ideally, all pareto curves are initialized to the complete probabilistic simplex.
+    //     // we traverse the string diagram until we find some candidate which seems applicable for refinement.
+    //     //
+    //     // Any refinement step will ultimately always go down to the leaf nodes,
+    //     // as the only way to refine sequence, sum, trace is by refining their
+    //     // children.
+    //     //
+    //     // In other words, we could simply call some refine function on the root node repeatedly.
+    //     // (Although it may be more efficient to call refine multiple times on other nodes instead)
+    //     //
+    //     // 
+
+    // //} while(distance between rootPareto.lower and rootPareto.upper is smaller than epsilon);
+    // } while(1);
 }
 
 
