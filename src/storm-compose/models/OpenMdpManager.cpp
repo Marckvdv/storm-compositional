@@ -1,16 +1,15 @@
 #include "OpenMdpManager.h"
 
-#include "storm/exceptions/UnexpectedException.h"
-#include "storm/utility/macros.h"
 #include <memory>
 #include "PrismModel.h"
+#include "storm/exceptions/UnexpectedException.h"
+#include "storm/utility/macros.h"
 
 namespace storm {
 namespace models {
 
 template<typename ValueType>
-OpenMdpManager<ValueType>::OpenMdpManager() {
-}
+OpenMdpManager<ValueType>::OpenMdpManager() {}
 
 template<typename ValueType>
 std::shared_ptr<OpenMdp<ValueType>> OpenMdpManager<ValueType>::dereference(const std::string& name) const {
@@ -56,5 +55,5 @@ void OpenMdpManager<ValueType>::constructConcreteMdps() {
 template class OpenMdpManager<storm::RationalNumber>;
 template class OpenMdpManager<double>;
 
-}
-}
+}  // namespace models
+}  // namespace storm

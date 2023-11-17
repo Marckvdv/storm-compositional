@@ -2,23 +2,24 @@
 
 #include "OpenMdpVisitor.h"
 
+#include "storm-compose/benchmark/BenchmarkStats.h"
+#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
-#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
-#include "storm-compose/benchmark/BenchmarkStats.h"
-#include "storm/modelchecker/results/CheckResult.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm/environment/Environment.h"
+#include "storm/modelchecker/results/CheckResult.h"
 
 namespace storm {
 namespace models {
 namespace visitor {
 
-template<typename ValueType> class BidirectionalReachabilityResult;
+template<typename ValueType>
+class BidirectionalReachabilityResult;
 
 struct LowerUpperParetoSettings {
     double precision;
@@ -39,8 +40,10 @@ Similar for sum and trace.
 template<typename ValueType>
 class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::pair<BidirectionalReachabilityResult<ValueType>, BidirectionalReachabilityResult<ValueType>> ParetoType;
-public:
-    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings);
+
+   public:
+    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats,
+                            LowerUpperParetoSettings settings);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
@@ -53,10 +56,10 @@ public:
 
     // TODO Functions below are public because it is also being used in PropertyDrivenVisitor
     // Need to find some common place to store this instead.
-    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards=false);
-    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards=false);
+    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards = false);
+    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards = false);
 
-private:
+   private:
     static std::unordered_map<std::string, storm::expressions::Expression> getIdentifierMapping(storm::expressions::ExpressionManager const& manager);
 
     std::unordered_map<std::string, ParetoType> paretoResults;
@@ -68,6 +71,6 @@ private:
     LowerUpperParetoSettings settings;
 };
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

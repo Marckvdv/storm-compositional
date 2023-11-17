@@ -20,6 +20,7 @@
 #include "storm/settings/modules/IOSettings.h"
 #include "storm/settings/modules/MinMaxEquationSolverSettings.h"
 #include "storm/settings/modules/ModelCheckerSettings.h"
+#include "storm/settings/modules/MultiObjectiveSettings.h"
 #include "storm/settings/modules/MultiplierSettings.h"
 #include "storm/settings/modules/NativeEquationSolverSettings.h"
 #include "storm/settings/modules/OviSolverSettings.h"
@@ -28,7 +29,6 @@
 #include "storm/settings/modules/SylvanSettings.h"
 #include "storm/settings/modules/TopologicalEquationSolverSettings.h"
 #include "storm/settings/modules/TransformationSettings.h"
-#include "storm/settings/modules/MultiObjectiveSettings.h"
 
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 

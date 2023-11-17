@@ -1274,7 +1274,7 @@ std::string toString(std::vector<ValueType> const& vector) {
 
 template<typename ValueType>
 void normalizeInPlace(std::vector<ValueType>& target) {
-    scaleVectorInPlace(target, 1/carl::sqrt(dotProduct(target, target)));
+    scaleVectorInPlace(target, 1 / carl::sqrt(dotProduct(target, target)));
 }
 
 }  // namespace vector

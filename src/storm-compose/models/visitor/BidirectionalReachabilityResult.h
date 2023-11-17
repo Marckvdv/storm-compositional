@@ -1,6 +1,7 @@
 #pragma once
 
 #include "storm-compose/models/ConcreteMdp.h"
+#include "storm/modelchecker/multiobjective/Objective.h"
 
 #include <vector>
 
@@ -10,7 +11,7 @@ namespace visitor {
 
 template<typename ValueType>
 class BidirectionalReachabilityResult {
-public:
+   public:
     typedef std::vector<ValueType> point;
 
     BidirectionalReachabilityResult() = default;
@@ -25,17 +26,18 @@ public:
     size_t getLeftEntrances() const;
     size_t getRightEntrances() const;
 
-private:
+    std::vector<storm::modelchecker::multiobjective::Objective<ValueType>> getReachabilityObjectives();
+
+   private:
     size_t getIndex(size_t entrance, bool leftEntrance) const;
 
-    template <typename T>
-    friend std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<T> const& result);
+    template<typename T>
+    friend std::ostream& operator<<(std::ostream& os, BidirectionalReachabilityResult<T> const& result);
 
     size_t lEntrances, rEntrances, lExits, rExits;
     std::vector<std::vector<point>> points;
 };
 
-
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

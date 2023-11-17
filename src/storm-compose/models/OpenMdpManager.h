@@ -13,7 +13,7 @@ class OpenMdp;
 
 template<typename ValueType>
 class OpenMdpManager {
-    public:
+   public:
     OpenMdpManager();
 
     std::shared_ptr<OpenMdp<ValueType>> dereference(const std::string& name) const;
@@ -23,10 +23,10 @@ class OpenMdpManager {
     void addReference(const std::string& name, std::shared_ptr<OpenMdp<ValueType>> reference);
     void constructConcreteMdps();
 
-    private:
+   private:
     std::shared_ptr<OpenMdp<ValueType>> root;
     std::unordered_map<std::string, std::shared_ptr<OpenMdp<ValueType>>> references;
 };
 
-}
-}
+}  // namespace models
+}  // namespace storm

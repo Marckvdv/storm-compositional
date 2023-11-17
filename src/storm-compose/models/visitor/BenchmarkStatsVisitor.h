@@ -7,10 +7,10 @@ namespace storm {
 namespace models {
 namespace visitor {
 
-template <class ValueType>
+template<class ValueType>
 class BenchmarkStatsVisitor : public OpenMdpVisitor<ValueType> {
-public:
-    BenchmarkStatsVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType> &stats);
+   public:
+    BenchmarkStatsVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
@@ -19,9 +19,9 @@ public:
     virtual void visitSumModel(SumModel<ValueType>& model) override;
     virtual void visitTraceModel(TraceModel<ValueType>& model) override;
 
-private:
+   private:
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
-    storm::compose::benchmark::BenchmarkStats<ValueType> &stats;
+    storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 
     void increaseDepth();
     void decreaseDepth();
@@ -31,6 +31,6 @@ private:
     size_t depth = 0;
 };
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

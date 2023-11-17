@@ -1,13 +1,13 @@
 #pragma once
 
-#include "storm/utility/Stopwatch.h"
 #include "storm/adapters/JsonAdapter.h"
+#include "storm/utility/Stopwatch.h"
 
 namespace storm {
 namespace compose {
 namespace benchmark {
 
-template <class ValueType>
+template<class ValueType>
 struct BenchmarkStats {
     BenchmarkStats() = default;
 
@@ -54,6 +54,6 @@ struct BenchmarkStats {
     }
 };
 
-}
-}
-}
+}  // namespace benchmark
+}  // namespace compose
+}  // namespace storm

@@ -6,12 +6,12 @@
 namespace storm {
 namespace modelchecker {
 
-template <typename ValueType>
-NaiveOpenMdpChecker<ValueType>::NaiveOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : AbstractOpenMdpChecker<ValueType>(manager, stats) {
+template<typename ValueType>
+NaiveOpenMdpChecker<ValueType>::NaiveOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                                    storm::compose::benchmark::BenchmarkStats<ValueType>& stats)
+    : AbstractOpenMdpChecker<ValueType>(manager, stats) {}
 
-}
-
-template <typename ValueType>
+template<typename ValueType>
 ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
     storm::models::visitor::ParetoVisitor<ValueType> paretoVisitor(this->manager);
     this->manager->getRoot()->accept(paretoVisitor);
@@ -28,5 +28,5 @@ ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker<ValueType>::check(O
 template class NaiveOpenMdpChecker<storm::RationalNumber>;
 template class NaiveOpenMdpChecker<double>;
 
-}
-}
+}  // namespace modelchecker
+}  // namespace storm

@@ -1,17 +1,19 @@
 #include "BidirectionalReachabilityResult.h"
 
+#include "storm-parsers/parser/FormulaParser.h"
+
 namespace storm {
 namespace models {
 namespace visitor {
 
 using storm::models::OpenMdp;
-using storm::storage::SparseMatrixBuilder;
-using storm::storage::SparseMatrix;
 using storm::models::sparse::Mdp;
+using storm::storage::SparseMatrix;
+using storm::storage::SparseMatrixBuilder;
 
 template<typename ValueType>
-BidirectionalReachabilityResult<ValueType>::BidirectionalReachabilityResult(size_t lEntrances, size_t rEntrances, size_t lExits, size_t rExits) : lEntrances(lEntrances), rEntrances(rEntrances), lExits(lExits), rExits(rExits), points(lEntrances+rEntrances) {
-}
+BidirectionalReachabilityResult<ValueType>::BidirectionalReachabilityResult(size_t lEntrances, size_t rEntrances, size_t lExits, size_t rExits)
+    : lEntrances(lEntrances), rEntrances(rEntrances), lExits(lExits), rExits(rExits), points(lEntrances + rEntrances) {}
 
 template<typename ValueType>
 size_t BidirectionalReachabilityResult<ValueType>::getIndex(size_t entrance, bool leftEntrance) const {
@@ -26,25 +28,27 @@ template<typename ValueType>
 void BidirectionalReachabilityResult<ValueType>::addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint) {
     size_t index = getIndex(entrance, leftEntrance);
     STORM_LOG_ASSERT(index < points.size(), "sanity check" << index << " vs " << points.size());
-    //ValueType sum = 0;
+    // ValueType sum = 0;
     for (auto& v : paretoOptimalPoint) {
-        //STORM_LOG_THROW(v > -1e-8, storm::exceptions::InvalidOperationException, "negative point value: " << v);
-        if (v < 0) v = 0;
-        //STORM_LOG_THROW(v < 1.0001, storm::exceptions::InvalidOperationException, "point greather than 1: " << v);
-        //sum += v;
+        // STORM_LOG_THROW(v > -1e-8, storm::exceptions::InvalidOperationException, "negative point value: " << v);
+        if (v < 0)
+            v = 0;
+        // STORM_LOG_THROW(v < 1.0001, storm::exceptions::InvalidOperationException, "point greather than 1: " << v);
+        // sum += v;
     }
-    //STORM_LOG_THROW(sum > 0.999 && sum < 1.0001, storm::exceptions::InvalidOperationException, "sum not 1: " << sum);
+    // STORM_LOG_THROW(sum > 0.999 && sum < 1.0001, storm::exceptions::InvalidOperationException, "sum not 1: " << sum);
 
     points[index].push_back(paretoOptimalPoint);
 }
 
 template<typename ValueType>
-const std::vector<typename BidirectionalReachabilityResult<ValueType>::point>& BidirectionalReachabilityResult<ValueType>::getPoints(size_t entrance, bool leftEntrance) const {
+const std::vector<typename BidirectionalReachabilityResult<ValueType>::point>& BidirectionalReachabilityResult<ValueType>::getPoints(size_t entrance,
+                                                                                                                                     bool leftEntrance) const {
     return points[getIndex(entrance, leftEntrance)];
 }
 
 template<typename ValueType>
-std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueType>::toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager)  {
+std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueType>::toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager) {
     // Constructing a concrete MDP from a ParetoReachabilityResult is simply turning each point into an action,
     // e.g. the second point for entrance 0 is the second action for state 0, reaching the exits with the probabilities described by the point.
 
@@ -54,14 +58,9 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     // [+1, +lExits - 1] left exits
     // [+1, +rExits - 1] right exits
 
-    const size_t
-        lEntrancesStart = 0,
-        rEntrancesStart = lEntrancesStart + lEntrances,
-        lExitsStart = rEntrancesStart + rEntrances,
-        rExitsStart = lExitsStart + lExits,
-        entrances = lEntrances + rEntrances,
-        totalStateCount = lEntrances + rEntrances + lExits + rExits + 1,
-        sinkState = totalStateCount - 1;
+    const size_t lEntrancesStart = 0, rEntrancesStart = lEntrancesStart + lEntrances, lExitsStart = rEntrancesStart + rEntrances,
+                 rExitsStart = lExitsStart + lExits, entrances = lEntrances + rEntrances, totalStateCount = lEntrances + rEntrances + lExits + rExits + 1,
+                 sinkState = totalStateCount - 1;
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, true, true);
     storm::models::sparse::StateLabeling labeling(totalStateCount);
@@ -81,12 +80,12 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
 
             // Keep track of total probability mass
             const auto& points = getPoints(entrance, leftEntrance);
-            //std::cout << "size of points: " << points.size() << std::endl;
-            //std::cout << (leftEntrance ? "left " : "right ") << "entrance " << entrance << std::endl;
-            //if (points.empty()) {
-            //    std::cout << "WARN: Points was empty (?)" << std::endl;
-            //    throw 1;
-            //}
+            // std::cout << "size of points: " << points.size() << std::endl;
+            // std::cout << (leftEntrance ? "left " : "right ") << "entrance " << entrance << std::endl;
+            // if (points.empty()) {
+            //     std::cout << "WARN: Points was empty (?)" << std::endl;
+            //     throw 1;
+            // }
 
             for (const auto& point : points) {
                 ValueType probabilitySum = storm::utility::zero<ValueType>();
@@ -106,8 +105,8 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
         }
     };
 
-    buildTransitions(true); // left entrances
-    buildTransitions(false); // right entrances
+    buildTransitions(true);   // left entrances
+    buildTransitions(false);  // right entrances
 
     // Turn exits and sink state into self-loop states
     for (size_t i = builder.getCurrentRowGroupCount(); i < totalStateCount; ++i) {
@@ -118,7 +117,7 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
 
     std::vector<size_t> lEntrance, rEntrance, lExit, rExit;
     currentState = 0;
-    auto pushEntrancesExits = [&] (auto &entranceExit, const size_t count, bool exit, bool leftExit) {
+    auto pushEntrancesExits = [&](auto& entranceExit, const size_t count, bool exit, bool leftExit) {
         for (size_t i = 0; i < count; ++i, ++currentState) {
             entranceExit.push_back(currentState);
             if (exit) {
@@ -138,7 +137,7 @@ std::shared_ptr<ConcreteMdp<ValueType>> BidirectionalReachabilityResult<ValueTyp
     return std::make_shared<ConcreteMdp<ValueType>>(manager, newMdp, lEntrance, rEntrance, lExit, rExit);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 ValueType BidirectionalReachabilityResult<ValueType>::getLowerBound(size_t entrance, bool leftEntrance, size_t exit, bool leftExit) {
     const auto& points = getPoints(entrance, leftEntrance);
     const size_t exitIndex = exit + (leftExit ? 0 : lExits);
@@ -155,12 +154,12 @@ ValueType BidirectionalReachabilityResult<ValueType>::getLowerBound(size_t entra
     return maxReach;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 bool BidirectionalReachabilityResult<ValueType>::isEmpty() {
     return points.empty();
 }
 
-template <typename ValueType>
+template<typename ValueType>
 bool BidirectionalReachabilityResult<ValueType>::hasEntrance(size_t entrance, bool leftEntrance) {
     if (leftEntrance) {
         return entrance < lEntrances;
@@ -169,11 +168,11 @@ bool BidirectionalReachabilityResult<ValueType>::hasEntrance(size_t entrance, bo
     }
 }
 
-template <typename ValueType>
-std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<ValueType> const& result) {
+template<typename ValueType>
+std::ostream& operator<<(std::ostream& os, BidirectionalReachabilityResult<ValueType> const& result) {
     os << "Bidirectional reachability result:" << std::endl;
 
-    auto printPoint = [&] (const auto& point) {
+    auto printPoint = [&](const auto& point) {
         ValueType sum = 0;
         for (size_t lExit = 0; lExit < result.lExits; ++lExit) {
             auto value = point[lExit];
@@ -220,27 +219,53 @@ std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<Value
     return os;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 size_t BidirectionalReachabilityResult<ValueType>::getPointDimension() const {
     return lExits + rExits;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 size_t BidirectionalReachabilityResult<ValueType>::getLeftEntrances() const {
     return lEntrances;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 size_t BidirectionalReachabilityResult<ValueType>::getRightEntrances() const {
     return rEntrances;
+}
+
+template<typename ValueType>
+std::vector<storm::modelchecker::multiobjective::Objective<ValueType>> BidirectionalReachabilityResult<ValueType>::getReachabilityObjectives() {
+    std::vector<storm::modelchecker::multiobjective::Objective<ValueType>> objectives;
+
+    auto pushExitObjectives = [&](bool leftExit) {
+        size_t exits = leftExit ? lExits : rExits;
+        for (size_t i = 0; i < exits; ++i) {
+            std::stringstream formulaBuffer;
+
+            std::string exitMarker = leftExit ? "lex" : "rex";
+            formulaBuffer << "Pmax=? [F \"" << exitMarker << i << "\"]";
+
+            storm::parser::FormulaParser formulaParser;
+            auto formula = formulaParser.parseSingleFormulaFromString(formulaBuffer.str());
+
+            storm::modelchecker::multiobjective::Objective<ValueType> objective;
+            objective.originalFormula = formula;
+            objectives.push_back(objective);
+        }
+    };
+    pushExitObjectives(true);
+    pushExitObjectives(false);
+
+    return objectives;
 }
 
 template class BidirectionalReachabilityResult<double>;
 template class BidirectionalReachabilityResult<storm::RationalNumber>;
 
-template std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<double> const& result);
-template std::ostream& operator<<(std::ostream &os, BidirectionalReachabilityResult<storm::RationalNumber> const& result);
+template std::ostream& operator<<(std::ostream& os, BidirectionalReachabilityResult<double> const& result);
+template std::ostream& operator<<(std::ostream& os, BidirectionalReachabilityResult<storm::RationalNumber> const& result);
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

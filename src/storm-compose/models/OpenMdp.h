@@ -2,12 +2,14 @@
 
 #include <boost/optional.hpp>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "storm/adapters/RationalNumberAdapter.h"
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "OpenMdpManager.h"
+#include "storage/geometry/Polytope.h"
+#include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
+#include "storm/adapters/RationalNumberAdapter.h"
 
 /*
  What is an OpenMdp?
@@ -37,14 +39,16 @@ class ConcreteMdp;
 namespace visitor {
 template<typename ValueType>
 class OpenMdpVisitor;
-}
+template<typename ValueType>
+class BidirectionalReachabilityResult;
+}  // namespace visitor
 
-//template<typename ValueType>
-//class Reference;
+// template<typename ValueType>
+// class Reference;
 
 template<typename ValueType>
 class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
-public:
+   public:
     virtual ~OpenMdp() = 0;
     OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager);
 
@@ -67,6 +71,7 @@ public:
 
     std::shared_ptr<OpenMdp<ValueType>> toOpenMdp();
     virtual bool isRightward() const = 0;
+    virtual void initializeParetoCurve();
 
     struct Scope {
         std::vector<size_t> scope;
@@ -99,10 +104,13 @@ public:
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) = 0;
     virtual std::vector<ConcreteEntranceExit> collectEntranceExit(EntranceExit entryExit, Scope& scope = {}) const = 0;
 
-protected:
+   protected:
     boost::optional<std::string> name;
     std::weak_ptr<OpenMdpManager<ValueType>> manager;
+
+    typedef storm::storage::geometry::Polytope<ValueType> PolytopeType;
+    boost::optional<std::pair<std::shared_ptr<PolytopeType>, std::shared_ptr<PolytopeType>>> paretoCurve;
 };
 
-}
-}
+}  // namespace models
+}  // namespace storm

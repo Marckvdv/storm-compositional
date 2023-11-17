@@ -3,18 +3,16 @@
 namespace storm {
 namespace modelchecker {
 
-template <typename ValueType>
+template<typename ValueType>
 class ApproximateReachabilityResult {
-public:
-    ApproximateReachabilityResult() : lower(0), upper(0) {
-    }
+   public:
+    ApproximateReachabilityResult() : lower(0), upper(0) {}
 
     ApproximateReachabilityResult(ValueType lower, ValueType upper) : lower(lower), upper(upper) {
         STORM_LOG_ASSERT(lower <= upper, "Lower bound was higher than the upper bound");
     }
 
-    ApproximateReachabilityResult(ValueType exactValue) : lower(exactValue), upper(exactValue) {
-    }
+    ApproximateReachabilityResult(ValueType exactValue) : lower(exactValue), upper(exactValue) {}
 
     ValueType getLowerBound() {
         return lower;
@@ -32,18 +30,18 @@ public:
         return lower == upper;
     }
 
-private:
-    template <typename T>
-    friend std::ostream& operator<<(std::ostream &os, ApproximateReachabilityResult<T> const& result);
+   private:
+    template<typename T>
+    friend std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<T> const& result);
 
     ValueType lower, upper;
 };
 
-template <typename ValueType>
-std::ostream& operator<<(std::ostream &os, ApproximateReachabilityResult<ValueType> const& result) {
+template<typename ValueType>
+std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueType> const& result) {
     os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
     return os;
 }
 
-}
-}
+}  // namespace modelchecker
+}  // namespace storm

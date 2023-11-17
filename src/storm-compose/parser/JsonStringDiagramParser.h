@@ -1,19 +1,19 @@
 #pragma once
 
-#include "storm/adapters/JsonAdapter.h"
-#include "storm-compose/models/OpenMdpManager.h"
 #include "storm-compose/models/OpenMdp.h"
+#include "storm-compose/models/OpenMdpManager.h"
+#include "storm/adapters/JsonAdapter.h"
 
-#include <string>
-#include <memory>
 #include <boost/filesystem/path.hpp>
+#include <memory>
+#include <string>
 
 namespace storm {
 namespace parser {
 
 template<typename ValueType>
 class JsonStringDiagramParser {
-    public:
+   public:
     typedef std::string StateValuation;
 
     JsonStringDiagramParser(storm::json<ValueType> data, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, boost::filesystem::path root);
@@ -24,7 +24,7 @@ class JsonStringDiagramParser {
     /// Parse input (in-place, storing results in manager)
     void parse();
 
-    private:
+   private:
     static storm::json<ValueType> parseJson(const std::string& str);
 
     std::shared_ptr<storm::models::OpenMdp<ValueType>> parseOpenMdp(const storm::json<ValueType>& data);
@@ -42,5 +42,5 @@ class JsonStringDiagramParser {
     boost::filesystem::path root;
 };
 
-}  // namespace exceptions
 }  // namespace parser
+}  // namespace storm

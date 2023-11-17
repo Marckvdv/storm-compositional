@@ -1,16 +1,16 @@
 #include "LowerUpperParetoVisitor.h"
 
-#include "storm/api/storm.h"
-#include "storm-parsers/api/storm-parsers.h"
 #include "storage/prism/Program.h"
-#include "storm/logic/Formula.h"
-#include "storm/storage/jani/Property.h"
-#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
-#include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
-#include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
-#include "storm-parsers/parser/FormulaParser.h"
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
+#include "storm-parsers/api/storm-parsers.h"
+#include "storm-parsers/parser/FormulaParser.h"
+#include "storm/api/storm.h"
+#include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
+#include "storm/logic/Formula.h"
+#include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
+#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
+#include "storm/storage/jani/Property.h"
 
 #include <memory>
 
@@ -19,9 +19,9 @@ namespace models {
 namespace visitor {
 
 using storm::models::OpenMdp;
-using storm::storage::SparseMatrixBuilder;
-using storm::storage::SparseMatrix;
 using storm::models::sparse::Mdp;
+using storm::storage::SparseMatrix;
+using storm::storage::SparseMatrixBuilder;
 
 template<typename ValueType>
 std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getPositivityPolytope(size_t dimension) {
@@ -36,7 +36,7 @@ std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getPositivityPoly
 }
 
 template<typename ValueType>
-std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getProbabilitySimplex(size_t dimension) {
+std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getSubdistributionPolytope(size_t dimension) {
     std::vector<storm::storage::geometry::Halfspace<ValueType>> halfSpaces;
     // each value must be greater or equal to zero
     for (size_t i = 0; i < dimension; ++i) {
@@ -54,7 +54,8 @@ std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getProbabilitySim
 template<typename ValueType>
 bool isDominating(std::vector<ValueType>& a, std::vector<ValueType>& b) {
     for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i] < b[i]) return false;
+        if (a[i] < b[i])
+            return false;
     }
     return true;
 }
@@ -63,20 +64,40 @@ template<typename ValueType>
 void removeDominatedPoints(std::vector<std::vector<ValueType>>& points) {
     for (int64_t i = 0; i < points.size(); ++i) {
         for (int64_t j = 0; j < points.size(); ++j) {
-            if (i == j) continue;
+            if (i == j)
+                continue;
 
             if (isDominating(points[j], points[i])) {
-                points.erase(points.begin()+i);
+                points.erase(points.begin() + i);
                 --i;
                 goto nextpoint;
             }
         }
-        nextpoint:;
+    nextpoint:;
     }
 }
 
 template<typename ValueType>
-LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings) : manager(manager), stats(stats), settings(settings) {
+void removeDominatingPoints(std::vector<std::vector<ValueType>>& points) {
+    for (int64_t i = 0; i < points.size(); ++i) {
+        for (int64_t j = 0; j < points.size(); ++j) {
+            if (i == j)
+                continue;
+
+            if (isDominating(points[i], points[j])) {
+                points.erase(points.begin() + i);
+                --i;
+                goto nextpoint;
+            }
+        }
+    nextpoint:;
+    }
+}
+
+template<typename ValueType>
+LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager,
+                                                            storm::compose::benchmark::BenchmarkStats<ValueType>& stats, LowerUpperParetoSettings settings)
+    : manager(manager), stats(stats), settings(settings) {
     using PT = storm::MultiObjectiveModelCheckerEnvironment::PrecisionType;
 
     auto& multiObjectiveOptions = env.modelchecker().multi();
@@ -92,7 +113,8 @@ LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<Open
         STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "unknown precision type");
     }
     multiObjectiveOptions.setPrecisionType(newPrecisionType);
-    if (settings.steps) multiObjectiveOptions.setMaxSteps(*settings.steps);
+    if (settings.steps)
+        multiObjectiveOptions.setMaxSteps(*settings.steps);
 }
 
 // TODO merge visitPrismModel and visitConcreteModel so that the code can be
@@ -100,23 +122,24 @@ LowerUpperParetoVisitor<ValueType>::LowerUpperParetoVisitor(std::shared_ptr<Open
 // concreteModel and then calls visitConcreteModel on it.
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
-   STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "concretize MDPs first!");
+    STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "concretize MDPs first!");
 }
 
 template<typename ValueType>
 void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     STORM_LOG_DEBUG("[COMPOSE] Visiting ConcreteModel");
 
-    //std::ofstream f("m.dot");
-    //model.getMdp()->writeDotToStream(f);
-    //f.close();
+    // std::ofstream f("m.dot");
+    // model.getMdp()->writeDotToStream(f);
+    // f.close();
 
     std::string formulaString = getFormula(model);
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
 
-    BidirectionalReachabilityResult<ValueType> lowerResults(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size()),
-        upperResults(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
+    BidirectionalReachabilityResult<ValueType> lowerResults(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(),
+                                                            model.getRExit().size()),
+        upperResults(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(), model.getRExit().size());
 
     auto& stateLabeling = model.getMdp()->getStateLabeling();
     if (!stateLabeling.containsLabel("init")) {
@@ -142,36 +165,37 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
                 STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 
-                //std::cout << "Upper verts before intersection: " << std::endl;
-                //for (auto &p : paretoResult.getOverApproximation()->getVertices()) {
-                //    for (auto& v : p) {
-                //        std::cout << v << ", ";
-                //    }
-                //    std::cout << std::endl;
-                //}
+                // std::cout << "Upper verts before intersection: " << std::endl;
+                // for (auto &p : paretoResult.getOverApproximation()->getVertices()) {
+                //     for (auto& v : p) {
+                //         std::cout << v << ", ";
+                //     }
+                //     std::cout << std::endl;
+                // }
 
-                auto probabilisticSimplex = getProbabilitySimplex<ValueType>(lowerResults.getPointDimension());
-                auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(probabilisticSimplex);
+                auto subdistributionPolytope = getSubdistributionPolytope<ValueType>(lowerResults.getPointDimension());
+                auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
                 auto lowerPoints = lowerPolytope->getVertices();
 
-                auto upperPolytope = paretoResult.getOverApproximation()->intersection(probabilisticSimplex);
+                auto upperPolytope = paretoResult.getOverApproximation()->intersection(subdistributionPolytope);
                 auto upperPoints = upperPolytope->getVertices();
 
+                // TODO double check below
                 removeDominatedPoints<ValueType>(lowerPoints);
-                removeDominatedPoints<ValueType>(upperPoints);
+                removeDominatingPoints<ValueType>(upperPoints);
 
                 this->stats.paretoPoints += lowerPoints.size();
                 this->stats.paretoPoints += upperPoints.size();
 
-                //std::cout << "Lower verts after intersection: " << std::endl;
-                //for (auto &p : lowerPoints) {
-                //    for (auto& v : p) {
-                //        std::cout << v << ", ";
-                //    }
-                //    std::cout << std::endl;
-                //}
-                //const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
-                //const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
+                // std::cout << "Lower verts after intersection: " << std::endl;
+                // for (auto &p : lowerPoints) {
+                //     for (auto& v : p) {
+                //         std::cout << v << ", ";
+                //     }
+                //     std::cout << std::endl;
+                // }
+                // const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
+                // const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
 
                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
                     const auto& point = lowerPoints[j];
@@ -183,12 +207,13 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                     upperResults.addPoint(entranceNumber, leftEntrance, point);
                 }
             } else {
-                STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException, "result was not pareto nor quantitative");
-                STORM_LOG_THROW(model.lExit.size() + model.rExit.size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1 exit");
+                STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException,
+                                "result was not pareto nor quantitative");
+                STORM_LOG_THROW(model.getLExit().size() + model.getRExit().size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 
                 // TODO double check below
-                std::vector<ValueType> point {quantitativeResult[entrance]};
+                std::vector<ValueType> point{quantitativeResult[entrance]};
                 lowerResults.addPoint(entranceNumber, leftEntrance, point);
                 upperResults.addPoint(entranceNumber, leftEntrance, point);
             }
@@ -197,8 +222,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
         }
     };
 
-    checkEntrances(model.lEntrance, true);
-    checkEntrances(model.rEntrance, false);
+    checkEntrances(model.getLEntrance(), true);
+    checkEntrances(model.getREntrance(), false);
 
     currentPareto = {lowerResults, upperResults};
 
@@ -219,7 +244,7 @@ void LowerUpperParetoVisitor<ValueType>::visitReference(Reference<ValueType>& re
         // Result is not yet cached so we need to compute it ourself
         const auto manager = reference.getManager();
         auto dereferenced = manager->dereference(referenceName);
-        dereferenced->accept(*this); // after this currentPareto should be set
+        dereferenced->accept(*this);  // after this currentPareto should be set
 
         paretoResults[referenceName] = currentPareto;
     }
@@ -291,19 +316,17 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
         paretoCurves.push_back(currentPareto);
     }
 
-    size_t pointDimension = lExits+rExits;
-    BidirectionalReachabilityResult<ValueType> 
-        lower(lEntrances, rEntrances, lExits, rExits),
-        upper(lEntrances, rEntrances, lExits, rExits);
+    size_t pointDimension = lExits + rExits;
+    BidirectionalReachabilityResult<ValueType> lower(lEntrances, rEntrances, lExits, rExits), upper(lEntrances, rEntrances, lExits, rExits);
 
     size_t entranceOffsetLeft = 0, entranceOffsetRight = 0, exitOffset = 0;
-    for (const auto &curve : paretoCurves) {
+    for (const auto& curve : paretoCurves) {
         auto processPoints = [&](const auto& result, bool leftEntrance, auto& target) {
             size_t entranceCount = leftEntrance ? result.getLeftEntrances() : result.getRightEntrances();
             size_t entranceOffset = leftEntrance ? entranceOffsetLeft : entranceOffsetRight;
             for (size_t entrance = 0; entrance < entranceCount; ++entrance) {
                 const auto& points = result.getPoints(entrance, leftEntrance);
-                for (const auto &point : points) {
+                for (const auto& point : points) {
                     std::vector<ValueType> newPoint;
                     for (size_t i = 0; i < exitOffset; ++i) {
                         newPoint.push_back(storm::utility::zero<ValueType>());
@@ -403,8 +426,8 @@ std::string LowerUpperParetoVisitor<ValueType>::getFormula(PrismModel<ValueType>
             formulaBuffer << "\n";
         }
     };
-    reachTarget(model.lExit);
-    reachTarget(model.rExit);
+    reachTarget(model.getLExit());
+    reachTarget(model.getRExit());
 
     formulaBuffer << ")";
 
@@ -437,8 +460,8 @@ std::string LowerUpperParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType
             ++currentState;
         }
     };
-    reachTarget(model.lExit, true);
-    reachTarget(model.rExit, false);
+    reachTarget(model.getLExit(), true);
+    reachTarget(model.getRExit(), false);
 
     formulaBuffer << ")";
 
@@ -446,7 +469,8 @@ std::string LowerUpperParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType
 }
 
 template<typename ValueType>
-std::unordered_map<std::string, storm::expressions::Expression> LowerUpperParetoVisitor<ValueType>::getIdentifierMapping(storm::expressions::ExpressionManager const& manager) {
+std::unordered_map<std::string, storm::expressions::Expression> LowerUpperParetoVisitor<ValueType>::getIdentifierMapping(
+    storm::expressions::ExpressionManager const& manager) {
     std::unordered_map<std::string, storm::expressions::Expression> result;
     for (const auto& var : manager.getVariables()) {
         result[var.getName()] = var.getExpression();
@@ -457,6 +481,6 @@ std::unordered_map<std::string, storm::expressions::Expression> LowerUpperPareto
 template class LowerUpperParetoVisitor<double>;
 template class LowerUpperParetoVisitor<storm::RationalNumber>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

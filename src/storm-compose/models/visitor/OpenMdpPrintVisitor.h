@@ -11,10 +11,8 @@ namespace visitor {
 
 template<typename ValueType>
 class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
-    public:
-    OpenMdpPrintVisitor(std::ostream& out) : out(out), scope() {
-
-    }
+   public:
+    OpenMdpPrintVisitor(std::ostream& out) : out(out), scope() {}
 
     virtual ~OpenMdpPrintVisitor() {}
 
@@ -32,14 +30,14 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         printIndentation(scope);
         out << "CONCRETE " << model.getMdp()->getNumberOfStates() << " STATES(";
-        if (model.lEntrance.size() > 0)
-            out << ">| " << model.lEntrance.size() << ",";
-        if (model.rEntrance.size() > 0)
-            out << "|< " << model.rEntrance.size() << ",";
-        if (model.lExit.size() > 0)
-            out << "<| " << model.lExit.size() << ",";
-        if (model.rExit.size() > 0)
-            out << "|> " << model.rExit.size();
+        if (model.getLEntrance().size() > 0)
+            out << ">| " << model.getLEntrance().size() << ",";
+        if (model.getREntrance().size() > 0)
+            out << "|< " << model.getREntrance().size() << ",";
+        if (model.getLExit().size() > 0)
+            out << "<| " << model.getLExit().size() << ",";
+        if (model.getRExit().size() > 0)
+            out << "|> " << model.getRExit().size();
         out << ")";
     }
 
@@ -76,7 +74,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         out << ")";
     }
 
-    private:
+   private:
     std::ostream& out;
     typename OpenMdp<ValueType>::Scope scope;
 };
@@ -84,6 +82,6 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
 template class OpenMdpPrintVisitor<double>;
 template class OpenMdpPrintVisitor<storm::RationalNumber>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

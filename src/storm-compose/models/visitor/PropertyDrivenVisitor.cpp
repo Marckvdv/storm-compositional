@@ -1,36 +1,31 @@
 #include "PropertyDrivenVisitor.h"
 
+#include "storm-compose/models/visitor/ParetoVisitor.h"
+#include "storm-parsers/parser/FormulaParser.h"
 #include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
 #include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
-#include "storm-parsers/parser/FormulaParser.h"
-#include "storm-compose/models/visitor/ParetoVisitor.h"
 
 namespace storm {
 namespace models {
 namespace visitor {
 
-template <typename ValueType>
-PropertyDrivenVisitor<ValueType>::PropertyDrivenVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager)
-    : manager(manager) {
+template<typename ValueType>
+PropertyDrivenVisitor<ValueType>::PropertyDrivenVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {}
 
-}
+template<typename ValueType>
+PropertyDrivenVisitor<ValueType>::~PropertyDrivenVisitor() {}
 
-template <typename ValueType>
-PropertyDrivenVisitor<ValueType>::~PropertyDrivenVisitor() {
-
-}
-
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     STORM_LOG_ASSERT(false, "Expected concrete models");
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     currentWeight = weightedReachability(currentWeight, model);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
     // We could do some caching here, but the problem is that this depends on the weight used.
     // I suspect the amount of actual caching to be done is rather low.
@@ -40,16 +35,16 @@ void PropertyDrivenVisitor<ValueType>::visitReference(Reference<ValueType>& refe
     dereferenced->accept(*this);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
     // Iterate from right to left
     // TODO replace this confusing construct below
-    for (size_t i = model.getValues().size(); i --> 0;) {
+    for (size_t i = model.getValues().size(); i-- > 0;) {
         model.getValues()[i]->accept(*this);
     }
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
     WeightType originalWeight = currentWeight;
     WeightType finalWeight;
@@ -66,7 +61,7 @@ void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
         bool allZero = true;
         for (size_t i = 0; i < exits.size(); ++i) {
             ValueType& val = originalWeight[index];
-            if (!storm::utility::isAlmostZero(val)) { // TODO check definition of isAlmostZero
+            if (!storm::utility::isAlmostZero(val)) {  // TODO check definition of isAlmostZero
                 allZero = false;
             }
 
@@ -92,17 +87,17 @@ void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
     currentWeight = finalWeight;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
     STORM_LOG_ASSERT(false, "currently not implemented!");
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::setWeight(std::vector<ValueType> weight) {
     currentWeight = std::move(weight);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::setTargetExit(size_t exitCount, size_t exit, bool leftExit) {
     STORM_LOG_ASSERT(!leftExit, "Only right exits allowed at the moment");
 
@@ -112,10 +107,10 @@ void PropertyDrivenVisitor<ValueType>::setTargetExit(size_t exitCount, size_t ex
     setWeight(weights);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp) {
-    using storm::modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor;
     using storm::modelchecker::multiobjective::StandardMdpPcaaWeightVectorChecker;
+    using storm::modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor;
     using storm::models::sparse::Mdp;
 
     setWeight(weights);
@@ -132,7 +127,7 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(st
     auto mdp = concreteMdp.getMdp();
 
     std::vector<ValueType> newWeights;
-    for (size_t entrance : concreteMdp.lEntrance) {
+    for (size_t entrance : concreteMdp.getLEntrance()) {
         // TODO make efficient
         mdp->getStateLabeling().setStates("init", storage::BitVector(mdp->getNumberOfStates()));
         mdp->getStateLabeling().addLabelToState("init", entrance);
@@ -156,7 +151,7 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::weightedReachability(st
     return newWeights;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 std::vector<ValueType> PropertyDrivenVisitor<ValueType>::getCurrentWeight() {
     return currentWeight;
 }
@@ -164,6 +159,6 @@ std::vector<ValueType> PropertyDrivenVisitor<ValueType>::getCurrentWeight() {
 template class PropertyDrivenVisitor<storm::RationalNumber>;
 template class PropertyDrivenVisitor<double>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

@@ -39,5 +39,5 @@ storm::storage::sparse::StateValuations::StateValuation StateValuationParser::pa
     return storm::storage::sparse::StateValuations::StateValuation({}, std::move(integerValues), {});
 }
 
-}
-}
+}  // namespace parser
+}  // namespace storm

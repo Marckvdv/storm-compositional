@@ -1,14 +1,13 @@
 #pragma once
 
+#include <utility>
 #include "OpenMdpVisitor.h"
+#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
-#include "storm-compose/models/ConcreteMdp.h"
-#include <utility>
-
 
 namespace storm {
 namespace models {
@@ -16,10 +15,8 @@ namespace visitor {
 
 template<typename ValueType>
 class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
-    public:
-    OpenMdpToDotVisitor(std::ostream& out) : out(out), scope() {
-
-    }
+   public:
+    OpenMdpToDotVisitor(std::ostream& out) : out(out), scope() {}
 
     virtual ~OpenMdpToDotVisitor() {}
 
@@ -55,7 +52,9 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         return result.str();
     }
 
-    std::string printTransition(const typename OpenMdp<ValueType>::Scope& fromScope, typename OpenMdp<ValueType>::EntranceExit fromEntranceExit, const typename OpenMdp<ValueType>::Scope& toScope, typename OpenMdp<ValueType>::EntranceExit toEntranceExit, bool mirrorDir=false) {
+    std::string printTransition(const typename OpenMdp<ValueType>::Scope& fromScope, typename OpenMdp<ValueType>::EntranceExit fromEntranceExit,
+                                const typename OpenMdp<ValueType>::Scope& toScope, typename OpenMdp<ValueType>::EntranceExit toEntranceExit,
+                                bool mirrorDir = false) {
         std::stringstream result;
         if (!mirrorDir) {
             result << printNode(fromScope, fromEntranceExit);
@@ -73,14 +72,14 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
 
     std::string printColor(const typename OpenMdp<ValueType>::Scope& scope) {
         size_t depth = scope.scope.size();
-        float brightness = 1.0/(depth+1);
-        uint8_t red = (uint8_t)255.f*(brightness);
-        uint8_t green = (uint8_t)255.f*(1.f - brightness);
-        uint8_t blue = (uint8_t)255.f*(1.f - brightness);
+        float brightness = 1.0 / (depth + 1);
+        uint8_t red = (uint8_t)255.f * (brightness);
+        uint8_t green = (uint8_t)255.f * (1.f - brightness);
+        uint8_t blue = (uint8_t)255.f * (1.f - brightness);
 
         std::stringstream result;
         result << "\"#";
-        result << std::hex ;
+        result << std::hex;
         result << std::setw(2) << std::setfill('0') << (int)red;
         result << std::setw(2) << std::setfill('0') << (int)green;
         result << std::setw(2) << std::setfill('0') << (int)blue;
@@ -96,14 +95,13 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << "}" << std::endl;
     }
 
-    virtual void visitPrismModel(PrismModel<ValueType>& model) override {
-    }
+    virtual void visitPrismModel(PrismModel<ValueType>& model) override {}
 
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
-        auto drawEntranceExit = [&] (auto& entranceExit, std::string text, std::string extra="") {
-            for(size_t i = 0; i < entranceExit.size(); ++i) {
+        auto drawEntranceExit = [&](auto& entranceExit, std::string text, std::string extra = "") {
+            for (size_t i = 0; i < entranceExit.size(); ++i) {
                 scope.pushScope(i);
                 out << text << printScope(scope);
                 out << "[label=\"" << i << text << "\"" << extra << "];" << std::endl;
@@ -111,14 +109,14 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
             }
         };
 
-        drawEntranceExit(model.lEntrance, "lEn", ", style=filled, fillcolor=red");
-        drawEntranceExit(model.lExit, "lEx", ", style=filled, fillcolor=blue");
-        drawEntranceExit(model.rEntrance, "rEn", ", style=filled, fillcolor=lightblue");
-        drawEntranceExit(model.rExit, "rEx", ", style=filled, fillcolor=orange");
+        drawEntranceExit(model.getLEntrance(), "lEn", ", style=filled, fillcolor=red");
+        drawEntranceExit(model.getLExit(), "lEx", ", style=filled, fillcolor=blue");
+        drawEntranceExit(model.getREntrance(), "rEn", ", style=filled, fillcolor=lightblue");
+        drawEntranceExit(model.getRExit(), "rEx", ", style=filled, fillcolor=orange");
 
-        auto drawArrowsFromEntranceToExit = [&] (auto& entrance, auto& exit, std::string entranceText, std::string exitText) {
-            for(size_t i = 0; i < entrance.size(); ++i) {
-                for(size_t j = 0; j < exit.size(); ++j) {
+        auto drawArrowsFromEntranceToExit = [&](auto& entrance, auto& exit, std::string entranceText, std::string exitText) {
+            for (size_t i = 0; i < entrance.size(); ++i) {
+                for (size_t j = 0; j < exit.size(); ++j) {
                     scope.pushScope(i);
                     out << entranceText << printScope(scope) << "->";
                     scope.popScope();
@@ -129,10 +127,10 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
             }
         };
 
-        drawArrowsFromEntranceToExit(model.lEntrance, model.lExit, "lEn", "lEx");
-        drawArrowsFromEntranceToExit(model.lEntrance, model.rExit, "lEn", "rEx");
-        drawArrowsFromEntranceToExit(model.rEntrance, model.lExit, "rEn", "lEx");
-        drawArrowsFromEntranceToExit(model.rEntrance, model.rExit, "rEn", "rEx");
+        drawArrowsFromEntranceToExit(model.getLEntrance(), model.getLExit(), "lEn", "lEx");
+        drawArrowsFromEntranceToExit(model.getLEntrance(), model.getRExit(), "lEn", "rEx");
+        drawArrowsFromEntranceToExit(model.getREntrance(), model.getLExit(), "rEn", "lEx");
+        drawArrowsFromEntranceToExit(model.getREntrance(), model.getRExit(), "rEn", "rEx");
 
         out << "label = mdp" << clusterCount << ";" << std::endl;
         out << "style = filled;" << std::endl;
@@ -151,15 +149,15 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
             scope.popScope();
         }
 
-        for (size_t i = 0; i < model.values.size()-1; ++i) {
+        for (size_t i = 0; i < model.values.size() - 1; ++i) {
             const auto& lhs = model.values[i];
-            const auto& rhs = model.values[i+1];
+            const auto& rhs = model.values[i + 1];
 
             // rExit -> lEntrance
             scope.pushScope(i);
             auto lhsRExits = lhs->collectEntranceExit(OpenMdp<ValueType>::R_EXIT, scope);
             scope.popScope();
-            scope.pushScope(i+1);
+            scope.pushScope(i + 1);
             auto rhsLEntrances = rhs->collectEntranceExit(OpenMdp<ValueType>::L_ENTRANCE, scope);
             scope.popScope();
             STORM_LOG_ASSERT(lhsRExits.size() == rhsLEntrances.size(), "arity mismatch " << lhsRExits.size() << " vs " << rhsLEntrances.size());
@@ -170,7 +168,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
             }
 
             // rEntrance <- lExit
-            scope.pushScope(i+1);
+            scope.pushScope(i + 1);
             auto rhsLExits = rhs->collectEntranceExit(OpenMdp<ValueType>::L_EXIT, scope);
             scope.popScope();
             scope.pushScope(i);
@@ -228,7 +226,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         }
     }
 
-    private:
+   private:
     std::ostream& out;
     size_t clusterCount = 0;
     typename OpenMdp<ValueType>::Scope scope;
@@ -237,6 +235,6 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
 template class OpenMdpToDotVisitor<double>;
 template class OpenMdpToDotVisitor<storm::RationalNumber>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

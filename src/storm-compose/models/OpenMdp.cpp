@@ -6,12 +6,10 @@ namespace storm {
 namespace models {
 
 template<typename ValueType>
-OpenMdp<ValueType>::~OpenMdp() {
-}
+OpenMdp<ValueType>::~OpenMdp() {}
 
 template<typename ValueType>
-OpenMdp<ValueType>::OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
-}
+OpenMdp<ValueType>::OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {}
 
 template<typename ValueType>
 bool OpenMdp<ValueType>::hasName() {
@@ -84,6 +82,24 @@ std::shared_ptr<OpenMdp<ValueType>> OpenMdp<ValueType>::toOpenMdp() {
 }
 
 template<typename ValueType>
+void OpenMdp<ValueType>::initializeParetoCurve() {
+    // Scope emptyScope = {};
+
+    // size_t lEntrances = collectEntranceExit(OpenMdp<ValueType>::L_ENTRANCE, emptyScope).size();
+    // size_t rEntrances = collectEntranceExit(OpenMdp<ValueType>::R_ENTRANCE, emptyScope).size();
+    // size_t lExits = collectEntranceExit(OpenMdp<ValueType>::L_EXIT, emptyScope).size();
+    // size_t rExits = collectEntranceExit(OpenMdp<ValueType>::R_EXIT, emptyScope).size();
+
+    // size_t weightVectorDimension = lExits + rExits;
+
+    std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> underApproximation = storm::storage::geometry::Polytope<ValueType>::createEmptyPolytope();
+    std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> overApproximation = storm::storage::geometry::Polytope<ValueType>::createUniversalPolytope();
+    // TODO replace overApproximation with subdistriubtion polytope.
+
+    paretoCurve = {{underApproximation, overApproximation}};
+}
+
+template<typename ValueType>
 typename OpenMdp<ValueType>::EntranceExit OpenMdp<ValueType>::match(EntranceExit entranceExit) {
     switch (entranceExit) {
         case OpenMdp<ValueType>::L_ENTRANCE:
@@ -103,5 +119,5 @@ typename OpenMdp<ValueType>::EntranceExit OpenMdp<ValueType>::match(EntranceExit
 template class OpenMdp<double>;
 template class OpenMdp<storm::RationalNumber>;
 
-}
-}
+}  // namespace models
+}  // namespace storm

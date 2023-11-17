@@ -1,14 +1,14 @@
 #include "ParetoVisitor.h"
 
-#include "storm/api/storm.h"
-#include "storm-parsers/api/storm-parsers.h"
 #include "storage/prism/Program.h"
-#include "storm/logic/Formula.h"
-#include "storm/storage/jani/Property.h"
-#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
-#include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
-#include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
+#include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"
+#include "storm/api/storm.h"
+#include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
+#include "storm/logic/Formula.h"
+#include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
+#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
+#include "storm/storage/jani/Property.h"
 
 #include <memory>
 
@@ -17,16 +17,16 @@ namespace models {
 namespace visitor {
 
 using storm::models::OpenMdp;
-using storm::storage::SparseMatrixBuilder;
-using storm::storage::SparseMatrix;
 using storm::models::sparse::Mdp;
+using storm::storage::SparseMatrix;
+using storm::storage::SparseMatrixBuilder;
 
 template<typename ValueType>
 ParetoVisitor<ValueType>::ParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {
     auto& multiObjectiveOptions = env.modelchecker().multi();
     multiObjectiveOptions.setMethod(storm::modelchecker::multiobjective::MultiObjectiveMethod::Pcaa);
-    //multiObjectiveOptions.setPrecision(0.1);
-    //multiObjectiveOptions.setPrecisionType(storm::MultiObjectiveModelCheckerEnvironment::ABSOLUTE);
+    // multiObjectiveOptions.setPrecision(0.1);
+    // multiObjectiveOptions.setPrecisionType(storm::MultiObjectiveModelCheckerEnvironment::ABSOLUTE);
 }
 
 // TODO merge visitPrismModel and visitConcreteModel so that the code can be
@@ -48,12 +48,13 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     parser.setIdentifierMapping(getIdentifierMapping(manager));
 
     std::cout << "Path: " << model.getPath() << std::endl;
-    std::cout << "lEntrance: " << model.lEntrance.size() << std::endl;
-    std::cout << "rEntrance: " << model.rEntrance.size() << std::endl;
-    std::cout << "lExit: " << model.lExit.size() << std::endl;
-    std::cout << "rExit: " << model.rExit.size() << std::endl;
+    std::cout << "lEntrance: " << model.getLEntrance().size() << std::endl;
+    std::cout << "rEntrance: " << model.getREntrance().size() << std::endl;
+    std::cout << "lExit: " << model.getLExit().size() << std::endl;
+    std::cout << "rExit: " << model.getRExit().size() << std::endl;
 
-    BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
+    BidirectionalReachabilityResult<ValueType> results(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(),
+                                                       model.getRExit().size());
     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
         // TODO find away we do not have to rebuild the MDP for each entrance.
         // This should be possible by setting multiple initial states during generation,
@@ -81,7 +82,7 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
                 }
             } else {
                 STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
-                STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
+                STORM_LOG_ASSERT(model.getLExit().size() + model.getRExit().size() == 1, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 
                 std::cout << "Warning: Still need to fix this!!! (a)" << std::endl;
@@ -93,8 +94,8 @@ void ParetoVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
         }
     };
 
-    checkEntrances(model.lEntrance, true);
-    checkEntrances(model.rEntrance, false);
+    checkEntrances(model.getLEntrance(), true);
+    checkEntrances(model.getREntrance(), false);
 
     currentPareto = results;
 }
@@ -105,7 +106,8 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
 
-    BidirectionalReachabilityResult<ValueType> results(model.lEntrance.size(), model.rEntrance.size(), model.lExit.size(), model.rExit.size());
+    BidirectionalReachabilityResult<ValueType> results(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(),
+                                                       model.getRExit().size());
     size_t entranceNumber = 0;
 
     auto& stateLabeling = model.getMdp()->getStateLabeling();
@@ -131,11 +133,11 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
                 }
             } else {
                 STORM_LOG_ASSERT(result->isExplicitQuantitativeCheckResult(), "result was not pareto nor quantitative");
-                STORM_LOG_ASSERT(model.lExit.size() + model.rExit.size() == 1, "Expected only 1 exit");
+                STORM_LOG_ASSERT(model.getLExit().size() + model.getRExit().size() == 1, "Expected only 1 exit");
                 auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
                 std::cout << "Warning: Still need to fix this!!! (b)" << std::endl;
 
-                std::vector<ValueType> point {quantitativeResult[0]};
+                std::vector<ValueType> point{quantitativeResult[0]};
                 results.addPoint(entranceNumber, leftEntrance, point);
             }
 
@@ -143,8 +145,8 @@ void ParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model)
         }
     };
 
-    checkEntrances(model.lEntrance, true);
-    checkEntrances(model.rEntrance, false);
+    checkEntrances(model.getLEntrance(), true);
+    checkEntrances(model.getREntrance(), false);
 
     currentPareto = results;
 }
@@ -161,7 +163,7 @@ void ParetoVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
         // Result is not yet cached so we need to compute it ourself
         const auto manager = reference.getManager();
         auto dereferenced = manager->dereference(referenceName);
-        dereferenced->accept(*this); // after this currentPareto should be set
+        dereferenced->accept(*this);  // after this currentPareto should be set
 
         paretoResults[referenceName] = currentPareto;
     }
@@ -208,12 +210,12 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
         std::shared_ptr<ConcreteMdp<ValueType>> concreteMdp = currentPareto.toConcreteMdp(manager);
         concreteMdps.push_back(std::static_pointer_cast<OpenMdp<ValueType>>(concreteMdp));
 
-        //bool exportToDot = false; // TODO remove me
-        //if (exportToDot) {
-        //    std::string name = "model" + std::to_string(count) + ".dot";
-        //    std::ofstream out(name);
-        //    concreteMdp->getMdp()->writeDotToStream(out);
-        //}
+        // bool exportToDot = false; // TODO remove me
+        // if (exportToDot) {
+        //     std::string name = "model" + std::to_string(count) + ".dot";
+        //     std::ofstream out(name);
+        //     concreteMdp->getMdp()->writeDotToStream(out);
+        // }
         ++count;
     }
 
@@ -224,11 +226,11 @@ void ParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
     ConcreteMdp<ValueType> stitchedMdp = flatBuilder.getCurrent();
 
-    //bool exportToDot = fals; // TODO remove me
-    //if (exportToDot) {
-    //    std::ofstream out("sum.dot");
-    //    stitchedMdp.getMdp()->writeDotToStream(out);
-    //}
+    // bool exportToDot = fals; // TODO remove me
+    // if (exportToDot) {
+    //     std::ofstream out("sum.dot");
+    //     stitchedMdp.getMdp()->writeDotToStream(out);
+    // }
 
     visitConcreteModel(stitchedMdp);
 }
@@ -281,8 +283,8 @@ std::string ParetoVisitor<ValueType>::getFormula(PrismModel<ValueType> const& mo
             formulaBuffer << "\n";
         }
     };
-    reachTarget(model.lExit);
-    reachTarget(model.rExit);
+    reachTarget(model.getLExit());
+    reachTarget(model.getRExit());
 
     formulaBuffer << ")";
 
@@ -315,8 +317,8 @@ std::string ParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType> const& m
             ++currentState;
         }
     };
-    reachTarget(model.lExit, true);
-    reachTarget(model.rExit, false);
+    reachTarget(model.getLExit(), true);
+    reachTarget(model.getRExit(), false);
 
     formulaBuffer << ")";
 
@@ -324,7 +326,8 @@ std::string ParetoVisitor<ValueType>::getFormula(ConcreteMdp<ValueType> const& m
 }
 
 template<typename ValueType>
-std::unordered_map<std::string, storm::expressions::Expression> ParetoVisitor<ValueType>::getIdentifierMapping(storm::expressions::ExpressionManager const& manager) {
+std::unordered_map<std::string, storm::expressions::Expression> ParetoVisitor<ValueType>::getIdentifierMapping(
+    storm::expressions::ExpressionManager const& manager) {
     std::unordered_map<std::string, storm::expressions::Expression> result;
     for (const auto& var : manager.getVariables()) {
         result[var.getName()] = var.getExpression();
@@ -335,6 +338,6 @@ std::unordered_map<std::string, storm::expressions::Expression> ParetoVisitor<Va
 template class ParetoVisitor<double>;
 template class ParetoVisitor<storm::RationalNumber>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

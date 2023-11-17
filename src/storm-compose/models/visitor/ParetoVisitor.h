@@ -2,23 +2,24 @@
 
 #include "OpenMdpVisitor.h"
 
+#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
-#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
-#include "storm/modelchecker/results/CheckResult.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm/environment/Environment.h"
+#include "storm/modelchecker/results/CheckResult.h"
 
 namespace storm {
 namespace models {
 namespace visitor {
 
-template<typename ValueType> class BidirectionalReachabilityResult;
+template<typename ValueType>
+class BidirectionalReachabilityResult;
 
 /*
 Current workflow:
@@ -31,7 +32,7 @@ Similar for sum and trace.
 // No intermediate ConcreteMdps need to be stored.
 template<typename ValueType>
 class ParetoVisitor : public OpenMdpVisitor<ValueType> {
-public:
+   public:
     ParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
@@ -45,10 +46,10 @@ public:
 
     // TODO Functions below are public because it is also being used in PropertyDrivenVisitor
     // Need to find some common place to store this instead.
-    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards=false);
-    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards=false);
+    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards = false);
+    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards = false);
 
-private:
+   private:
     static std::unordered_map<std::string, storm::expressions::Expression> getIdentifierMapping(storm::expressions::ExpressionManager const& manager);
 
     std::unordered_map<std::string, BidirectionalReachabilityResult<ValueType>> paretoResults;
@@ -58,6 +59,6 @@ private:
     storm::Environment env;
 };
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

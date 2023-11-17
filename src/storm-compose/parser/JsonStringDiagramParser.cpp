@@ -1,14 +1,14 @@
 #include "JsonStringDiagramParser.h"
 
-#include "storm/io/file.h"
-#include "storm/exceptions/UnexpectedException.h"
 #include "storm/adapters/RationalNumberAdapter.h"
+#include "storm/exceptions/UnexpectedException.h"
+#include "storm/io/file.h"
 
-#include "storm-compose/models/Reference.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/PrismModel.h"
-#include "storm-compose/models/SumModel.h"
+#include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SequenceModel.h"
+#include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
 
 #include <sstream>
@@ -16,15 +16,19 @@
 namespace storm {
 namespace parser {
 
-template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::LEFT_ENTRANCE = ">|";
-template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::RIGHT_ENTRANCE = "|<";
-template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::LEFT_EXIT = "<|";
-template <typename ValueType> const std::string JsonStringDiagramParser<ValueType>::RIGHT_EXIT = "|>";
+template<typename ValueType>
+const std::string JsonStringDiagramParser<ValueType>::LEFT_ENTRANCE = ">|";
+template<typename ValueType>
+const std::string JsonStringDiagramParser<ValueType>::RIGHT_ENTRANCE = "|<";
+template<typename ValueType>
+const std::string JsonStringDiagramParser<ValueType>::LEFT_EXIT = "<|";
+template<typename ValueType>
+const std::string JsonStringDiagramParser<ValueType>::RIGHT_EXIT = "|>";
 
 template<typename ValueType>
-JsonStringDiagramParser<ValueType>::JsonStringDiagramParser(storm::json<ValueType> data, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, boost::filesystem::path root)
-    : data(data), manager(manager), root(root) {
-}
+JsonStringDiagramParser<ValueType>::JsonStringDiagramParser(storm::json<ValueType> data, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                                            boost::filesystem::path root)
+    : data(data), manager(manager), root(root) {}
 
 template<typename ValueType>
 storm::json<ValueType> JsonStringDiagramParser<ValueType>::parseJson(const std::string& str) {
@@ -33,7 +37,8 @@ storm::json<ValueType> JsonStringDiagramParser<ValueType>::parseJson(const std::
 }
 
 template<typename ValueType>
-JsonStringDiagramParser<ValueType> JsonStringDiagramParser<ValueType>::fromFilePath(const std::string& path, std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) {
+JsonStringDiagramParser<ValueType> JsonStringDiagramParser<ValueType>::fromFilePath(const std::string& path,
+                                                                                    std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager) {
     std::ifstream f(path);
     std::stringstream buffer;
     buffer << f.rdbuf();
@@ -145,7 +150,7 @@ std::string JsonStringDiagramParser<ValueType>::parseStateValuation(const storm:
 template<typename ValueType>
 std::vector<std::string> JsonStringDiagramParser<ValueType>::parseStateValuations(const storm::json<ValueType>& data) {
     std::vector<std::string> stateValuations;
-    for (const auto &entry : data) {
+    for (const auto& entry : data) {
         stateValuations.push_back(parseStateValuation(entry));
     }
     return stateValuations;
@@ -154,5 +159,5 @@ std::vector<std::string> JsonStringDiagramParser<ValueType>::parseStateValuation
 template class JsonStringDiagramParser<storm::RationalNumber>;
 template class JsonStringDiagramParser<double>;
 
-}  // namespace exceptions
 }  // namespace parser
+}  // namespace storm

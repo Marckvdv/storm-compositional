@@ -1,7 +1,7 @@
 #pragma once
 
-#include "storm-compose/models/OpenMdpManager.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
+#include "storm-compose/models/OpenMdpManager.h"
 
 #include "ApproximateReachabilityResult.h"
 
@@ -11,11 +11,9 @@ namespace modelchecker {
 class OpenMdpReachabilityTask {
     typedef std::pair<bool, size_t> EntranceExit;
 
-public:
+   public:
     OpenMdpReachabilityTask() = default;
-    OpenMdpReachabilityTask(EntranceExit entrance, EntranceExit exit) : entrance(entrance), exit(exit) {
-
-    }
+    OpenMdpReachabilityTask(EntranceExit entrance, EntranceExit exit) : entrance(entrance), exit(exit) {}
 
     std::string getEntranceLabel() {
         return (entrance.first ? "len" : "ren") + std::to_string(entrance.second);
@@ -41,22 +39,23 @@ public:
         return exit.second;
     }
 
-private:
-    EntranceExit entrance {false, 0}, exit {true, 0};
+   private:
+    EntranceExit entrance{false, 0}, exit{true, 0};
 };
 
 // Interface for model checking string diagrams
-template <typename ValueType>
+template<typename ValueType>
 class AbstractOpenMdpChecker {
-public:
-    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats) : manager(manager), stats(stats) {
-    }
+   public:
+    AbstractOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats)
+        : manager(manager), stats(stats) {}
 
     virtual ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) = 0;
-protected:
+
+   protected:
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
     storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 };
 
-}
-}
+}  // namespace modelchecker
+}  // namespace storm

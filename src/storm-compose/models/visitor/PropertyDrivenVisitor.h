@@ -7,10 +7,11 @@ namespace storm {
 namespace models {
 namespace visitor {
 
-template <typename ValueType>
+template<typename ValueType>
 class PropertyDrivenVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::vector<ValueType> WeightType;
-public:
+
+   public:
     PropertyDrivenVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager);
     virtual ~PropertyDrivenVisitor();
 
@@ -27,12 +28,12 @@ public:
     WeightType weightedReachability(WeightType weights, ConcreteMdp<ValueType> concreteMdp);
     WeightType getCurrentWeight();
 
-private:
+   private:
     WeightType currentWeight;
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
 };
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

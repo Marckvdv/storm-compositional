@@ -1,23 +1,20 @@
 #include "PrismModel.h"
+#include <memory>
+#include "storm-compose/parser/StateValuationParser.h"
+#include "storm-parsers/api/storm-parsers.h"
 #include "storm/builder/ExplicitModelBuilder.h"
 #include "storm/generator/PrismNextStateGenerator.h"
-#include "storm-parsers/api/storm-parsers.h"
-#include "storm-compose/parser/StateValuationParser.h"
-#include <memory>
 
 namespace storm {
 namespace models {
 
 template<typename ValueType>
-PrismModel<ValueType>::PrismModel(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::string path,
-               std::vector<std::string> lEntrance, std::vector<std::string> rEntrance,
-               std::vector<std::string> lExit, std::vector<std::string> rExit
-) : OpenMdp<ValueType>(manager), path(path), lEntrance(lEntrance), rEntrance(rEntrance), lExit(lExit), rExit(rExit) {
-}
+PrismModel<ValueType>::PrismModel(std::weak_ptr<OpenMdpManager<ValueType>> manager, std::string path, std::vector<std::string> lEntrance,
+                                  std::vector<std::string> rEntrance, std::vector<std::string> lExit, std::vector<std::string> rExit)
+    : OpenMdp<ValueType>(manager), path(path), lEntrance(lEntrance), rEntrance(rEntrance), lExit(lExit), rExit(rExit) {}
 
 template<typename ValueType>
-PrismModel<ValueType>::~PrismModel() {
-}
+PrismModel<ValueType>::~PrismModel() {}
 
 template<typename ValueType>
 bool PrismModel<ValueType>::isPrismModel() const {
@@ -29,12 +26,12 @@ std::string PrismModel<ValueType>::getPath() const {
     return path;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void PrismModel<ValueType>::accept(visitor::OpenMdpVisitor<ValueType>& visitor) {
     visitor.visitPrismModel(*this);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     // 1) Load the PRISM file
     storm::builder::BuilderOptions buildOptions;
@@ -67,7 +64,8 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
                 labeling.addLabel(label);
                 labeling.addLabelToState(label, *optionalIndex);
             } else {
-                STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "Could not find state valuation " << entry << " in prism file " << getPath());
+                STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException,
+                                "Could not find state valuation " << entry << " in prism file " << getPath());
             }
             ++count;
         }
@@ -80,19 +78,40 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     return ConcreteMdp<ValueType>(this->manager, mdp, lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx);
 }
 
-template <typename ValueType>
+template<typename ValueType>
 bool PrismModel<ValueType>::isRightward() const {
     return rEntrance.size() == 0 && lExit.size() == 0;
 }
 
-template <typename ValueType>
-std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> PrismModel<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit, typename OpenMdp<ValueType>::Scope& scope) const {
+template<typename ValueType>
+std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> PrismModel<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
+                                                                                                          typename OpenMdp<ValueType>::Scope& scope) const {
     STORM_LOG_ASSERT(false, "Concretize all OpenMdps before calling this function");
     return {};
+}
+
+template<typename ValueType>
+std::vector<std::string> const& PrismModel<ValueType>::getLEntrance() const {
+    return lEntrance;
+}
+
+template<typename ValueType>
+std::vector<std::string> const& PrismModel<ValueType>::getREntrance() const {
+    return rEntrance;
+}
+
+template<typename ValueType>
+std::vector<std::string> const& PrismModel<ValueType>::getLExit() const {
+    return lExit;
+}
+
+template<typename ValueType>
+std::vector<std::string> const& PrismModel<ValueType>::getRExit() const {
+    return rExit;
 }
 
 template class PrismModel<storm::RationalNumber>;
 template class PrismModel<double>;
 
-}
-}
+}  // namespace models
+}  // namespace storm

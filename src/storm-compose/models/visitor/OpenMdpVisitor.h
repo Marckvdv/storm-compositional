@@ -1,23 +1,30 @@
 #pragma once
 
+#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/OpenMdp.h"
+#include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
-#include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/TraceModel.h"
-#include "storm-compose/models/ConcreteMdp.h"
 
 namespace storm {
 namespace models {
 
-template <typename ValueType> class OpenMdp;
-template <typename ValueType> class PrismModel;
-template <typename ValueType> class ConcreteMdp;
-template <typename ValueType> class SequenceModel;
-template <typename ValueType> class SumModel;
-template <typename ValueType> class Reference;
-template <typename ValueType> class TraceModel;
+template<typename ValueType>
+class OpenMdp;
+template<typename ValueType>
+class PrismModel;
+template<typename ValueType>
+class ConcreteMdp;
+template<typename ValueType>
+class SequenceModel;
+template<typename ValueType>
+class SumModel;
+template<typename ValueType>
+class Reference;
+template<typename ValueType>
+class TraceModel;
 
 namespace visitor {
 
@@ -26,7 +33,7 @@ namespace visitor {
 // using class member fields.
 template<typename ValueType>
 class OpenMdpVisitor {
-    public:
+   public:
     virtual ~OpenMdpVisitor() = 0;
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) {
@@ -61,9 +68,8 @@ class OpenMdpVisitor {
 };
 
 template<typename ValueType>
-OpenMdpVisitor<ValueType>::~OpenMdpVisitor() {
-}
+OpenMdpVisitor<ValueType>::~OpenMdpVisitor() {}
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

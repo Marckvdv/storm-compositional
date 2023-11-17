@@ -1,34 +1,34 @@
+#include "storm-cli-utilities/cli.h"
+#include "storm-cli-utilities/model-handling.h"
 #include "storm/adapters/RationalNumberAdapter.h"
-#include "storm/settings/modules/DebugSettings.h"
-#include "storm/settings/modules/GeneralSettings.h"
 #include "storm/analysis/GraphConditions.h"
 #include "storm/api/storm.h"
+#include "storm/exceptions/NotSupportedException.h"
+#include "storm/exceptions/UnexpectedException.h"
 #include "storm/modelchecker/results/ExplicitQualitativeCheckResult.h"
-#include "storm/utility/initialize.h"
+#include "storm/settings/modules/DebugSettings.h"
+#include "storm/settings/modules/GeneralSettings.h"
 #include "storm/utility/NumberTraits.h"
 #include "storm/utility/SignalHandler.h"
 #include "storm/utility/Stopwatch.h"
-#include "storm/exceptions/NotSupportedException.h"
-#include "storm/exceptions/UnexpectedException.h"
-#include "storm-cli-utilities/cli.h"
-#include "storm-cli-utilities/model-handling.h"
+#include "storm/utility/initialize.h"
 
-#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 #include "storm-compose-cli/settings/ComposeSettings.h"
-#include "storm-compose/parser/JsonStringDiagramParser.h"
+#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm-compose/models/visitor/BenchmarkStatsVisitor.h"
+#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpPrintVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
-#include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
-#include "storm-compose/models/visitor/BenchmarkStatsVisitor.h"
+#include "storm-compose/parser/JsonStringDiagramParser.h"
 
+#include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
-#include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 #include "storm-compose/modelchecker/PropertyDrivenOpenMdpChecker.h"
-#include "storm-compose/benchmark/BenchmarkStats.h"
+#include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
 
@@ -46,28 +46,30 @@ enum ReachabilityCheckingApproach {
     PROPERTY_DRIVEN,
 };
 
-template <typename ValueType>
+template<typename ValueType>
 struct ReachabilityCheckingOptions {
     ReachabilityCheckingOptions() = default;
 
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> omdpManager;
-    std::pair<bool, size_t> entrance {false, 0}, exit {true, 0};
+    std::pair<bool, size_t> entrance{false, 0}, exit{true, 0};
     ReachabilityCheckingApproach approach = MONOLITHIC;
     boost::optional<std::string> benchmarkStatsPath;
 };
 
 boost::optional<std::pair<bool, size_t>> parseEntranceExit(std::string text) {
-    if (text.length() < 2) return boost::none;
+    if (text.length() < 2)
+        return boost::none;
 
     bool left = false;
-    if (text[0] == 'l') left = true;
-    else if (text[0] != 'r') return boost::none;
+    if (text[0] == 'l')
+        left = true;
+    else if (text[0] != 'r')
+        return boost::none;
 
-    return boost::optional<std::pair<bool, size_t>>({ left, std::stoi(text.substr(1)) });
+    return boost::optional<std::pair<bool, size_t>>({left, std::stoi(text.substr(1))});
 }
 
-
-template <typename ValueType>
+template<typename ValueType>
 boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
     ReachabilityCheckingOptions<ValueType> options;
 
@@ -76,18 +78,25 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
 
     auto entrance = parseEntranceExit(composeSettings.getEntrance());
     auto exit = parseEntranceExit(composeSettings.getExit());
-    if (!entrance || !exit) return boost::none;
+    if (!entrance || !exit)
+        return boost::none;
     options.entrance = *entrance;
     options.exit = *exit;
 
     if (composeSettings.isApproachSet()) {
         std::string approach = composeSettings.getApproach();
-        if (approach == "monolithic") options.approach = MONOLITHIC;
-        else if (approach == "naive") options.approach = NAIVE;
-        else if (approach == "naive2") options.approach = NAIVE2;
-        else if (approach == "weighted") options.approach = WEIGHTED;
-        else if (approach == "property") options.approach = PROPERTY_DRIVEN;
-        else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << "is not supported");
+        if (approach == "monolithic")
+            options.approach = MONOLITHIC;
+        else if (approach == "naive")
+            options.approach = NAIVE;
+        else if (approach == "naive2")
+            options.approach = NAIVE2;
+        else if (approach == "weighted")
+            options.approach = WEIGHTED;
+        else if (approach == "property")
+            options.approach = PROPERTY_DRIVEN;
+        else
+            STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << "is not supported");
     }
 
     std::string fileName = composeSettings.getStringDiagramFilename();
@@ -113,7 +122,7 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
     return options;
 }
 
-template <typename ValueType>
+template<typename ValueType>
 void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
     storm::compose::benchmark::BenchmarkStats<ValueType> stats;
 
@@ -134,7 +143,6 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
     } else {
         settings.steps = boost::none;
     }
-
 
     stats.totalTime.start();
     std::unique_ptr<storm::modelchecker::AbstractOpenMdpChecker<ValueType>> checker;
@@ -191,41 +199,41 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
  * @return Return code, 0 if successfull, not 0 otherwise.
  */
 int main(const int argc, const char** argv) {
-    //try {
-        storm::utility::setUp();
-        storm::cli::printHeader("Storm-compose", argc, argv);
-        storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
+    // try {
+    storm::utility::setUp();
+    storm::cli::printHeader("Storm-compose", argc, argv);
+    storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
 
-        bool optionsCorrect = storm::cli::parseOptions(argc, argv);
-        if (!optionsCorrect) {
-            return -1;
+    bool optionsCorrect = storm::cli::parseOptions(argc, argv);
+    if (!optionsCorrect) {
+        return -1;
+    }
+    storm::utility::Stopwatch totalTimer(true);
+    storm::cli::setUrgentOptions();
+
+    // Invoke storm-compose with obtained settings
+    auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
+
+    if (generalSettings.isExactSet()) {
+        auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
+        if (!options) {
+            std::cout << "failed parsing options" << std::endl;
+            return 1;
         }
-        storm::utility::Stopwatch totalTimer(true);
-        storm::cli::setUrgentOptions();
-
-        // Invoke storm-compose with obtained settings
-        auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
-
-        if (generalSettings.isExactSet()) {
-            auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
-            if (!options) {
-                std::cout << "failed parsing options" << std::endl;
-                return 1;
-            }
-            performModelChecking(*options);
-        } else {
-            auto options = storm::compose::cli::processOptions<double>();
-            if (!options) {
-                std::cout << "failed parsing options" << std::endl;
-                return 1;
-            }
-            performModelChecking(*options);
+        performModelChecking(*options);
+    } else {
+        auto options = storm::compose::cli::processOptions<double>();
+        if (!options) {
+            std::cout << "failed parsing options" << std::endl;
+            return 1;
         }
+        performModelChecking(*options);
+    }
 
-        totalTimer.stop();
-        if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
-            storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
-        }
+    totalTimer.stop();
+    if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
+        storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
+    }
     //} catch(std::bad_alloc e) {
     //    std::cout << "Got an exception: " << e.what() << std::endl;
     //    return 23;

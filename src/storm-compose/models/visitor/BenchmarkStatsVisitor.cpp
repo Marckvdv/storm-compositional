@@ -9,19 +9,19 @@ namespace storm {
 namespace models {
 namespace visitor {
 
-template <class ValueType>
-BenchmarkStatsVisitor<ValueType>::BenchmarkStatsVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType> &stats) 
-    : manager(manager), stats(stats){
-
+template<class ValueType>
+BenchmarkStatsVisitor<ValueType>::BenchmarkStatsVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager,
+                                                        storm::compose::benchmark::BenchmarkStats<ValueType>& stats)
+    : manager(manager), stats(stats) {
     // intentionally left empty
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     STORM_LOG_ASSERT(false, "concretize first before calling");
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     increaseDepth();
 
@@ -42,7 +42,7 @@ void BenchmarkStatsVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>
     decreaseDepth();
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
     // increaseDepth();
 
@@ -63,31 +63,31 @@ void BenchmarkStatsVisitor<ValueType>::visitReference(Reference<ValueType>& refe
     // decreaseDepth();
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
     increaseDepth();
 
     stats.sequenceCount += model.getValues().size();
-    for(const auto &v : model.getValues()) {
+    for (const auto& v : model.getValues()) {
         v->accept(*this);
     }
 
     decreaseDepth();
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
     increaseDepth();
 
     stats.sumCount += model.getValues().size();
-    for(const auto &v : model.getValues()) {
+    for (const auto& v : model.getValues()) {
         v->accept(*this);
     }
 
     decreaseDepth();
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
     increaseDepth();
 
@@ -97,7 +97,7 @@ void BenchmarkStatsVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
     decreaseDepth();
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::increaseDepth() {
     ++depth;
     if (depth > stats.stringDiagramDepth) {
@@ -105,7 +105,7 @@ void BenchmarkStatsVisitor<ValueType>::increaseDepth() {
     }
 }
 
-template <class ValueType>
+template<class ValueType>
 void BenchmarkStatsVisitor<ValueType>::decreaseDepth() {
     --depth;
     STORM_LOG_ASSERT(depth >= 0, "sanity check");
@@ -114,6 +114,6 @@ void BenchmarkStatsVisitor<ValueType>::decreaseDepth() {
 template class BenchmarkStatsVisitor<double>;
 template class BenchmarkStatsVisitor<storm::RationalNumber>;
 
-}
-}
-}
+}  // namespace visitor
+}  // namespace models
+}  // namespace storm

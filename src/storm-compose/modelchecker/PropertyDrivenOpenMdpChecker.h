@@ -2,24 +2,25 @@
 
 #include "AbstractOpenMdpChecker.h"
 
-//#include "storm/storage/geometry/NativePolytope.h"
+// #include "storm/storage/geometry/NativePolytope.h"
 
 namespace storm {
 namespace modelchecker {
 
-template <typename ValueType>
+template<typename ValueType>
 struct ParetoCurve {
-//    storm::storage::geometry::NativePolytope<ValueType> lower, upper;
+    //    storm::storage::geometry::NativePolytope<ValueType> lower, upper;
 };
 
-template <typename ValueType>
+template<typename ValueType>
 class PropertyDrivenOpenMdpChecker : public AbstractOpenMdpChecker<ValueType> {
-public:
-    PropertyDrivenOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
+   public:
+    PropertyDrivenOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                 storm::compose::benchmark::BenchmarkStats<ValueType>& stats);
 
     virtual ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) override;
 
-private:
+   private:
     void initializeParetoCurves();
 
     std::vector<ValueType> getTargetWeight(OpenMdpReachabilityTask const& task) const;
@@ -30,5 +31,5 @@ private:
     std::map<std::string, ParetoCurve<ValueType>> paretoCurves;
 };
 
-}
-}
+}  // namespace modelchecker
+}  // namespace storm

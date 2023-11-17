@@ -25,37 +25,36 @@ const std::string ComposeIOSettings::paretoStepsName = "paretoSteps";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     auto addStringOption = [&](std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
-        this->addOption(
-            storm::settings::OptionBuilder(moduleName, optionName, false, description)
-                .addArgument(storm::settings::ArgumentBuilder::createStringArgument(fieldName, fieldDescription).build())
-                .build());
+        this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description)
+                            .addArgument(storm::settings::ArgumentBuilder::createStringArgument(fieldName, fieldDescription).build())
+                            .build());
     };
 
     addStringOption(stringDiagramOption, "model check the given string diagram", "filename", "The name of the file to model check (json).");
-    addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance", "<l|r><number> e.g. l5 is left entrance 5, default: l0");
+    addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance",
+                    "<l|r><number> e.g. l5 is left entrance 5, default: l0");
     addStringOption(exitName, "exit to consider as the target state of the string diagram", "exit", "<l|r><number> e.g. r3 is right exit 3, default: r0");
-    addStringOption(approachName, "approach to use for computing reachability in the string diagram", "approach", "(choose from {monolithic, naive, weight}, default: monolithic");
+    addStringOption(approachName, "approach to use for computing reachability in the string diagram", "approach",
+                    "(choose from {monolithic, naive, weight}, default: monolithic");
     addStringOption(exportStringDiagramName, "export the string diagram to a dot file", "filename", "The name of the file to write the dot file");
     addStringOption(benchmarkDataName, "write benchmark results", "filename", "The path to store the benchmark results");
     addStringOption(paretoPrecisionTypeName, "multi objective computation precision type", "type", "In: {absolute, relative}");
 
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false, "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
-            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
-            .build());
+    this->addOption(storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false,
+                                                   "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
+                        .build());
 
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
-            .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())
-            .build());
+    this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
+                        .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())
+                        .build());
 }
 
 bool ComposeIOSettings::check() const {
     return true;
 }
 
-void ComposeIOSettings::finalize() {
-}
+void ComposeIOSettings::finalize() {}
 
 bool ComposeIOSettings::isStringDiagramSet() const {
     return this->getOption(stringDiagramOption).getHasOptionBeenSet();

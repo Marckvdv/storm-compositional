@@ -5,16 +5,13 @@
 namespace storm {
 namespace modelchecker {
 
-template <typename ValueType>
-WeightedOpenMdpChecker<ValueType>::WeightedOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats)
-    : AbstractOpenMdpChecker<ValueType>(manager, stats) {
+template<typename ValueType>
+WeightedOpenMdpChecker<ValueType>::WeightedOpenMdpChecker(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                                          storm::compose::benchmark::BenchmarkStats<ValueType>& stats)
+    : AbstractOpenMdpChecker<ValueType>(manager, stats) {}
 
-}
-
-template <typename ValueType>
+template<typename ValueType>
 ApproximateReachabilityResult<ValueType> WeightedOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
-    
-
     typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
 
     this->manager->constructConcreteMdps();
@@ -33,7 +30,7 @@ ApproximateReachabilityResult<ValueType> WeightedOpenMdpChecker<ValueType>::chec
     }
 
     STORM_LOG_ASSERT(task.isLeftEntrance(), "must be left entrance");
-    ApproximateReachabilityResult<ValueType> result { currentWeight[task.getEntranceId()], 1 };
+    ApproximateReachabilityResult<ValueType> result{currentWeight[task.getEntranceId()], 1};
 
     return result;
 }
@@ -41,5 +38,5 @@ ApproximateReachabilityResult<ValueType> WeightedOpenMdpChecker<ValueType>::chec
 template class WeightedOpenMdpChecker<storm::RationalNumber>;
 template class WeightedOpenMdpChecker<double>;
 
-}
-}
+}  // namespace modelchecker
+}  // namespace storm
