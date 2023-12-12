@@ -2,9 +2,9 @@
 
 #include "OpenMdpVisitor.h"
 #include "storage/Scheduler.h"
+#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/storage/AbstractCache.h"
 #include "storm/environment/Environment.h"
-#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 
 namespace storm {
 namespace models {
@@ -15,15 +15,16 @@ class SingleCVIVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::vector<ValueType> WeightType;
 
    public:
-    SingleCVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, CompositionalValueVector<ValueType>& valueVector, std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache);
+    SingleCVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, CompositionalValueVector<ValueType>& valueVector,
+                     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache);
     virtual ~SingleCVIVisitor();
 
     void visitPrismModel(PrismModel<ValueType>& model) override;
     void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
-    //void visitReference(Reference<ValueType>& reference) override;
+    // void visitReference(Reference<ValueType>& reference) override;
     void visitSequenceModel(SequenceModel<ValueType>& model) override;
     void visitSumModel(SumModel<ValueType>& model) override;
-    //void visitTraceModel(TraceModel<ValueType>& model) override;
+    // void visitTraceModel(TraceModel<ValueType>& model) override;
 
     void updateComponent(/* TODO figure out arguments */);
 

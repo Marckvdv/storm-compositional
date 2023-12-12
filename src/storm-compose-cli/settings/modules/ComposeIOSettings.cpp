@@ -46,10 +46,10 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
                         .build());
 
-    this->addOption(storm::settings::OptionBuilder(moduleName, oviEpsilonName, false,
-                                                   "epsilon with which to perform optimistic (compositional) value iteration")
-                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
-                        .build());
+    this->addOption(
+        storm::settings::OptionBuilder(moduleName, oviEpsilonName, false, "epsilon with which to perform optimistic (compositional) value iteration")
+            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
+            .build());
 
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
                         .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())

@@ -1,7 +1,7 @@
 #include "WeightedOpenMdpChecker.h"
 
-#include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
 
 namespace storm {
 namespace modelchecker {

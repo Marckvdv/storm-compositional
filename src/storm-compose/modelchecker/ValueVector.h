@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <map>
+#include <vector>
 
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 
 namespace storm {
 namespace models {
@@ -12,7 +12,7 @@ namespace visitor {
 
 template<typename ValueType>
 class ValueVector {
-public:
+   public:
     ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight);
     ValueVector() = default;
 
@@ -23,7 +23,7 @@ public:
     std::vector<ValueType>& getValues();
     bool dominates(ValueVector<ValueType> const& other);
 
-private:
+   private:
     ValueVectorMapping<ValueType> mapping;
     std::vector<ValueType> values, finalWeight;
 };

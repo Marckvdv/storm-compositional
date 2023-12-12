@@ -2,6 +2,7 @@
 
 #include "storage/prism/Program.h"
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"
@@ -9,11 +10,10 @@
 #include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"
 #include "storm/logic/Formula.h"
 #include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
-#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
-#include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
-#include "storm/storage/jani/Property.h"
 #include "storm/modelchecker/multiobjective/pcaa/SparsePcaaParetoQuery.h"
-#include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
+#include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
+#include "storm/storage/jani/Property.h"
 
 #include <memory>
 
@@ -175,7 +175,7 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
 
                 removeDominatedPoints<ValueType>(lowerPoints);
                 // TODO fix below
-                //removeDominatingPoints<ValueType>(upperPoints);
+                // removeDominatingPoints<ValueType>(upperPoints);
 
                 this->stats.paretoPoints += lowerPoints.size();
                 this->stats.paretoPoints += upperPoints.size();
@@ -473,9 +473,11 @@ std::unordered_map<std::string, storm::expressions::Expression> LowerUpperPareto
 }
 
 template<typename ValueType>
-std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env, storm::models::sparse::Mdp<ValueType> const& mdp, storm::logic::MultiObjectiveFormula const& formula) {
+std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env, storm::models::sparse::Mdp<ValueType> const& mdp,
+                                                                                     storm::logic::MultiObjectiveFormula const& formula) {
     typedef storm::models::sparse::Mdp<ValueType> SparseModelType;
-    auto preprocessorResult = modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor<storm::models::sparse::Mdp<ValueType>>::preprocess(env, mdp, formula);
+    auto preprocessorResult =
+        modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor<storm::models::sparse::Mdp<ValueType>>::preprocess(env, mdp, formula);
 
     auto query = std::unique_ptr<storm::modelchecker::multiobjective::SparsePcaaQuery<SparseModelType, storm::RationalNumber>>(
         new storm::modelchecker::multiobjective::SparsePcaaParetoQuery<SparseModelType, storm::RationalNumber>(preprocessorResult));

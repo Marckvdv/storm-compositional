@@ -1,10 +1,10 @@
 #include "PropertyDrivenVisitor.h"
 
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
 #include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
-#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 
 namespace storm {
 namespace models {
@@ -38,7 +38,7 @@ template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
     // Iterate from right to left
     // TODO replace this confusing construct below
-    for (size_t i = model.getValues().size(); i --> 0;) {
+    for (size_t i = model.getValues().size(); i-- > 0;) {
         model.getValues()[i]->accept(*this);
     }
 }

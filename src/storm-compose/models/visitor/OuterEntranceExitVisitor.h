@@ -31,16 +31,19 @@ class OuterEntranceExitVisitor : public OpenMdpVisitor<ValueType> {
         collect = true;
     }
 
-    virtual void visitPrismModel(PrismModel<ValueType>& model) override {
-    }
+    virtual void visitPrismModel(PrismModel<ValueType>& model) override {}
 
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         if (collect) {
             std::vector<size_t> const* entries;
-            if (entranceExit == storage::L_ENTRANCE) entries = &model.getLEntrance();
-            if (entranceExit == storage::R_ENTRANCE) entries = &model.getREntrance();
-            if (entranceExit == storage::L_EXIT) entries = &model.getLExit();
-            if (entranceExit == storage::R_EXIT) entries = &model.getRExit();
+            if (entranceExit == storage::L_ENTRANCE)
+                entries = &model.getLEntrance();
+            if (entranceExit == storage::R_ENTRANCE)
+                entries = &model.getREntrance();
+            if (entranceExit == storage::L_EXIT)
+                entries = &model.getLExit();
+            if (entranceExit == storage::R_EXIT)
+                entries = &model.getRExit();
 
             for (size_t i = 0; i < entries->size(); ++i) {
                 weightMapping.insert({{currentComponentId, {entranceExit, i}}, weightMapping.size()});

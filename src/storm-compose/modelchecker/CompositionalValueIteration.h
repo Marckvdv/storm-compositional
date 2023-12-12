@@ -1,15 +1,14 @@
 #pragma once
 
 #include "AbstractOpenMdpChecker.h"
-#include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
-#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/modelchecker/CompositionalValueVector.h"
 #include "storm-compose/modelchecker/ValueVector.h"
-#include "storm-compose/storage/AbstractCache.h"
 #include "storm-compose/models/visitor/CVIVisitor.h"
+#include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm-compose/storage/AbstractCache.h"
 
 // #include "storm/storage/geometry/NativePolytope.h"
-
 
 namespace storm {
 
@@ -18,7 +17,7 @@ namespace visitor {
 template<typename ValueType>
 class CVIVisitor;
 }
-}
+}  // namespace models
 
 namespace modelchecker {
 
@@ -37,9 +36,8 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
         ValueType epsilon = 1e-4;
     };
 
-    CompositionalValueIteration(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
-                                 storm::compose::benchmark::BenchmarkStats<ValueType>& stats,
-                                 Options options);
+    CompositionalValueIteration(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats,
+                                Options options);
 
     virtual ApproximateReachabilityResult<ValueType> check(OpenMdpReachabilityTask task) override;
 

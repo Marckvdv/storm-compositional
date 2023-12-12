@@ -64,8 +64,7 @@ class EntranceExitVisitor : public OpenMdpVisitor<ValueType> {
         currentComponentId = 0;
     }
 
-    virtual void visitPrismModel(PrismModel<ValueType>& model) override {
-    }
+    virtual void visitPrismModel(PrismModel<ValueType>& model) override {}
 
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override {
         std::vector<size_t> const* src = nullptr;
@@ -151,7 +150,6 @@ class EntranceExitVisitor : public OpenMdpVisitor<ValueType> {
         }
         collected = entries;
     }
-
 
     std::vector<ConcreteEntranceExit>& getCollected() {
         return collected;

@@ -17,7 +17,7 @@ class ConcreteMdp;
 namespace visitor {
 template<typename ValueType>
 class OpenMdpVisitor;
-} // visitor
+}  // namespace visitor
 
 template<typename ValueType>
 class PrismModel : public OpenMdp<ValueType> {

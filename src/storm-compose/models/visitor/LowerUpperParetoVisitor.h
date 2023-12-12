@@ -59,8 +59,9 @@ class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     static std::string getFormula(PrismModel<ValueType> const& model, bool rewards = false);
     static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards = false);
 
-    std::unique_ptr<storm::modelchecker::CheckResult>
-        performMultiObjectiveModelChecking(storm::Environment env, storm::models::sparse::Mdp<ValueType> const& mdp, storm::logic::MultiObjectiveFormula const& formula);
+    std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env,
+                                                                                         storm::models::sparse::Mdp<ValueType> const& mdp,
+                                                                                         storm::logic::MultiObjectiveFormula const& formula);
 
    private:
     static std::unordered_map<std::string, storm::expressions::Expression> getIdentifierMapping(storm::expressions::ExpressionManager const& manager);

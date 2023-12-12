@@ -2,8 +2,8 @@
 
 #include "AbstractCache.h"
 #include "EntranceExit.h"
-#include "storm/storage/geometry/Polytope.h"
 #include "storm-compose/models/ConcreteMdp.h"
+#include "storm/storage/geometry/Polytope.h"
 
 namespace storm {
 namespace storage {
@@ -14,7 +14,8 @@ class ParetoCache : public AbstractCache<ValueType> {
     typedef std::vector<ValueType> WeightType;
 
     boost::optional<WeightType> getLowerBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) override;
-    void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight, boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none) override;
+    void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
+                    boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none) override;
     bool needScheduler() override;
 
    private:

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <map>
+#include <vector>
 
-#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 
 namespace storm {
 namespace models {
@@ -12,7 +12,7 @@ namespace visitor {
 
 template<typename ValueType>
 class CompositionalValueVector : public OpenMdpVisitor<ValueType> {
-public:
+   public:
     CompositionalValueVector(std::map<std::pair<Scope, storage::Position>, size_t> scopeMapping, std::vector<ValueType> finalWeight);
     CompositionalValueVector() = default;
 
@@ -31,11 +31,12 @@ public:
     std::vector<ValueType>& getValues();
     bool dominates(CompositionalValueVector<ValueType> const& other);
 
-private:
-    std::map<std::pair<Scope, storage::Position>, size_t> scopeMapping; // initialized by constructor, initially populated with entrances only, updated with exits
+   private:
+    std::map<std::pair<Scope, storage::Position>, size_t>
+        scopeMapping;  // initialized by constructor, initially populated with entrances only, updated with exits
     std::vector<ValueType> values, finalWeight;
 
-    //std::vector<ConcreteMdp<ValueType>&> leaves;
+    // std::vector<ConcreteMdp<ValueType>&> leaves;
 
     Scope currentScope;
     size_t currentLeftPosition = 0, currentRightPosition = 0;

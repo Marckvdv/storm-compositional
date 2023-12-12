@@ -1,11 +1,11 @@
-#include "storm-config.h"
-#include "test/storm_gtest.h"
-#include "storm/api/storm.h"
-#include "storm-compose/parser/JsonStringDiagramParser.h"
-#include "storm-compose/models/OpenMdp.h"
+#include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
-#include "storm-compose/benchmark/BenchmarkStats.h"
+#include "storm-compose/models/OpenMdp.h"
+#include "storm-compose/parser/JsonStringDiagramParser.h"
+#include "storm-config.h"
+#include "storm/api/storm.h"
+#include "test/storm_gtest.h"
 
 class DoubleEnvironment {
    public:
@@ -48,7 +48,7 @@ class BasicModelcheckingTest : public ::testing::Test {
         auto parser = storm::parser::JsonStringDiagramParser<ValueType>::fromFilePath(programFile, omdpManager);
         parser.parse();
 
-        return { omdpManager };
+        return {omdpManager};
     }
 
    private:
@@ -64,9 +64,7 @@ TYPED_TEST(BasicModelcheckingTest, MonolithicRightwardReachability) {
     using namespace storm::modelchecker;
     using namespace storm::compose::benchmark;
 
-    const static std::vector<std::string> cases {
-        "test1/sd.json"
-    };
+    const static std::vector<std::string> cases{"test1/sd.json"};
 
     OpenMdpReachabilityTask task;
     typedef typename TestFixture::ValueType ValueType;

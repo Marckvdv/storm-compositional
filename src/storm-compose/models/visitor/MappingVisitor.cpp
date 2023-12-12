@@ -7,9 +7,9 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<ConcreteMdp<ValueType>*> leaves, std::map<Key, size_t> mapping, std::set<Key> outerPositions, size_t highestIndex) : leaves(leaves), mapping(mapping), outerPositions(outerPositions), highestIndex(highestIndex) {
-
-}
+ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<ConcreteMdp<ValueType>*> leaves, std::map<Key, size_t> mapping, std::set<Key> outerPositions,
+                                                  size_t highestIndex)
+    : leaves(leaves), mapping(mapping), outerPositions(outerPositions), highestIndex(highestIndex) {}
 
 template<typename ValueType>
 void ValueVectorMapping<ValueType>::print() const {
@@ -24,8 +24,8 @@ void ValueVectorMapping<ValueType>::print() const {
 
 template<typename ValueType>
 size_t ValueVectorMapping<ValueType>::lookup(const Key& key) const {
-//    std::cout << "Key: <" << key.first << ", " << storage::positionToString(key.second) << "> " << std::endl;
-//    std::cout << "Key: <" << leaves[key.first]->getName() << ", " << storage::positionToString(key.second) << "> " << std::endl;
+    //    std::cout << "Key: <" << key.first << ", " << storage::positionToString(key.second) << "> " << std::endl;
+    //    std::cout << "Key: <" << leaves[key.first]->getName() << ", " << storage::positionToString(key.second) << "> " << std::endl;
     return mapping.at(key);
 }
 
@@ -55,9 +55,9 @@ void MappingVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model
     outerPositions = {};
     leaves.push_back(&model);
 
-    auto processEntranceExit = [&] (const auto& list, storage::EntranceExit entranceExit, auto& entranceExitPos) {
+    auto processEntranceExit = [&](const auto& list, storage::EntranceExit entranceExit, auto& entranceExitPos) {
         for (size_t i = 0; i < list.size(); ++i) {
-            storage::Position pos { entranceExit, entranceExitPos };
+            storage::Position pos{entranceExit, entranceExitPos};
             localMapping.insert({{currentLeafId, pos}, localMapping.size()});
             outerPositions.insert({currentLeafId, pos});
 
@@ -111,7 +111,7 @@ void MappingVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& mod
     for (size_t i = 1; i < localMappings.size(); ++i) {
         const auto& nextMapping = localMappings[i];
         const auto& nextOuter = outerPositionsSets[i];
-        const auto& prevOuter = outerPositionsSets[i-1];
+        const auto& prevOuter = outerPositionsSets[i - 1];
         size_t offset = mapping.size();
 
         for (const auto& entry : nextMapping) {
@@ -135,15 +135,15 @@ void MappingVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& mod
 
                     STORM_LOG_ASSERT(inserted, "failed to insert");
                 } else {
-                    mapping.insert({entry.first, offset+entry.second});
+                    mapping.insert({entry.first, offset + entry.second});
                 }
             } else {
-                mapping.insert({entry.first, offset+entry.second});
+                mapping.insert({entry.first, offset + entry.second});
             }
         }
     }
 
-    for (const auto& entry : localMappings[localMappings.size()-1]) {
+    for (const auto& entry : localMappings[localMappings.size() - 1]) {
         auto pos = entry.first.second;
         bool isRight = pos.first == storage::R_ENTRANCE || pos.first == storage::R_EXIT;
         if (isRight) {
@@ -165,8 +165,8 @@ void MappingVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
         // Add offset to each entry to make sure that entrances/exits of the values in Sum are disjoint
         size_t offset = mapping.size();
-        for (const auto &entry : localMapping) {
-            size_t newIndex = offset+entry.second;
+        for (const auto& entry : localMapping) {
+            size_t newIndex = offset + entry.second;
             mapping.insert({entry.first, newIndex});
 
             if (outerPositions.count(entry.first) > 0) {
@@ -188,12 +188,10 @@ void MappingVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
 
     // Map 0..left-1 exits to the same index as their right entrance counterpart
     for (size_t i = 0; i < left; ++i) {
-
     }
 
     // Map 0..right-1 exits to the same index as their left entrance counterpart
     for (size_t i = 0; i < right; ++i) {
-
     }
 }
 
@@ -206,7 +204,7 @@ ValueVectorMapping<ValueType> MappingVisitor<ValueType>::getMapping() {
         }
     }
 
-    return ValueVectorMapping<ValueType> (leaves, localMapping, outerPositions, highestIndex);
+    return ValueVectorMapping<ValueType>(leaves, localMapping, outerPositions, highestIndex);
 }
 
 template<typename ValueType>

@@ -7,13 +7,13 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight) : mapping(mapping), values(mapping.getHighestIndex()+1), finalWeight(finalWeight) {
-}
+ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight)
+    : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {}
 
 template<typename ValueType>
 ValueType ValueVector<ValueType>::getWeight(size_t leafId, storage::Position position) {
     auto& weight = values[mapping.lookup({leafId, position})];
-    //std::cout << "got weight: " << weight << std::endl;
+    // std::cout << "got weight: " << weight << std::endl;
     return weight;
 }
 
@@ -34,7 +34,7 @@ void ValueVector<ValueType>::initializeValues() {
         std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
 
         setWeight(entry.first, entry.second, finalWeight[index]);
-        ++index; // TODO make sure this lines up
+        ++index;  // TODO make sure this lines up
     }
 }
 

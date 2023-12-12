@@ -1,7 +1,7 @@
 #pragma once
 
-#include "OpenMdpVisitor.h"
 #include "EntranceExitVisitor.h"
+#include "OpenMdpVisitor.h"
 #include "exceptions/InvalidOperationException.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"

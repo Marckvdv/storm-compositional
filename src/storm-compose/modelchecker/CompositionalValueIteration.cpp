@@ -1,19 +1,19 @@
 #include "CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/CompositionalValueVector.h"
-#include "storm-compose/storage/EntranceExit.h"
+#include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm-compose/models/visitor/MappingVisitor.h"
+#include "storm-compose/models/visitor/OuterEntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoInitializerVisitor.h"
 #include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
-#include "storm-compose/models/visitor/MappingVisitor.h"
-#include "storm-compose/models/visitor/EntranceExitVisitor.h"
-#include "storm-compose/models/visitor/OuterEntranceExitVisitor.h"
-#include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
+#include "storm-compose/storage/EntranceExit.h"
 #include "storm-compose/storage/ExactCache.h"
 #include "storm-compose/storage/NoCache.h"
 #include "storm-compose/storage/ParetoCache.h"
+#include "storm/exceptions/InvalidOperationException.h"
+#include "storm/exceptions/NotSupportedException.h"
 #include "storm/utility/SignalHandler.h"
 #include "storm/utility/constants.h"
-#include "storm/exceptions/NotSupportedException.h"
-#include "storm/exceptions/InvalidOperationException.h"
 
 namespace storm {
 namespace modelchecker {
@@ -50,13 +50,14 @@ void CompositionalValueIteration<ValueType>::initializeParetoCurves() {
 ** For exits that are intermediate, the weight is taken from the global value vector.
 ** We obtain optimal values for the entrances, which are stored back into the global value vector.
 ** 4) Repeat. Termination either using the 'optimistic VI' approach or bottom-up TACAS style
- */
+*/
 template<typename ValueType>
 ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::check(OpenMdpReachabilityTask task) {
     initialize(task);
 
-    std::cout << "initial values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps << " )"<< std::endl;
-    for (const auto &v : valueVector.getValues()) {
+    std::cout << "initial values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
+              << " )" << std::endl;
+    for (const auto& v : valueVector.getValues()) {
         std::cout << " " << storm::utility::convertNumber<double>(v);
     }
     std::cout << std::endl;
@@ -67,8 +68,9 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         models::visitor::CVIVisitor<ValueType> cviVisitor(this->manager, valueVector, cache);
         root->accept(cviVisitor);
 
-        std::cout << "current values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps << " )"<< std::endl;
-        for (const auto &v : valueVector.getValues()) {
+        std::cout << "current values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
+                  << " )" << std::endl;
+        for (const auto& v : valueVector.getValues()) {
             std::cout << " " << storm::utility::convertNumber<double>(v);
         }
         std::cout << std::endl;
@@ -78,7 +80,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         newValue.addConstant(options.epsilon);
         auto newValueCopy = newValue;
 
-        //models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache);
+        // models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache);
         models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, cache);
         root->accept(upperboundVisitor);
         if (newValueCopy.dominates(newValue)) {
@@ -88,8 +90,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         }
 
         ++currentStep;
-    } while(!shouldTerminate());
-
+    } while (!shouldTerminate());
 
     std::cout << "WARN for now assuming we are only interested in the first left entrance" << std::endl;
     std::cout << "WARN assuming first entrance is the one of interest" << std::endl;
@@ -136,7 +137,7 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeCache() {
     cache = std::make_shared<storm::storage::ExactCache<ValueType>>();
-    //cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
+    // cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
 }
 
 template<typename ValueType>

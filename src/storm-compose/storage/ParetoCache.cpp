@@ -5,11 +5,10 @@
 #include "storage/geometry/Polytope.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/storage/EntranceExit.h"
-#include "storm/modelchecker/prctl/helper/SparseDtmcPrctlHelper.h"
-#include "storm/utility/constants.h"
-#include "storm/solver/SolveGoal.h"
 #include "storm/environment/Environment.h"
-#include "storm-compose/storage/EntranceExit.h"
+#include "storm/modelchecker/prctl/helper/SparseDtmcPrctlHelper.h"
+#include "storm/solver/SolveGoal.h"
+#include "storm/utility/constants.h"
 
 namespace storm {
 namespace storage {
@@ -30,8 +29,8 @@ boost::optional<std::vector<ValueType>> ParetoCache<ValueType>::getLowerBound(mo
             if (!paretoEntry)
                 return false;
 
-            const auto &lb = paretoEntry->first;
-            const auto &ub = paretoEntry->second;
+            const auto& lb = paretoEntry->first;
+            const auto& ub = paretoEntry->second;
 
             ValueType error = getError(lb, ub);
             if (error > this->errorTolerance)
@@ -40,20 +39,23 @@ boost::optional<std::vector<ValueType>> ParetoCache<ValueType>::getLowerBound(mo
 
             ++weightIndex;
         }
-       return true;
+        return true;
     };
 
     bool result1 = processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
-    if (!result1) return boost::none;
+    if (!result1)
+        return boost::none;
 
     bool result2 = processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
-    if (!result2) return boost::none;
+    if (!result2)
+        return boost::none;
 
     return lowerBound;
 }
 
 template<typename ValueType>
-void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight, std::vector<ValueType> inputWeight, boost::optional<storm::storage::Scheduler<ValueType>> sched) {
+void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight, std::vector<ValueType> inputWeight,
+                                        boost::optional<storm::storage::Scheduler<ValueType>> sched) {
     STORM_LOG_THROW(sched, storm::exceptions::InvalidArgumentException, "need scheduler present");
 
     if (!isInitialized(ptr)) {
@@ -100,13 +102,13 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
     // Now that we have the points, update the lower and upper bounds:
     size_t entranceIndex = 0;
     size_t leftEntranceCount = ptr->getLEntrance().size();
-    for (const auto &p : points) {
+    for (const auto& p : points) {
         bool leftEntrance = entranceIndex < leftEntranceCount;
         storage::EntranceExit entranceExit = leftEntrance ? storage::L_ENTRANCE : storage::R_ENTRANCE;
         size_t realEntranceIndex = leftEntrance ? entranceIndex : entranceIndex - leftEntranceCount;
-        Position pos {entranceExit, realEntranceIndex};
+        Position pos{entranceExit, realEntranceIndex};
 
-        std::pair<models::ConcreteMdp<ValueType>*, Position> key {ptr, pos};
+        std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
 
         updateLowerUpperBounds(key, p, outputWeight);
 
@@ -115,9 +117,10 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
 }
 
 template<typename ValueType>
-void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMdp<ValueType>*, Position> key, std::vector<ValueType> point, std::vector<ValueType> weight) {
-    auto &lb = lowerBounds[key];
-    auto &ub = upperBounds[key];
+void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMdp<ValueType>*, Position> key, std::vector<ValueType> point,
+                                                    std::vector<ValueType> weight) {
+    auto& lb = lowerBounds[key];
+    auto& ub = upperBounds[key];
 
     auto newPointPolytope = storage::geometry::Polytope<ValueType>::create({point});
     storage::geometry::Halfspace<ValueType> newHalfspace(weight, point);
@@ -128,13 +131,13 @@ void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMd
 
 template<typename ValueType>
 bool ParetoCache<ValueType>::isInitialized(models::ConcreteMdp<ValueType>* ptr) {
-    Position leftPos {L_ENTRANCE, 0};
+    Position leftPos{L_ENTRANCE, 0};
     const auto it1 = lowerBounds.find({ptr, leftPos});
     if (it1 != lowerBounds.end()) {
         return true;
     }
 
-    Position rightPos {R_ENTRANCE, 0};
+    Position rightPos{R_ENTRANCE, 0};
     const auto it2 = lowerBounds.find({ptr, rightPos});
     if (it2 != lowerBounds.end()) {
         return true;
@@ -147,16 +150,16 @@ template<typename ValueType>
 void ParetoCache<ValueType>::initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr) {
     // TODO FIXME
     for (size_t i = 0; i < ptr->getLEntrance().size(); ++i) {
-        Position pos {L_ENTRANCE, i};
-        std::pair<models::ConcreteMdp<ValueType>*, Position> key {ptr, pos};
+        Position pos{L_ENTRANCE, i};
+        std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
 
         lowerBounds[key] = geometry::Polytope<ValueType>::createEmptyPolytope();
         upperBounds[key] = geometry::Polytope<ValueType>::createUniversalPolytope();
     }
 
     for (size_t i = 0; i < ptr->getREntrance().size(); ++i) {
-        Position pos {R_ENTRANCE, i};
-        std::pair<models::ConcreteMdp<ValueType>*, Position> key {ptr, pos};
+        Position pos{R_ENTRANCE, i};
+        std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
 
         lowerBounds[key] = geometry::Polytope<ValueType>::createEmptyPolytope();
         upperBounds[key] = geometry::Polytope<ValueType>::createUniversalPolytope();
@@ -169,7 +172,8 @@ bool ParetoCache<ValueType>::needScheduler() {
 }
 
 template<typename ValueType>
-boost::optional<std::pair<std::vector<ValueType>, std::vector<ValueType>>> ParetoCache<ValueType>::getLowerUpper(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, Position pos) {
+boost::optional<std::pair<std::vector<ValueType>, std::vector<ValueType>>> ParetoCache<ValueType>::getLowerUpper(models::ConcreteMdp<ValueType>* ptr,
+                                                                                                                 WeightType outputWeight, Position pos) {
     std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
 
     auto lowerBoundPolytope = lowerBounds[key];
@@ -196,7 +200,7 @@ ValueType ParetoCache<ValueType>::innerProduct(WeightType a, WeightType b) {
 
     ValueType result = storm::utility::zero<ValueType>();
     for (size_t i = 0; i < a.size(); ++i) {
-        result += a[i]*b[i];
+        result += a[i] * b[i];
     }
     return result;
 }

@@ -3,13 +3,13 @@
 #include "storage/BitVector.h"
 #include "storage/SparseMatrix.h"
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
 #include "storm-parsers/parser/FormulaParser.h"
-#include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
-#include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
-#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm/environment/Environment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
+#include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
+#include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
 #include "utility/constants.h"
 
 namespace storm {
@@ -17,12 +17,12 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-CVIVisitor<ValueType>::CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, ValueVector<ValueType>& valueVector, std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache) : manager(manager), valueVector(valueVector), cache(cache) {
-}
+CVIVisitor<ValueType>::CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, ValueVector<ValueType>& valueVector,
+                                  std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache)
+    : manager(manager), valueVector(valueVector), cache(cache) {}
 
 template<typename ValueType>
-CVIVisitor<ValueType>::~CVIVisitor() {
-}
+CVIVisitor<ValueType>::~CVIVisitor() {}
 
 template<typename ValueType>
 void CVIVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
@@ -34,17 +34,19 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     std::vector<ValueType> weights;
     bool allZero = true;
     for (size_t i = 0; i < model.getLExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos {storage::L_EXIT, currentLeftExitPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, currentLeftExitPosition};
         ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0) allZero = false;
+        if (weight != 0)
+            allZero = false;
         weights.push_back(weight);
 
         ++currentLeftExitPosition;
     }
     for (size_t i = 0; i < model.getRExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos {storage::R_EXIT, currentRightExitPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, currentRightExitPosition};
         ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0) allZero = false;
+        if (weight != 0)
+            allZero = false;
         weights.push_back(weight);
 
         ++currentRightExitPosition;
@@ -68,10 +70,10 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
             cache->addToCache(&model, weights, inputValues, scheduler);
         }
     }
-    //std::cout << "size of input values " << inputValues.size() << std::endl;
+    // std::cout << "size of input values " << inputValues.size() << std::endl;
     size_t weightIndex = 0;
     for (size_t i = 0; i < model.getLEntrance().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos {storage::L_ENTRANCE, currentLeftPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_ENTRANCE, currentLeftPosition};
         valueVector.setWeight(currentLeafId, pos, inputValues[weightIndex]);
 
         ++weightIndex;
@@ -79,7 +81,7 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     }
 
     for (size_t i = 0; i < model.getREntrance().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos {storage::R_ENTRANCE, currentRightPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_ENTRANCE, currentRightPosition};
         valueVector.setWeight(currentLeafId, pos, inputValues[weightIndex]);
 
         ++weightIndex;
@@ -100,9 +102,9 @@ void CVIVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) 
         currentLeftExitPosition = 0;
         currentRightExitPosition = 0;
 
-        //currentScope.pushScope(currentSequencePosition);
+        // currentScope.pushScope(currentSequencePosition);
         v->accept(*this);
-        //currentScope.popScope();
+        // currentScope.popScope();
         ++currentSequencePosition;
     }
 }
@@ -116,7 +118,8 @@ void CVIVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 }
 
 template<typename ValueType>
-std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<ValueType>>> CVIVisitor<ValueType>::weightedReachability(std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp, bool returnScheduler, storm::Environment env) {
+std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<ValueType>>> CVIVisitor<ValueType>::weightedReachability(
+    std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp, bool returnScheduler, storm::Environment env) {
     using storm::modelchecker::multiobjective::StandardMdpPcaaWeightVectorChecker;
     using storm::modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor;
     using storm::models::sparse::Mdp;
@@ -136,7 +139,7 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
             mdp->getStateLabeling().setStates("init", storage::BitVector(mdp->getNumberOfStates()));
             mdp->getStateLabeling().addLabelToState("init", entrance);
 
-            //env.solver().setLinearEquationSolverPrecision(storm::RationalNumber(1e-6));
+            // env.solver().setLinearEquationSolverPrecision(storm::RationalNumber(1e-6));
             auto preprocessResult = SparseMultiObjectivePreprocessor<Mdp<ValueType>>::preprocess(env, *mdp, formula->asMultiObjectiveFormula());
             StandardMdpPcaaWeightVectorChecker checker(preprocessResult);
 
@@ -150,7 +153,7 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
             ValueType sum = 0;
             for (size_t i = 0; i < weights.size(); ++i) {
                 sum += weights[i] * underApprox[i];
-                //std::cout << underApprox[i] << std::endl;
+                // std::cout << underApprox[i] << std::endl;
             }
 
             newWeights.push_back(sum);
@@ -179,7 +182,7 @@ std::vector<ValueType> CVIVisitor<ValueType>::weightedReachability2(std::vector<
 
     auto rewardModels = mdp->getRewardModels();
 
-    std::map<size_t, ValueType> stateToWeightMap; // TODO populate
+    std::map<size_t, ValueType> stateToWeightMap;  // TODO populate
     storm::storage::SparseMatrixBuilder<ValueType> rewardMatrixBuilder(0, 0, 0, true, true);
 
     for (size_t rowGroup = 0; rowGroup < transitionMatrix.getRowGroupCount(); ++rowGroup) {
@@ -190,9 +193,8 @@ std::vector<ValueType> CVIVisitor<ValueType>::weightedReachability2(std::vector<
                 auto column = entry.getColumn();
                 const auto it = stateToWeightMap.find(column);
                 if (it != stateToWeightMap.end()) {
-                    //rewardMatrixBuilder.addNextValue(index_type row, index_type column, const value_type &value)
+                    // rewardMatrixBuilder.addNextValue(index_type row, index_type column, const value_type &value)
                 } else {
-
                 }
             }
         }

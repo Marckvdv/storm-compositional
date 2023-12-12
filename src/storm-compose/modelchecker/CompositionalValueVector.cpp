@@ -6,8 +6,9 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-CompositionalValueVector<ValueType>::CompositionalValueVector(std::map<std::pair<Scope, storage::Position>, size_t> scopeMapping, std::vector<ValueType> finalWeight) : scopeMapping(scopeMapping), finalWeight(finalWeight) {
-}
+CompositionalValueVector<ValueType>::CompositionalValueVector(std::map<std::pair<Scope, storage::Position>, size_t> scopeMapping,
+                                                              std::vector<ValueType> finalWeight)
+    : scopeMapping(scopeMapping), finalWeight(finalWeight) {}
 
 template<typename ValueType>
 void CompositionalValueVector<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
@@ -25,7 +26,7 @@ void CompositionalValueVector<ValueType>::visitConcreteModel(ConcreteMdp<ValueTy
         size_t idx;
         if (outerExit) {
             idx = scopeMapping.size();
-            values.resize(idx+1, 0);
+            values.resize(idx + 1, 0);
             values[idx] = finalWeight[currentOuterExit++];
         } else {
             idx = it->second;
@@ -44,7 +45,7 @@ void CompositionalValueVector<ValueType>::visitConcreteModel(ConcreteMdp<ValueTy
         size_t idx;
         if (outerExit) {
             idx = scopeMapping.size();
-            values.resize(idx+1, 0);
+            values.resize(idx + 1, 0);
             values[idx] = finalWeight[currentOuterExit++];
         } else {
             idx = it->second;
@@ -90,11 +91,10 @@ void CompositionalValueVector<ValueType>::visitTraceModel(TraceModel<ValueType>&
     STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "Not yet supported");
 }
 
-
 template<typename ValueType>
 ValueType CompositionalValueVector<ValueType>::getWeight(Scope scope, storage::Position position) {
     auto& weight = values[scopeMapping.at({scope, position})];
-    //std::cout << "got weight: " << weight << std::endl;
+    // std::cout << "got weight: " << weight << std::endl;
     return weight;
 }
 
@@ -105,7 +105,7 @@ void CompositionalValueVector<ValueType>::setWeight(Scope scope, storage::Positi
 
 template<typename ValueType>
 void CompositionalValueVector<ValueType>::printMapping() {
-    for (const auto &entry : scopeMapping) {
+    for (const auto& entry : scopeMapping) {
         const auto& scope = entry.first.first;
         const auto& direction = entry.first.second.first;
         const auto& position = entry.first.second.second;

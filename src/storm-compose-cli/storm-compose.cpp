@@ -23,10 +23,10 @@
 
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
+#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
-#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
@@ -106,7 +106,7 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
     parser.parse();
 
     // TODO find better place for this
-    //if (composeSettings.isExportStringDiagramSet()) {
+    // if (composeSettings.isExportStringDiagramSet()) {
     //    std::ofstream out(composeSettings.getExportStringDiagramFilename());
     //    storm::models::visitor::OpenMdpToDotVisitor<ValueType> visitor(out);
     //    options.omdpManager->constructConcreteMdps();
@@ -160,7 +160,7 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
         case COMPOSITIONAL_VI:
-            //STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
+            // STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
             typename modelchecker::CompositionalValueIteration<ValueType>::Options modelcheckerOptions;
             modelcheckerOptions.epsilon = composeSettings.getOVIEpsilon();
             checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);

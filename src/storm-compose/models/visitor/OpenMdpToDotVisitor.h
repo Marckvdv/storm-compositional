@@ -53,9 +53,8 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         return result.str();
     }
 
-    std::string printTransition(const models::visitor::Scope& fromScope, models::visitor::EntranceExit fromEntranceExit,
-                                const models::visitor::Scope& toScope, models::visitor::EntranceExit toEntranceExit,
-                                bool mirrorDir = false) {
+    std::string printTransition(const models::visitor::Scope& fromScope, models::visitor::EntranceExit fromEntranceExit, const models::visitor::Scope& toScope,
+                                models::visitor::EntranceExit toEntranceExit, bool mirrorDir = false) {
         std::stringstream result;
         if (!mirrorDir) {
             result << printNode(fromScope, fromEntranceExit);

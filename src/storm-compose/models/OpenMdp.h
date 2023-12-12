@@ -75,6 +75,7 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
 
     // visitor pattern for easier recursion of the OpenMdp structure
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) = 0;
+
    protected:
     boost::optional<std::string> name;
     std::weak_ptr<OpenMdpManager<ValueType>> manager;
