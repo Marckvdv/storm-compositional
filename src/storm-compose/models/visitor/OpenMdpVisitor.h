@@ -51,13 +51,13 @@ class OpenMdpVisitor {
     }
 
     virtual void visitSequenceModel(SequenceModel<ValueType>& model) {
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             m->accept(*this);
         }
     }
 
     virtual void visitSumModel(SumModel<ValueType>& model) {
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             m->accept(*this);
         }
     }

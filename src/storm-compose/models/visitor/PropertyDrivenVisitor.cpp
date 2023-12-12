@@ -4,6 +4,7 @@
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
 #include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 
 namespace storm {
 namespace models {
@@ -27,8 +28,6 @@ void PropertyDrivenVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>
 
 template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitReference(Reference<ValueType>& reference) {
-    // We could do some caching here, but the problem is that this depends on the weight used.
-    // I suspect the amount of actual caching to be done is rather low.
     const auto& referenceName = reference.getReference();
     const auto manager = reference.getManager();
     auto dereferenced = manager->dereference(referenceName);
@@ -39,7 +38,7 @@ template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
     // Iterate from right to left
     // TODO replace this confusing construct below
-    for (size_t i = model.getValues().size(); i-- > 0;) {
+    for (size_t i = model.getValues().size(); i --> 0;) {
         model.getValues()[i]->accept(*this);
     }
 }
@@ -49,12 +48,13 @@ void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
     WeightType originalWeight = currentWeight;
     WeightType finalWeight;
 
-    typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
     // We need to split the weights for each value
     size_t index = 0;
     for (auto& value : model.getValues()) {
         std::vector<ValueType> weight;
-        auto exits = value->collectEntranceExit(OpenMdp<ValueType>::R_EXIT, emptyScope);
+        EntranceExitVisitor<ValueType> entranceExitVisitor(storage::R_EXIT);
+        value->accept(entranceExitVisitor);
+        auto exits = entranceExitVisitor.getCollected();
 
         std::cout << "Exits size: " << exits.size() << std::endl;
 
@@ -73,7 +73,9 @@ void PropertyDrivenVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
 
         if (allZero) {
             std::cout << "SKIP" << std::endl;
-            auto entrances = value->collectEntranceExit(OpenMdp<ValueType>::L_ENTRANCE, emptyScope);
+            entranceExitVisitor.setEntranceExit(storage::L_ENTRANCE);
+            value->accept(entranceExitVisitor);
+            auto entrances = entranceExitVisitor.getCollected();
             for (size_t i = 0; i < entrances.size(); ++i) {
                 finalWeight.push_back(storm::utility::zero<ValueType>());
             }
@@ -94,7 +96,7 @@ void PropertyDrivenVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& mo
 
 template<typename ValueType>
 void PropertyDrivenVisitor<ValueType>::setWeight(std::vector<ValueType> weight) {
-    currentWeight = std::move(weight);
+    currentWeight = weight;
 }
 
 template<typename ValueType>

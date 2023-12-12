@@ -30,8 +30,6 @@ class TraceModel : public OpenMdp<ValueType> {
    public:
     TraceModel(std::shared_ptr<OpenMdpManager<ValueType>> manager, std::shared_ptr<OpenMdp<ValueType>> value, size_t left, size_t right);
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
-    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
-                                                                                       typename OpenMdp<ValueType>::Scope& scope) const override;
     std::shared_ptr<OpenMdp<ValueType>> getValue();
 
     bool isRightward() const override;

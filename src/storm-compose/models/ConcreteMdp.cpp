@@ -41,33 +41,6 @@ const std::shared_ptr<storm::models::sparse::Mdp<ValueType>> ConcreteMdp<ValueTy
 }
 
 template<typename ValueType>
-std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> ConcreteMdp<ValueType>::collectEntranceExit(
-    typename OpenMdp<ValueType>::EntranceExit entranceExit, typename OpenMdp<ValueType>::Scope& scope) const {
-    std::vector<size_t> const* src = nullptr;
-
-    if (entranceExit == OpenMdp<ValueType>::L_ENTRANCE)
-        src = &lEntrance;
-    else if (entranceExit == OpenMdp<ValueType>::R_ENTRANCE)
-        src = &rEntrance;
-    else if (entranceExit == OpenMdp<ValueType>::L_EXIT)
-        src = &lExit;
-    else if (entranceExit == OpenMdp<ValueType>::R_EXIT)
-        src = &rExit;
-
-    // Doing some pointer magic, double check
-    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> entries;
-    size_t i = 0;
-    for (auto entry : *src) {
-        scope.pushScope(i);
-        typename OpenMdp<ValueType>::ConcreteEntranceExit newEntry{this, entry, scope};
-        scope.popScope();
-        entries.push_back(newEntry);
-        ++i;
-    }
-    return entries;
-}
-
-template<typename ValueType>
 void ConcreteMdp<ValueType>::exportToDot(std::string path) {
     std::ofstream outputFile;
     outputFile.open(path);
@@ -77,29 +50,6 @@ void ConcreteMdp<ValueType>::exportToDot(std::string path) {
 template<typename ValueType>
 bool ConcreteMdp<ValueType>::isRightward() const {
     return rEntrance.size() == 0 && lExit.size() == 0;
-}
-
-template<typename ValueType>
-std::vector<ValueType> ConcreteMdp<ValueType>::weightedReachability(std::vector<ValueType> const& weight) {
-    // Step 1.1) Construct objectives for each of the exits.
-    visitor::BidirectionalReachabilityResult<ValueType> currentResults;
-    auto objectives = currentResults.getReachabilityObjectives();
-    std::vector<std::shared_ptr<storm::logic::Formula const>> formulas;
-    for (auto& objectives : objectives) {
-        formulas.push_back(objectives.originalFormula);
-    }
-
-    // Step 2) perform weighted reachability on the model
-    storm::Environment env;
-
-    typedef storm::models::sparse::Mdp<ValueType> SparseModelType;
-    auto preprocessResult = modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor<SparseModelType>::preprocess(env, *mdp, formulas);
-    storm::modelchecker::multiobjective::StandardMdpPcaaWeightVectorChecker<SparseModelType> checker(preprocessResult);
-
-    checker.check(env, weight);
-
-    // Step 3) obtain reachability results for initial states (= entrances)
-    auto results = checker.getUnderApproximationOfInitialStateResults();
 }
 
 template<typename ValueType>
@@ -120,6 +70,16 @@ std::vector<size_t> const& ConcreteMdp<ValueType>::getLExit() const {
 template<typename ValueType>
 std::vector<size_t> const& ConcreteMdp<ValueType>::getRExit() const {
     return rExit;
+}
+
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getEntranceCount() const {
+    return lEntrance.size() + rEntrance.size();
+}
+
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getExitCount() const {
+    return lExit.size() + rExit.size();
 }
 
 template class ConcreteMdp<double>;

@@ -75,19 +75,15 @@ ConcreteMdp<ValueType> PrismModel<ValueType>::toConcreteMdp() {
     processEntranceExit(lExit, lExitIdx, false, true);
     processEntranceExit(rExit, rExitIdx, false, false);
 
-    return ConcreteMdp<ValueType>(this->manager, mdp, lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx);
+    auto result = ConcreteMdp<ValueType>(this->manager, mdp, lEntranceIdx, rEntranceIdx, lExitIdx, rExitIdx);
+    result.setName(getPath());
+
+    return result;
 }
 
 template<typename ValueType>
 bool PrismModel<ValueType>::isRightward() const {
     return rEntrance.size() == 0 && lExit.size() == 0;
-}
-
-template<typename ValueType>
-std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> PrismModel<ValueType>::collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
-                                                                                                          typename OpenMdp<ValueType>::Scope& scope) const {
-    STORM_LOG_ASSERT(false, "Concretize all OpenMdps before calling this function");
-    return {};
 }
 
 template<typename ValueType>

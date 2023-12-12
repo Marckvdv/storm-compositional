@@ -1,3 +1,4 @@
+#include "storage/SparseMatrix.h"
 #include "storm-cli-utilities/cli.h"
 #include "storm-cli-utilities/model-handling.h"
 #include "storm/adapters/RationalNumberAdapter.h"
@@ -17,8 +18,6 @@
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 #include "storm-compose/models/visitor/BenchmarkStatsVisitor.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
-#include "storm-compose/models/visitor/OpenMdpPrintVisitor.h"
-#include "storm-compose/models/visitor/OpenMdpToDotVisitor.h"
 #include "storm-compose/models/visitor/ParetoVisitor.h"
 #include "storm-compose/parser/JsonStringDiagramParser.h"
 
@@ -27,7 +26,7 @@
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
-#include "storm-compose/modelchecker/PropertyDrivenOpenMdpChecker.h"
+#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
@@ -43,7 +42,7 @@ enum ReachabilityCheckingApproach {
     NAIVE,
     NAIVE2,
     WEIGHTED,
-    PROPERTY_DRIVEN,
+    COMPOSITIONAL_VI,
 };
 
 template<typename ValueType>
@@ -93,8 +92,8 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
             options.approach = NAIVE2;
         else if (approach == "weighted")
             options.approach = WEIGHTED;
-        else if (approach == "property")
-            options.approach = PROPERTY_DRIVEN;
+        else if (approach == "compositional_vi")
+            options.approach = COMPOSITIONAL_VI;
         else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << "is not supported");
     }
@@ -107,13 +106,13 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
     parser.parse();
 
     // TODO find better place for this
-    if (composeSettings.isExportStringDiagramSet()) {
-        std::ofstream out(composeSettings.getExportStringDiagramFilename());
-        storm::models::visitor::OpenMdpToDotVisitor<ValueType> visitor(out);
-        options.omdpManager->constructConcreteMdps();
-        visitor.visitRoot(*options.omdpManager->getRoot());
-        out.close();
-    }
+    //if (composeSettings.isExportStringDiagramSet()) {
+    //    std::ofstream out(composeSettings.getExportStringDiagramFilename());
+    //    storm::models::visitor::OpenMdpToDotVisitor<ValueType> visitor(out);
+    //    options.omdpManager->constructConcreteMdps();
+    //    visitor.visitRoot(*options.omdpManager->getRoot());
+    //    out.close();
+    //}
 
     if (composeSettings.isBenchmarkDataSet()) {
         options.benchmarkStatsPath = composeSettings.getBenchmarkDataFilename();
@@ -160,9 +159,11 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
             checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
-        case PROPERTY_DRIVEN:
-            STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
-            checker = std::make_unique<storm::modelchecker::PropertyDrivenOpenMdpChecker<ValueType>>(options.omdpManager, stats);
+        case COMPOSITIONAL_VI:
+            //STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
+            typename modelchecker::CompositionalValueIteration<ValueType>::Options modelcheckerOptions;
+            modelcheckerOptions.epsilon = composeSettings.getOVIEpsilon();
+            checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);
             break;
     }
 

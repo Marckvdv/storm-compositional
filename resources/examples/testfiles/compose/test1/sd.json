@@ -1,0 +1,21 @@
+{
+    "root": "root",
+    "components": {
+        "root": {
+            "type": "sequence",
+            "values": ["a", "b"]
+        },
+        "a": {
+            "type": "prism",
+            "path": "a.prism",
+            ">|": ["s=0", "s=1"],
+            "|>": ["s=2", "s=3", "s=4"]
+        },
+        "b": {
+            "type": "prism",
+            "path": "b.prism",
+            ">|": ["s=0", "s=1", "s=2"],
+            "|>": ["s=3", "s=4"]
+        }
+    }
+}

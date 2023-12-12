@@ -7,6 +7,10 @@
 
 namespace storm {
 namespace models {
+
+template<typename ValueType>
+class ConcreteMdp;
+
 namespace visitor {
 
 template<typename ValueType>

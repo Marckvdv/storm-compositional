@@ -10,7 +10,10 @@
 #include "storm/logic/Formula.h"
 #include "storm/modelchecker/multiobjective/multiObjectiveModelChecking.h"
 #include "storm/modelchecker/results/ExplicitParetoCurveCheckResult.h"
+#include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
 #include "storm/storage/jani/Property.h"
+#include "storm/modelchecker/multiobjective/pcaa/SparsePcaaParetoQuery.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 
 #include <memory>
 
@@ -20,8 +23,6 @@ namespace visitor {
 
 using storm::models::OpenMdp;
 using storm::models::sparse::Mdp;
-using storm::storage::SparseMatrix;
-using storm::storage::SparseMatrixBuilder;
 
 template<typename ValueType>
 std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getPositivityPolytope(size_t dimension) {
@@ -165,14 +166,6 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
                 STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 
-                // std::cout << "Upper verts before intersection: " << std::endl;
-                // for (auto &p : paretoResult.getOverApproximation()->getVertices()) {
-                //     for (auto& v : p) {
-                //         std::cout << v << ", ";
-                //     }
-                //     std::cout << std::endl;
-                // }
-
                 auto subdistributionPolytope = getSubdistributionPolytope<ValueType>(lowerResults.getPointDimension());
                 auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
                 auto lowerPoints = lowerPolytope->getVertices();
@@ -180,22 +173,12 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 auto upperPolytope = paretoResult.getOverApproximation()->intersection(subdistributionPolytope);
                 auto upperPoints = upperPolytope->getVertices();
 
-                // TODO double check below
                 removeDominatedPoints<ValueType>(lowerPoints);
-                removeDominatingPoints<ValueType>(upperPoints);
+                // TODO fix below
+                //removeDominatingPoints<ValueType>(upperPoints);
 
                 this->stats.paretoPoints += lowerPoints.size();
                 this->stats.paretoPoints += upperPoints.size();
-
-                // std::cout << "Lower verts after intersection: " << std::endl;
-                // for (auto &p : lowerPoints) {
-                //     for (auto& v : p) {
-                //         std::cout << v << ", ";
-                //     }
-                //     std::cout << std::endl;
-                // }
-                // const auto& lowerPoints = paretoResult.getUnderApproximation()->getVertices();
-                // const auto& upperPoints = paretoResult.getOverApproximation()->getVertices();
 
                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
                     const auto& point = lowerPoints[j];
@@ -304,11 +287,22 @@ void LowerUpperParetoVisitor<ValueType>::visitSumModel(SumModel<ValueType>& mode
     // The sum of two pareto curves is simply extending each point with zeroes
     // for the entries that do not belong to the child
 
-    typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
-    size_t lEntrances = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::L_ENTRANCE, emptyScope).size();
-    size_t rEntrances = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::R_ENTRANCE, emptyScope).size();
-    size_t lExits = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::L_EXIT, emptyScope).size();
-    size_t rExits = model.collectEntranceExit(storm::models::OpenMdp<ValueType>::R_EXIT, emptyScope).size();
+    models::visitor::EntranceExitVisitor<ValueType> entranceExitVisitor;
+    entranceExitVisitor.setEntranceExit(storage::L_ENTRANCE);
+    model.accept(entranceExitVisitor);
+    size_t lEntrances = entranceExitVisitor.getCollected().size();
+
+    entranceExitVisitor.setEntranceExit(storage::R_ENTRANCE);
+    model.accept(entranceExitVisitor);
+    size_t rEntrances = entranceExitVisitor.getCollected().size();
+
+    entranceExitVisitor.setEntranceExit(storage::L_EXIT);
+    model.accept(entranceExitVisitor);
+    size_t lExits = entranceExitVisitor.getCollected().size();
+
+    entranceExitVisitor.setEntranceExit(storage::R_EXIT);
+    model.accept(entranceExitVisitor);
+    size_t rExits = entranceExitVisitor.getCollected().size();
 
     std::vector<decltype(currentPareto)> paretoCurves;
     for (const auto& openMdp : model.getValues()) {
@@ -476,6 +470,17 @@ std::unordered_map<std::string, storm::expressions::Expression> LowerUpperPareto
         result[var.getName()] = var.getExpression();
     }
     return result;
+}
+
+template<typename ValueType>
+std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env, storm::models::sparse::Mdp<ValueType> const& mdp, storm::logic::MultiObjectiveFormula const& formula) {
+    typedef storm::models::sparse::Mdp<ValueType> SparseModelType;
+    auto preprocessorResult = modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor<storm::models::sparse::Mdp<ValueType>>::preprocess(env, mdp, formula);
+
+    auto query = std::unique_ptr<storm::modelchecker::multiobjective::SparsePcaaQuery<SparseModelType, storm::RationalNumber>>(
+        new storm::modelchecker::multiobjective::SparsePcaaParetoQuery<SparseModelType, storm::RationalNumber>(preprocessorResult));
+
+    return query->check(env);
 }
 
 template class LowerUpperParetoVisitor<double>;

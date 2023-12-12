@@ -31,6 +31,7 @@ class ComposeIOSettings : public ModuleSettings {
     bool isParetoPrecisionSet() const;
     bool isParetoPrecisionTypeSet() const;
     bool isParetoStepsSet() const;
+    bool isOVIEpsilonSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -41,6 +42,7 @@ class ComposeIOSettings : public ModuleSettings {
     double getParetoPrecision() const;
     std::string getParetoPrecisionType() const;
     size_t getParetoSteps() const;
+    double getOVIEpsilon() const;
 
     // The name of the module.
     static const std::string moduleName;
@@ -53,6 +55,7 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string paretoPrecisionName;
     static const std::string paretoPrecisionTypeName;
     static const std::string paretoStepsName;
+    static const std::string oviEpsilonName;
 };
 
 }  // namespace modules

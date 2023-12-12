@@ -8,6 +8,7 @@
 #include "storm-compose/models/SequenceModel.h"
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 
 namespace storm {
 namespace models {
@@ -20,7 +21,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
 
     virtual ~OpenMdpToDotVisitor() {}
 
-    std::string printScope(const typename OpenMdp<ValueType>::Scope& scope) {
+    std::string printScope(const models::visitor::Scope& scope) {
         std::stringstream result;
         result << "s";
         if (scope.scope.size() > 0) {
@@ -32,19 +33,19 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         return result.str();
     }
 
-    std::string printNode(const typename OpenMdp<ValueType>::Scope& scope, typename OpenMdp<ValueType>::EntranceExit entranceExit) {
+    std::string printNode(const models::visitor::Scope& scope, models::visitor::EntranceExit entranceExit) {
         std::stringstream result;
         switch (entranceExit) {
-            case OpenMdp<ValueType>::L_ENTRANCE:
+            case models::visitor::L_ENTRANCE:
                 result << "lEn";
                 break;
-            case OpenMdp<ValueType>::R_ENTRANCE:
+            case models::visitor::R_ENTRANCE:
                 result << "rEn";
                 break;
-            case OpenMdp<ValueType>::L_EXIT:
+            case models::visitor::L_EXIT:
                 result << "lEx";
                 break;
-            case OpenMdp<ValueType>::R_EXIT:
+            case models::visitor::R_EXIT:
                 result << "rEx";
                 break;
         }
@@ -52,8 +53,8 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         return result.str();
     }
 
-    std::string printTransition(const typename OpenMdp<ValueType>::Scope& fromScope, typename OpenMdp<ValueType>::EntranceExit fromEntranceExit,
-                                const typename OpenMdp<ValueType>::Scope& toScope, typename OpenMdp<ValueType>::EntranceExit toEntranceExit,
+    std::string printTransition(const models::visitor::Scope& fromScope, models::visitor::EntranceExit fromEntranceExit,
+                                const models::visitor::Scope& toScope, models::visitor::EntranceExit toEntranceExit,
                                 bool mirrorDir = false) {
         std::stringstream result;
         if (!mirrorDir) {
@@ -70,7 +71,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         return result.str();
     }
 
-    std::string printColor(const typename OpenMdp<ValueType>::Scope& scope) {
+    std::string printColor(const models::visitor::Scope& scope) {
         size_t depth = scope.scope.size();
         float brightness = 1.0 / (depth + 1);
         uint8_t red = (uint8_t)255.f * (brightness);
@@ -90,7 +91,6 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
 
     void visitRoot(OpenMdp<ValueType>& model) {
         out << "digraph {" << std::endl;
-        typename OpenMdp<ValueType>::Scope emptyScope{};
         model.accept(*this);
         out << "}" << std::endl;
     }
@@ -143,15 +143,15 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
         size_t i = 0;
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             scope.pushScope(i++);
             m->accept(*this);
             scope.popScope();
         }
 
-        for (size_t i = 0; i < model.values.size() - 1; ++i) {
-            const auto& lhs = model.values[i];
-            const auto& rhs = model.values[i + 1];
+        for (size_t i = 0; i < model.getValues().size() - 1; ++i) {
+            const auto& lhs = model.getValues()[i];
+            const auto& rhs = model.getValues()[i + 1];
 
             // rExit -> lEntrance
             scope.pushScope(i);
@@ -194,7 +194,7 @@ class OpenMdpToDotVisitor : public OpenMdpVisitor<ValueType> {
         out << "subgraph cluster_" << printScope(scope) << "{" << std::endl;
 
         size_t i = 0;
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             scope.pushScope(i++);
             m->accept(*this);
             scope.popScope();

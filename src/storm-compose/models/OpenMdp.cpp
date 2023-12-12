@@ -99,23 +99,6 @@ void OpenMdp<ValueType>::initializeParetoCurve() {
     paretoCurve = {{underApproximation, overApproximation}};
 }
 
-template<typename ValueType>
-typename OpenMdp<ValueType>::EntranceExit OpenMdp<ValueType>::match(EntranceExit entranceExit) {
-    switch (entranceExit) {
-        case OpenMdp<ValueType>::L_ENTRANCE:
-            return OpenMdp<ValueType>::R_EXIT;
-
-        case OpenMdp<ValueType>::R_ENTRANCE:
-            return OpenMdp<ValueType>::L_EXIT;
-
-        case OpenMdp<ValueType>::L_EXIT:
-            return OpenMdp<ValueType>::R_ENTRANCE;
-
-        case OpenMdp<ValueType>::R_EXIT:
-            return OpenMdp<ValueType>::L_ENTRANCE;
-    }
-}
-
 template class OpenMdp<double>;
 template class OpenMdp<storm::RationalNumber>;
 

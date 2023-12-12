@@ -14,6 +14,11 @@ class OpenMdpManager;
 template<typename ValueType>
 class ConcreteMdp;
 
+namespace visitor {
+template<typename ValueType>
+class OpenMdpVisitor;
+} // visitor
+
 template<typename ValueType>
 class PrismModel : public OpenMdp<ValueType> {
    public:
@@ -24,8 +29,6 @@ class PrismModel : public OpenMdp<ValueType> {
     bool isPrismModel() const override;
     std::string getPath() const;
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
-    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
-                                                                                       typename OpenMdp<ValueType>::Scope& scope) const override;
     ConcreteMdp<ValueType> toConcreteMdp();
     bool isRightward() const override;
 

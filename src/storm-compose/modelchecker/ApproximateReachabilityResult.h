@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utility/constants.h"
+
 namespace storm {
 namespace modelchecker {
 
@@ -39,7 +41,7 @@ class ApproximateReachabilityResult {
 
 template<typename ValueType>
 std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueType> const& result) {
-    os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
+    os << "<" << storm::utility::convertNumber<double>(result.lower) << ", " << storm::utility::convertNumber<double>(result.upper) << ">" << std::endl;
     return os;
 }
 

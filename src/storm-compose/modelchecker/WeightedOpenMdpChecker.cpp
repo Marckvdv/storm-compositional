@@ -1,6 +1,7 @@
 #include "WeightedOpenMdpChecker.h"
 
 #include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
+#include "storm-compose/models/visitor/EntranceExitVisitor.h"
 
 namespace storm {
 namespace modelchecker {
@@ -12,10 +13,11 @@ WeightedOpenMdpChecker<ValueType>::WeightedOpenMdpChecker(std::shared_ptr<storm:
 
 template<typename ValueType>
 ApproximateReachabilityResult<ValueType> WeightedOpenMdpChecker<ValueType>::check(OpenMdpReachabilityTask task) {
-    typename storm::models::OpenMdp<ValueType>::Scope emptyScope;
-
     this->manager->constructConcreteMdps();
-    auto exits = this->manager->getRoot()->collectEntranceExit(storm::models::OpenMdp<ValueType>::R_EXIT, emptyScope);
+
+    models::visitor::EntranceExitVisitor<ValueType> entranceExitVisitor(storage::R_EXIT);
+    this->manager->getRoot()->accept(entranceExitVisitor);
+    auto exits = entranceExitVisitor.getCollected();
 
     storm::models::visitor::PropertyDrivenVisitor<ValueType> propertyDrivenVisitor(this->manager);
     STORM_LOG_ASSERT(!task.isLeftExit(), "must be right exit");

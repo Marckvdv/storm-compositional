@@ -22,6 +22,7 @@ const std::string ComposeIOSettings::benchmarkDataName = "benchmarkData";
 const std::string ComposeIOSettings::paretoPrecisionName = "paretoPrecision";
 const std::string ComposeIOSettings::paretoPrecisionTypeName = "paretoPrecisionType";
 const std::string ComposeIOSettings::paretoStepsName = "paretoSteps";
+const std::string ComposeIOSettings::oviEpsilonName = "oviEpsilon";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     auto addStringOption = [&](std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
@@ -43,6 +44,11 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false,
                                                    "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, oviEpsilonName, false,
+                                                   "epsilon with which to perform optimistic (compositional) value iteration")
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
                         .build());
 
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
@@ -92,6 +98,10 @@ bool ComposeIOSettings::isParetoStepsSet() const {
     return this->getOption(paretoStepsName).getHasOptionBeenSet();
 }
 
+bool ComposeIOSettings::isOVIEpsilonSet() const {
+    return this->getOption(oviEpsilonName).getHasOptionBeenSet();
+}
+
 std::string ComposeIOSettings::getStringDiagramFilename() const {
     return this->getOption(stringDiagramOption).getArgumentByName("filename").getValueAsString();
 }
@@ -130,6 +140,14 @@ std::string ComposeIOSettings::getBenchmarkDataFilename() const {
 
 double ComposeIOSettings::getParetoPrecision() const {
     return this->getOption(paretoPrecisionName).getArgumentByName("precision").getValueAsDouble();
+}
+
+double ComposeIOSettings::getOVIEpsilon() const {
+    if (isOVIEpsilonSet()) {
+        return this->getOption(oviEpsilonName).getArgumentByName("epsilon").getValueAsDouble();
+    } else {
+        return 1e-4;
+    }
 }
 
 std::string ComposeIOSettings::getParetoPrecisionType() const {

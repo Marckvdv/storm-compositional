@@ -27,6 +27,11 @@ class Halfspace {
         // Intentionally left empty
     }
 
+    Halfspace(std::vector<ValueType> const& normalVector, std::vector<ValueType> const& offsetVector) : mNormalVector(normalVector), mOffset(storm::utility::vector::dotProduct(offsetVector, normalVector)) {
+        // Intentionally left empty
+        // TODO check
+    }
+
     /*
      * Returns true iff the given point is contained in this halfspace, i.e., normalVector*point <= offset holds.
      */

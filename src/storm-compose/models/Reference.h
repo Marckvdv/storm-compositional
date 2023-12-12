@@ -25,9 +25,6 @@ class Reference : public OpenMdp<ValueType> {
 
     std::string getReference() const;
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) override;
-    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
-                                                                                       typename OpenMdp<ValueType>::Scope& scope) const override;
-
     bool isRightward() const override;
 
    private:

@@ -31,16 +31,15 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> getMdp();
     const std::shared_ptr<storm::models::sparse::Mdp<ValueType>> getMdp() const;
 
-    std::vector<typename OpenMdp<ValueType>::ConcreteEntranceExit> collectEntranceExit(typename OpenMdp<ValueType>::EntranceExit entryExit,
-                                                                                       typename OpenMdp<ValueType>::Scope& scope) const override;
     void exportToDot(std::string path);
     bool isRightward() const override;
-    std::vector<ValueType> weightedReachability(std::vector<ValueType> const& weight);
 
     std::vector<size_t> const& getLEntrance() const;
     std::vector<size_t> const& getREntrance() const;
     std::vector<size_t> const& getLExit() const;
     std::vector<size_t> const& getRExit() const;
+    size_t getEntranceCount() const;
+    size_t getExitCount() const;
 
    private:
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;

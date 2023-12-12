@@ -54,7 +54,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         printIndentation(scope);
         out << "SEQUENCE(";
         size_t i = 0;
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             scope.pushScope(i++);
             m->accept(*this);
             scope.popScope();
@@ -66,7 +66,7 @@ class OpenMdpPrintVisitor : public OpenMdpVisitor<ValueType> {
         printIndentation(scope);
         out << "SUM(";
         size_t i = 0;
-        for (const auto& m : model.values) {
+        for (const auto& m : model.getValues()) {
             scope.pushScope(i++);
             m->accept(*this);
             scope.popScope();

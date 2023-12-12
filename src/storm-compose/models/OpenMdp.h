@@ -73,37 +73,8 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
     virtual bool isRightward() const = 0;
     virtual void initializeParetoCurve();
 
-    struct Scope {
-        std::vector<size_t> scope;
-
-        void pushScope(size_t s) {
-            scope.push_back(s);
-        }
-
-        size_t popScope() {
-            size_t r = scope.back();
-            scope.pop_back();
-            return r;
-        }
-
-        void appendScope(const Scope& other) {
-            scope.insert(std::end(scope), std::begin(other.scope), std::end(other.scope));
-        }
-    };
-
-    struct ConcreteEntranceExit {
-        ConcreteMdp<ValueType> const* mdp;
-        size_t state;
-        Scope scope;
-    };
-
-    enum EntranceExit { L_ENTRANCE, R_ENTRANCE, L_EXIT, R_EXIT };
-    static EntranceExit match(EntranceExit entranceExit);
-
     // visitor pattern for easier recursion of the OpenMdp structure
     virtual void accept(visitor::OpenMdpVisitor<ValueType>& visitor) = 0;
-    virtual std::vector<ConcreteEntranceExit> collectEntranceExit(EntranceExit entryExit, Scope& scope = {}) const = 0;
-
    protected:
     boost::optional<std::string> name;
     std::weak_ptr<OpenMdpManager<ValueType>> manager;

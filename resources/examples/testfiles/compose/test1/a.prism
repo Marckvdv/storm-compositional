@@ -1,0 +1,19 @@
+mdp
+
+module m
+    s : [0..5];
+
+    [a] initialState -> 0.4:(s'=2) + 0.6:(s'=5);
+    [b] initialState -> 0.4:(s'=3) + 0.6:(s'=5);
+    [c] initialState -> 0.4:(s'=4) + 0.6:(s'=5);
+
+    [d] initialState -> 0.3:(s'=2) + 0.4:(s'=3) + 0.3:(s'=4);
+
+    [] s=5 -> true;
+endmodule
+
+formula initialState = s=0|s=1;
+
+init
+    initialState
+endinit

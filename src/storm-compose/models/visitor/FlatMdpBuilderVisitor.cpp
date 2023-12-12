@@ -32,7 +32,7 @@ void FlatMdpBuilderVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueTyp
     // Obtain concrete MDPs
     size_t totalStateCount = 0;
     std::vector<ConcreteMdp<ValueType>> concreteMdps;
-    for (auto& m : model.values) {
+    for (auto& m : model.getValues()) {
         m->accept(*this);
         concreteMdps.push_back(current);  // TODO remove redundant copying
         totalStateCount += current.getMdp()->getNumberOfStates();
@@ -153,7 +153,7 @@ void FlatMdpBuilderVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model)
     // Obtain concrete MDPs
     std::vector<ConcreteMdp<ValueType>> concreteMdps;
     size_t totalStateCount = 0;
-    for (auto& m : model.values) {
+    for (auto& m : model.getValues()) {
         m->accept(*this);
         concreteMdps.push_back(current);  // TODO remove redundant copying
         totalStateCount += current.getMdp()->getNumberOfStates();
