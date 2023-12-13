@@ -199,51 +199,51 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
  * @return Return code, 0 if successfull, not 0 otherwise.
  */
 int main(const int argc, const char** argv) {
-    // try {
-    storm::utility::setUp();
-    storm::cli::printHeader("Storm-compose", argc, argv);
-    storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
+    try {
+        storm::utility::setUp();
+        storm::cli::printHeader("Storm-compose", argc, argv);
+        storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
 
-    bool optionsCorrect = storm::cli::parseOptions(argc, argv);
-    if (!optionsCorrect) {
+        bool optionsCorrect = storm::cli::parseOptions(argc, argv);
+        if (!optionsCorrect) {
+            return -1;
+        }
+        storm::utility::Stopwatch totalTimer(true);
+        storm::cli::setUrgentOptions();
+
+        // Invoke storm-compose with obtained settings
+        auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
+
+        if (generalSettings.isExactSet()) {
+            auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
+            if (!options) {
+                std::cout << "failed parsing options" << std::endl;
+                return 1;
+            }
+            performModelChecking(*options);
+        } else {
+            auto options = storm::compose::cli::processOptions<double>();
+            if (!options) {
+                std::cout << "failed parsing options" << std::endl;
+                return 1;
+            }
+            performModelChecking(*options);
+        }
+
+        totalTimer.stop();
+        if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
+            storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
+        }
+    } catch(std::bad_alloc e) {
+        std::cout << "Got an exception: " << e.what() << std::endl;
+        return 23;
+    } catch(std::exception e) {
+        std::cerr << "Got an exception " << e.what() << std::endl;
+        return -1;
+    } catch(...) {
+        std::cerr << "Got an unknown exception." << std::endl;
         return -1;
     }
-    storm::utility::Stopwatch totalTimer(true);
-    storm::cli::setUrgentOptions();
-
-    // Invoke storm-compose with obtained settings
-    auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
-
-    if (generalSettings.isExactSet()) {
-        auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
-        if (!options) {
-            std::cout << "failed parsing options" << std::endl;
-            return 1;
-        }
-        performModelChecking(*options);
-    } else {
-        auto options = storm::compose::cli::processOptions<double>();
-        if (!options) {
-            std::cout << "failed parsing options" << std::endl;
-            return 1;
-        }
-        performModelChecking(*options);
-    }
-
-    totalTimer.stop();
-    if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
-        storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
-    }
-    //} catch(std::bad_alloc e) {
-    //    std::cout << "Got an exception: " << e.what() << std::endl;
-    //    return 23;
-    //} catch(std::exception e) {
-    //    std::cerr << "Got an exception " << e.what() << std::endl;
-    //    return -1;
-    //} catch(...) {
-    //    std::cerr << "Got an unknown exception." << std::endl;
-    //    return -1;
-    //}
 
     // All operations have now been performed, so we clean up everything and terminate.
     storm::utility::cleanUp();

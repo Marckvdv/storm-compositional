@@ -3,6 +3,7 @@
 #include "ConcreteMdp.h"
 #include "OpenMdp.h"
 #include "OpenMdpManager.h"
+#include "storm-compose/models/visitor/OpenMdpVisitor.h"
 
 namespace storm {
 namespace models {
@@ -13,6 +14,11 @@ template<typename ValueType>
 class OpenMdpManager;
 template<typename ValueType>
 class ConcreteMdp;
+
+namespace visitor {
+template<typename ValueType>
+class OpenMdpVisitor;
+}
 
 template<typename ValueType>
 class PrismModel : public OpenMdp<ValueType> {

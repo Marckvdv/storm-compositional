@@ -1,11 +1,14 @@
 #include "MonolithicOpenMdpChecker.h"
 
+#include "solver/SolverSelectionOptions.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/environment/Environment.h"
 #include "storm/modelchecker/prctl/SparseMdpPrctlModelChecker.h"
 #include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
+#include "storm/solver/SolverSelectionOptions.h"
+#include "storm/environment/solver/MinMaxSolverEnvironment.h"
 
 namespace storm {
 namespace modelchecker {
@@ -52,6 +55,7 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     this->stats.reachabilityComputationTime.start();
     storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> checker(*mdp);
     storm::Environment env;
+    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
     auto sparseResult = checker.check(env, checkTask);
     this->stats.reachabilityComputationTime.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& explicitResult = sparseResult->template asExplicitQuantitativeCheckResult<ValueType>();
