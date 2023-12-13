@@ -55,12 +55,12 @@ template<typename ValueType>
 ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::check(OpenMdpReachabilityTask task) {
     initialize(task);
 
-    std::cout << "initial values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
-              << " )" << std::endl;
-    for (const auto& v : valueVector.getValues()) {
-        std::cout << " " << storm::utility::convertNumber<double>(v);
-    }
-    std::cout << std::endl;
+    //std::cout << "initial values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
+    //          << " )" << std::endl;
+    //for (const auto& v : valueVector.getValues()) {
+    //    std::cout << " " << storm::utility::convertNumber<double>(v);
+    //}
+    //std::cout << std::endl;
 
     auto noCache = std::make_shared<storage::NoCache<ValueType>>();
     auto root = this->manager->getRoot();
@@ -68,12 +68,12 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         models::visitor::CVIVisitor<ValueType> cviVisitor(this->manager, valueVector, cache);
         root->accept(cviVisitor);
 
-        std::cout << "current values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
-                  << " )" << std::endl;
-        for (const auto& v : valueVector.getValues()) {
-            std::cout << " " << storm::utility::convertNumber<double>(v);
-        }
-        std::cout << std::endl;
+        //std::cout << "current values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
+        //          << " )" << std::endl;
+        //for (const auto& v : valueVector.getValues()) {
+        //    std::cout << " " << storm::utility::convertNumber<double>(v);
+        //}
+        //std::cout << std::endl;
 
         // Compute v + epsilon
         auto newValue = valueVector;
@@ -112,7 +112,7 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
     models::visitor::MappingVisitor<ValueType> mappingVisitor;
     root->accept(mappingVisitor);
     auto mapping = mappingVisitor.getMapping();
-    mapping.print();
+    //mapping.print();
 
     models::visitor::PropertyDrivenVisitor visitor(this->manager);
 

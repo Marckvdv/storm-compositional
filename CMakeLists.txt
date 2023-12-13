@@ -82,6 +82,7 @@ option(STORM_COMPILE_WITH_ADDRESS_SANITIZER "Sets whether to compile with Addres
 option(STORM_COMPILE_WITH_ALL_SANITIZERS "Sets whether to compile with all sanitizers enabled" OFF)
 option(STORM_COMPILE_WITH_COMPILATION_PROFILING "Compile with output to profile compilation process" OFF)
 MARK_AS_ADVANCED(STORM_COMPILE_WITH_COMPILATION_PROFILING)
+option(STORM_COMPILE_WITH_DEBUG_SYMBOLS "Sets whether to build with debug symbols." OFF)
 
 
 if (STORM_COMPILE_WITH_ALL_SANITIZERS)
@@ -279,6 +280,10 @@ endif()
 #############################################################
 if (STORM_FORCE_POPCNT)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mpopcnt")
+endif()
+
+if (STORM_COMPILE_WITH_DEBUG_SYMBOLS)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif()
 
 #############################################################
