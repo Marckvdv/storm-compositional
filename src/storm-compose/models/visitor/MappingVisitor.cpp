@@ -237,7 +237,8 @@ void MappingVisitor<ValueType>::performPostProcessing() {
         size_t leafId = entry.first;
         const auto& tuple = entry.second;
 
-        std::cout << leafId << " -> <" << std::get<0>(tuple) << ", " << std::get<1>(tuple) << ", " << std::get<2>(tuple) << ", " << std::get<3>(tuple) << ">" << std::endl;
+        std::cout << leafId << " -> <" << std::get<0>(tuple) << ", " << std::get<1>(tuple) << ", " << std::get<2>(tuple) << ", " << std::get<3>(tuple) << ">"
+                  << std::endl;
     }
 
     decltype(outerPositions) newOuterPositions;
@@ -268,8 +269,8 @@ void MappingVisitor<ValueType>::performPostProcessing() {
         }
         size_t newIndex = pos.second - offset;
         std::cout << "NI: " << newIndex << std::endl;
-        storage::Position newPosition {pos.first, newIndex};
-        Key newKey {leafId, newPosition};
+        storage::Position newPosition{pos.first, newIndex};
+        Key newKey{leafId, newPosition};
 
         newLocalMapping[newKey] = entry.second;
 
