@@ -14,11 +14,11 @@
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/environment/Environment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
+#include "storm/exceptions/NotSupportedException.h"
 #include "storm/modelchecker/multiobjective/pcaa/StandardMdpPcaaWeightVectorChecker.h"
 #include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
 #include "storm/models/sparse/StandardRewardModel.h"
 #include "storm/utility/constants.h"
-#include "storm/exceptions/NotSupportedException.h"
 #include "utility/vector.h"
 
 namespace storm {
@@ -75,7 +75,7 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
         } else {
             stats.reachabilityComputationTime.start();
             auto newResult = weightedReachability2(weights, model, cache->needScheduler(), env);
-            //auto newResult = weightedReachability(weights, model, cache->needScheduler(), env);
+            // auto newResult = weightedReachability(weights, model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
             auto weight = newResult.first;
             auto scheduler = newResult.second;
@@ -219,21 +219,22 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
     std::map<size_t, ValueType> stateToWeightMap;
     storm::storage::BitVector exitStates(transitionMatrix.getRowGroupCount());
     for (const auto& state : concreteMdp.getLExit()) {
-        //std::cout << "state: " << state << " -> " << weights[weightIndex] << std::endl;
+        // std::cout << "state: " << state << " -> " << weights[weightIndex] << std::endl;
         stateToWeightMap[state] = weights[weightIndex];
         exitStates.set(state);
 
         ++weightIndex;
     }
     for (const auto& state : concreteMdp.getRExit()) {
-        //std::cout << "state: " << state << " -> " << weights[weightIndex] << std::endl;
+        // std::cout << "state: " << state << " -> " << weights[weightIndex] << std::endl;
         stateToWeightMap[state] = weights[weightIndex];
         exitStates.set(state);
 
         ++weightIndex;
     }
 
-    storm::storage::SparseMatrixBuilder<ValueType> rewardMatrixBuilder(transitionMatrix.getRowCount(), transitionMatrix.getColumnCount(), 0, true, true, transitionMatrix.getRowGroupCount());
+    storm::storage::SparseMatrixBuilder<ValueType> rewardMatrixBuilder(transitionMatrix.getRowCount(), transitionMatrix.getColumnCount(), 0, true, true,
+                                                                       transitionMatrix.getRowGroupCount());
 
     for (size_t rowGroup = 0; rowGroup < transitionMatrix.getRowGroupCount(); ++rowGroup) {
         size_t rowGroupStartIndex = transitionMatrix.getRowGroupIndices()[rowGroup];
@@ -255,7 +256,7 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
     }
 
     auto rewardMatrix = rewardMatrixBuilder.build();
-   // std::cout << "Reward Matrix: " << std::endl << rewardMatrix << std::endl;
+    // std::cout << "Reward Matrix: " << std::endl << rewardMatrix << std::endl;
     storm::models::sparse::StandardRewardModel<ValueType> rewardModel(std::nullopt, std::nullopt, rewardMatrix);
     STORM_LOG_ASSERT(transitionMatrix.isProbabilistic(), "not probabilistic");
 

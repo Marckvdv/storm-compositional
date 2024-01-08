@@ -56,10 +56,9 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
         storm::settings::OptionBuilder(moduleName, oviEpsilonName, false, "epsilon with which to perform optimistic (compositional) value iteration")
             .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
             .build());
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, paretoCacheEpsilonName, false, "error tolerance for using the cache")
-            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
-            .build());
+    this->addOption(storm::settings::OptionBuilder(moduleName, paretoCacheEpsilonName, false, "error tolerance for using the cache")
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
+                        .build());
 
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
                         .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())

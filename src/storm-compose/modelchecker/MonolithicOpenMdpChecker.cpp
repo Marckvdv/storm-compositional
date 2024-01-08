@@ -5,10 +5,10 @@
 #include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
+#include "storm/io/DirectEncodingExporter.h"
 #include "storm/modelchecker/prctl/SparseMdpPrctlModelChecker.h"
 #include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
 #include "storm/solver/SolverSelectionOptions.h"
-#include "storm/io/DirectEncodingExporter.h"
 
 namespace storm {
 namespace modelchecker {
@@ -39,7 +39,8 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
 }
 
 template<typename ValueType>
-ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::checkConcreteMdp(storm::models::ConcreteMdp<ValueType> const& concreteMdp, OpenMdpReachabilityTask task) {
+ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::checkConcreteMdp(storm::models::ConcreteMdp<ValueType> const& concreteMdp,
+                                                                                               OpenMdpReachabilityTask task) {
     auto mdp = concreteMdp.getMdp();
 
     if (true) {
@@ -60,7 +61,7 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
 
     size_t entranceState = *labeling.getStates(task.getEntranceLabel()).begin();
     labeling.addLabelToState("init", entranceState);
-    //std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;
+    // std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;
 
     CheckTask<storm::logic::Formula, ValueType> checkTask(*formula, false);
 
@@ -70,14 +71,14 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     ValueType precision = 1e-4;
     storm::Environment env;
     env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
-    //env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
+    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
     env.solver().minMax().setPrecision(precision);
 
     auto sparseResult = checker.check(env, checkTask);
     this->stats.reachabilityComputationTime.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& explicitResult = sparseResult->template asExplicitQuantitativeCheckResult<ValueType>();
     ValueType& lowerBound = explicitResult[entranceState];
-    ValueType upperBound = storm::utility::min<ValueType>(lowerBound+precision, storm::utility::one<ValueType>());
+    ValueType upperBound = storm::utility::min<ValueType>(lowerBound + precision, storm::utility::one<ValueType>());
 
     return ApproximateReachabilityResult<ValueType>(lowerBound, upperBound);
 }

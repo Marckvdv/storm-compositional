@@ -62,7 +62,7 @@ class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env,
                                                                                          storm::models::sparse::Mdp<ValueType> const& mdp,
                                                                                          storm::logic::MultiObjectiveFormula const& formula);
-    //static std::pair<ConcreteMdp<ValueType>, ConcreteMdp<ValueType>> toShortcutMdp(const ConcreteMdp<ValueType>& model, storm::Environment const& env);
+    // static std::pair<ConcreteMdp<ValueType>, ConcreteMdp<ValueType>> toShortcutMdp(const ConcreteMdp<ValueType>& model, storm::Environment const& env);
 
    private:
     static std::unordered_map<std::string, storm::expressions::Expression> getIdentifierMapping(storm::expressions::ExpressionManager const& manager);

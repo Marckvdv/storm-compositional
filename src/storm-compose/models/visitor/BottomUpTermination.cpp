@@ -31,7 +31,6 @@ void BottomUpTermination<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& 
 template<typename ValueType>
 storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTermination<ValueType>::getReachabilityResult(
     storm::modelchecker::OpenMdpReachabilityTask task, storm::models::OpenMdp<ValueType>& openMdp) {
-
     LeafTransformer<ValueType> lowerBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *lowerBounds[&concreteMdp]; });
     LeafTransformer<ValueType> upperBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *upperBounds[&concreteMdp]; });
     openMdp.accept(lowerBoundTransform);
@@ -40,7 +39,7 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
     auto lowerBoundShortcutMdp = lowerBoundTransform.getResult();
     auto upperBoundShortcutMdp = upperBoundTransform.getResult();
 
-    storm::compose::benchmark::BenchmarkStats<ValueType> stats; // TODO
+    storm::compose::benchmark::BenchmarkStats<ValueType> stats;  // TODO
 
     storm::modelchecker::MonolithicOpenMdpChecker<ValueType> lowerChecker(lowerBoundTransform.getManager(), stats);
     storm::modelchecker::MonolithicOpenMdpChecker<ValueType> upperChecker(upperBoundTransform.getManager(), stats);

@@ -17,13 +17,13 @@ class HeuristicCVIVisitor : public OpenMdpVisitor<ValueType> {
 
    public:
     HeuristicCVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, ValueVector<ValueType>& valueVector,
-               std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats);
+                        std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats);
     virtual ~HeuristicCVIVisitor();
 
    private:
     boost::optional<WeightType> queryCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
     void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
-                                boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none);
+                    boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none);
 
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;

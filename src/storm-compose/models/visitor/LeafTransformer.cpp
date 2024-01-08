@@ -57,7 +57,6 @@ void LeafTransformer<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
 
 template<typename ValueType>
 std::shared_ptr<OpenMdp<ValueType>> LeafTransformer<ValueType>::getResult() {
-
     return result;
 }
 

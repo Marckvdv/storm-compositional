@@ -1,12 +1,12 @@
 #include "CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/modelchecker/CompositionalValueVector.h"
+#include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
 #include "storm-compose/models/visitor/OuterEntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoInitializerVisitor.h"
-#include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/storage/EntranceExit.h"
 #include "storm-compose/storage/ExactCache.h"
 #include "storm-compose/storage/NoCache.h"
@@ -26,8 +26,8 @@ CompositionalValueIteration<ValueType>::CompositionalValueIteration(std::shared_
 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeParetoCurves() {
-    //models::visitor::ParetoInitializerVisitor<ValueType> visitor;
-    //this->manager->getRoot()->accept(visitor);
+    // models::visitor::ParetoInitializerVisitor<ValueType> visitor;
+    // this->manager->getRoot()->accept(visitor);
 }
 
 /*
@@ -68,10 +68,10 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "Size of value: " << valueVector.getValues().size() << std::endl;
         std::cout << "current value:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
                   << " )" << std::endl;
-        //for (const auto& v : valueVector.getValues()) {
-        //    std::cout << storm::utility::convertNumber<double>(v) << ", ";
-        //}
-        //std::cout << std::endl;
+        // for (const auto& v : valueVector.getValues()) {
+        //     std::cout << storm::utility::convertNumber<double>(v) << ", ";
+        // }
+        // std::cout << std::endl;
 
         if (options.useOvi) {
             // Compute v + epsilon
@@ -87,7 +87,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                 // optimistic value iteration stopping criterion
                 oviStop = true;
 
-                lowerBound = valueVector.getValues()[0]; // TODO FIXME don't hardcode this 0
+                lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
                 upperBound = utility::min<ValueType>(*lowerBound + options.epsilon, utility::one<ValueType>());
 
                 break;
@@ -96,7 +96,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
         if (options.useBottomUp) {
             // Cache is guaranteed to be a Pareto cache at this point.
-            storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&> (*cache);
+            storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
             models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
             root->accept(bottomUpVisitor);
             auto result = bottomUpVisitor.getReachabilityResult(task, *root);
@@ -123,13 +123,12 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "Bottom-up stopping criterion hit" << std::endl;
     }
 
-
     if (lowerBound && upperBound) {
         return ApproximateReachabilityResult<ValueType>(*lowerBound, *upperBound);
     } else if (lowerBound) {
         return ApproximateReachabilityResult<ValueType>(*lowerBound);
     } else {
-        lowerBound = valueVector.getValues()[0]; // TODO FIXME don't hardcode this 0
+        lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
         return ApproximateReachabilityResult<ValueType>(*lowerBound);
     }
 }
@@ -171,7 +170,8 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeCache() {
     // Bottom-up apprach requires Pareto cache
-    STORM_LOG_THROW(!(options.useBottomUp && options.cacheMethod != PARETO_CACHE), storm::exceptions::NotSupportedException, "Bottom-up termination requires Pareto cache");
+    STORM_LOG_THROW(!(options.useBottomUp && options.cacheMethod != PARETO_CACHE), storm::exceptions::NotSupportedException,
+                    "Bottom-up termination requires Pareto cache");
 
     if (options.cacheMethod == NO_CACHE) {
         cache = std::make_shared<storm::storage::NoCache<ValueType>>();

@@ -20,7 +20,7 @@ class ValueVector {
     ValueType getWeight(size_t leafId, storage::Position position);
     void setWeight(size_t leafId, storage::Position position, ValueType value);
     void initializeValues();
-    void addConstant(ValueType epsilon, bool clamp=true);
+    void addConstant(ValueType epsilon, bool clamp = true);
     std::vector<ValueType>& getValues();
     bool dominates(ValueVector<ValueType> const& other);
     ValueVectorMapping<ValueType>& getMapping();

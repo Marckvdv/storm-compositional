@@ -8,8 +8,7 @@ namespace visitor {
 
 template<typename ValueType>
 ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight)
-    : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {
-}
+    : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {}
 
 template<typename ValueType>
 ValueType ValueVector<ValueType>::getWeight(size_t leafId, storage::Position position) {

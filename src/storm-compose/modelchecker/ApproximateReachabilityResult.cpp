@@ -1,7 +1,7 @@
 #include "ApproximateReachabilityResult.h"
 
-#include "storm/utility/macros.h"
 #include "storm/adapters/RationalNumberAdapter.h"
+#include "storm/utility/macros.h"
 
 namespace storm {
 namespace modelchecker {
@@ -43,7 +43,8 @@ bool ApproximateReachabilityResult<ValueType>::isExact() const {
 }
 
 template<typename ValueType>
-ApproximateReachabilityResult<ValueType> ApproximateReachabilityResult<ValueType>::combineLowerUpper(ApproximateReachabilityResult<ValueType> const& lower, ApproximateReachabilityResult<ValueType> const& upper) {
+ApproximateReachabilityResult<ValueType> ApproximateReachabilityResult<ValueType>::combineLowerUpper(ApproximateReachabilityResult<ValueType> const& lower,
+                                                                                                     ApproximateReachabilityResult<ValueType> const& upper) {
     return ApproximateReachabilityResult<ValueType>(lower.lower, upper.upper);
 }
 

@@ -62,7 +62,7 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
     Options options;
     models::visitor::ValueVector<ValueType> valueVector;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
-    //std::shared_ptr<storm::storage::ParetoCache<ValueType>> cache;
+    // std::shared_ptr<storm::storage::ParetoCache<ValueType>> cache;
     storm::Environment env;
 };
 

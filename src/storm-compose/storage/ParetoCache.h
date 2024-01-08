@@ -3,9 +3,9 @@
 #include "AbstractCache.h"
 #include "EntranceExit.h"
 #include "storm-compose/models/ConcreteMdp.h"
+#include "storm-compose/models/OpenMdpManager.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
 #include "storm/storage/geometry/Polytope.h"
-#include "storm-compose/models/OpenMdpManager.h"
 
 namespace storm {
 namespace storage {
@@ -25,8 +25,10 @@ class ParetoCache : public AbstractCache<ValueType> {
                     boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none) override;
     bool needScheduler() override;
 
-    std::shared_ptr<storm::models::ConcreteMdp<ValueType>> toLowerBoundShortcutMdp(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::models::ConcreteMdp<ValueType>* model);
-    std::shared_ptr<storm::models::ConcreteMdp<ValueType>> toUpperBoundShortcutMdp(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::models::ConcreteMdp<ValueType>* model);
+    std::shared_ptr<storm::models::ConcreteMdp<ValueType>> toLowerBoundShortcutMdp(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                                                                   storm::models::ConcreteMdp<ValueType>* model);
+    std::shared_ptr<storm::models::ConcreteMdp<ValueType>> toUpperBoundShortcutMdp(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
+                                                                                   storm::models::ConcreteMdp<ValueType>* model);
 
    private:
     void initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr);

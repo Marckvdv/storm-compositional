@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utility/constants.h"
 #include <iostream>
+#include "utility/constants.h"
 
 namespace storm {
 namespace modelchecker {
@@ -18,7 +18,8 @@ class ApproximateReachabilityResult {
     ValueType getError() const;
     bool isExact(ValueType epsilon) const;
     bool isExact() const;
-    static ApproximateReachabilityResult<ValueType> combineLowerUpper(ApproximateReachabilityResult<ValueType> const& lower, ApproximateReachabilityResult<ValueType> const& upper);
+    static ApproximateReachabilityResult<ValueType> combineLowerUpper(ApproximateReachabilityResult<ValueType> const& lower,
+                                                                      ApproximateReachabilityResult<ValueType> const& upper);
 
    private:
     template<typename T>
@@ -30,11 +31,11 @@ class ApproximateReachabilityResult {
 
 template<typename ValueType>
 std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueType> const& result) {
-    //if (result.soundUpperBound) {
-    //    os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
-    //} else {
-    //    os << "<" << result.lower << ", ?>" << std::endl;
-    //}
+    // if (result.soundUpperBound) {
+    //     os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
+    // } else {
+    //     os << "<" << result.lower << ", ?>" << std::endl;
+    // }
 
     if (result.soundUpperBound) {
         os << "<" << storm::utility::convertNumber<double>(result.lower) << ", " << storm::utility::convertNumber<double>(result.upper) << ">" << std::endl;

@@ -455,82 +455,82 @@ std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChec
     return query->check(env);
 }
 
-//template<typename ValueType>
-//ConcreteMdp<ValueType> LowerUpperParetoVisitor<ValueType>::toShortcutMdp(const ConcreteMdp<ValueType>& model, storm::Environment const& env) {
-//    std::string formulaString = getFormula(model);
-//    storm::parser::FormulaParser formulaParser;
-//    auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
+// template<typename ValueType>
+// ConcreteMdp<ValueType> LowerUpperParetoVisitor<ValueType>::toShortcutMdp(const ConcreteMdp<ValueType>& model, storm::Environment const& env) {
+//     std::string formulaString = getFormula(model);
+//     storm::parser::FormulaParser formulaParser;
+//     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
 //
-//    BidirectionalReachabilityResult<ValueType> lowerResults(model), upperResults(model);
+//     BidirectionalReachabilityResult<ValueType> lowerResults(model), upperResults(model);
 //
-//    auto& stateLabeling = model.getMdp()->getStateLabeling();
-//    if (!stateLabeling.containsLabel("init")) {
-//        stateLabeling.addLabel("init");
-//    } else {
-//        stateLabeling.setStates("init", storm::storage::BitVector(model.getMdp()->getNumberOfStates()));
-//    }
+//     auto& stateLabeling = model.getMdp()->getStateLabeling();
+//     if (!stateLabeling.containsLabel("init")) {
+//         stateLabeling.addLabel("init");
+//     } else {
+//         stateLabeling.setStates("init", storm::storage::BitVector(model.getMdp()->getNumberOfStates()));
+//     }
 //
-//    auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
-//        size_t entranceNumber = 0;
-//        for (auto const& entrance : entrances) {
-//            stateLabeling.addLabelToState("init", entrance);
+//     auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
+//         size_t entranceNumber = 0;
+//         for (auto const& entrance : entrances) {
+//             stateLabeling.addLabelToState("init", entrance);
 //
-//            //stats.reachabilityComputationTime.start();
-//            std::unique_ptr<storm::modelchecker::CheckResult> result =
-//                storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(env, *model.getMdp(), formula->asMultiObjectiveFormula());
-//            //stats.reachabilityComputationTime.stop();
-//            stateLabeling.removeLabelFromState("init", entrance);
+//             //stats.reachabilityComputationTime.start();
+//             std::unique_ptr<storm::modelchecker::CheckResult> result =
+//                 storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(env, *model.getMdp(), formula->asMultiObjectiveFormula());
+//             //stats.reachabilityComputationTime.stop();
+//             stateLabeling.removeLabelFromState("init", entrance);
 //
-//            if (result->isExplicitParetoCurveCheckResult()) {
-//                auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
+//             if (result->isExplicitParetoCurveCheckResult()) {
+//                 auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
 //
-//                STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
-//                STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
+//                 STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
+//                 STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 //
-//                auto subdistributionPolytope = storm::storage::geometry::Polytope<ValueType>::getSubdistributionPolytope(lowerResults.getPointDimension());
-//                auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
-//                auto lowerPoints = lowerPolytope->getVertices();
+//                 auto subdistributionPolytope = storm::storage::geometry::Polytope<ValueType>::getSubdistributionPolytope(lowerResults.getPointDimension());
+//                 auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
+//                 auto lowerPoints = lowerPolytope->getVertices();
 //
-//                auto upperPolytope = paretoResult.getOverApproximation()->intersection(subdistributionPolytope);
-//                auto upperPoints = upperPolytope->getVertices();
+//                 auto upperPolytope = paretoResult.getOverApproximation()->intersection(subdistributionPolytope);
+//                 auto upperPoints = upperPolytope->getVertices();
 //
-//                removeDominatedPoints<ValueType>(lowerPoints);
-//                // TODO fix below
-//                // removeDominatingPoints<ValueType>(upperPoints);
+//                 removeDominatedPoints<ValueType>(lowerPoints);
+//                 // TODO fix below
+//                 // removeDominatingPoints<ValueType>(upperPoints);
 //
-//                //this->stats.paretoPoints += lowerPoints.size();
-//                //this->stats.paretoPoints += upperPoints.size();
+//                 //this->stats.paretoPoints += lowerPoints.size();
+//                 //this->stats.paretoPoints += upperPoints.size();
 //
-//                for (size_t j = 0; j < lowerPoints.size(); ++j) {
-//                    const auto& point = lowerPoints[j];
-//                    lowerResults.addPoint(entranceNumber, leftEntrance, point);
-//                }
+//                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
+//                     const auto& point = lowerPoints[j];
+//                     lowerResults.addPoint(entranceNumber, leftEntrance, point);
+//                 }
 //
-//                for (size_t j = 0; j < upperPoints.size(); ++j) {
-//                    const auto& point = upperPoints[j];
-//                    upperResults.addPoint(entranceNumber, leftEntrance, point);
-//                }
-//            } else {
-//                STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException,
-//                                "result was not pareto nor quantitative");
-//                STORM_LOG_THROW(model.getLExit().size() + model.getRExit().size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1 exit");
-//                auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
+//                 for (size_t j = 0; j < upperPoints.size(); ++j) {
+//                     const auto& point = upperPoints[j];
+//                     upperResults.addPoint(entranceNumber, leftEntrance, point);
+//                 }
+//             } else {
+//                 STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException,
+//                                 "result was not pareto nor quantitative");
+//                 STORM_LOG_THROW(model.getLExit().size() + model.getRExit().size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1
+//                 exit"); auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
 //
-//                // TODO double check below
-//                std::vector<ValueType> point{quantitativeResult[entrance]};
-//                lowerResults.addPoint(entranceNumber, leftEntrance, point);
-//                upperResults.addPoint(entranceNumber, leftEntrance, point);
-//            }
+//                 // TODO double check below
+//                 std::vector<ValueType> point{quantitativeResult[entrance]};
+//                 lowerResults.addPoint(entranceNumber, leftEntrance, point);
+//                 upperResults.addPoint(entranceNumber, leftEntrance, point);
+//             }
 //
-//            entranceNumber++;
-//        }
-//    };
+//             entranceNumber++;
+//         }
+//     };
 //
-//    checkEntrances(model.getLEntrance(), true);
-//    checkEntrances(model.getREntrance(), false);
+//     checkEntrances(model.getLEntrance(), true);
+//     checkEntrances(model.getREntrance(), false);
 //
-//    // TODO
-//}
+//     // TODO
+// }
 
 template class LowerUpperParetoVisitor<double>;
 template class LowerUpperParetoVisitor<storm::RationalNumber>;

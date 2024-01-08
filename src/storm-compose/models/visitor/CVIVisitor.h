@@ -31,13 +31,13 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
                                                                                                              ConcreteMdp<ValueType> concreteMdp,
                                                                                                              bool returnScheduler, storm::Environment env);
     static std::pair<WeightType, boost::optional<storm::storage::Scheduler<ValueType>>> weightedReachability2(WeightType weights,
-                                                                                                             ConcreteMdp<ValueType> concreteMdp,
-                                                                                                             bool returnScheduler, storm::Environment env);
+                                                                                                              ConcreteMdp<ValueType> concreteMdp,
+                                                                                                              bool returnScheduler, storm::Environment env);
 
    private:
     boost::optional<WeightType> queryCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
     void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
-                                boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none);
+                    boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none);
 
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;

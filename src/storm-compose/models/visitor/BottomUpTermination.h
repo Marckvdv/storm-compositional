@@ -1,12 +1,12 @@
 #pragma once
 
+#include "storm-compose/benchmark/BenchmarkStats.h"
+#include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/models/OpenMdp.h"
-#include "storm/environment/Environment.h"
-#include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
-#include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
 #include "storm-compose/storage/ParetoCache.h"
+#include "storm/environment/Environment.h"
 
 namespace storm {
 namespace models {
