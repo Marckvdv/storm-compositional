@@ -8,7 +8,8 @@ namespace visitor {
 
 template<typename ValueType>
 ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight)
-    : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {}
+    : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {
+}
 
 template<typename ValueType>
 ValueType ValueVector<ValueType>::getWeight(size_t leafId, storage::Position position) {
@@ -44,9 +45,15 @@ std::vector<ValueType>& ValueVector<ValueType>::getValues() {
 }
 
 template<typename ValueType>
-void ValueVector<ValueType>::addConstant(ValueType epsilon) {
-    for (auto& v : values) {
-        v += epsilon;
+void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
+    if (clamp) {
+        for (auto& v : values) {
+            v = storm::utility::min<ValueType>(v + epsilon, storm::utility::one<ValueType>());
+        }
+    } else {
+        for (auto& v : values) {
+            v += epsilon;
+        }
     }
 }
 
@@ -58,6 +65,40 @@ bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) {
         }
     }
     return true;
+}
+
+template<typename ValueType>
+ValueVectorMapping<ValueType>& ValueVector<ValueType>::getMapping() {
+    return mapping;
+}
+
+template<typename ValueType>
+std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
+    std::vector<ValueType> weights;
+    ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
+
+    /*
+    for (size_t i = 0; i < model->getLExit().size(); ++i) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, currentLeftExitPosition};
+        ValueType weight = valueVector.getWeight(currentLeafId, pos);
+        if (weight != 0)
+            allZero = false;
+        weights.push_back(weight);
+
+        ++currentLeftExitPosition;
+    }
+    for (size_t i = 0; i < model.getRExit().size(); ++i) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, currentRightExitPosition};
+        ValueType weight = valueVector.getWeight(currentLeafId, pos);
+        if (weight != 0)
+            allZero = false;
+        weights.push_back(weight);
+
+        ++currentRightExitPosition;
+    }
+    */
+
+    return weights;
 }
 
 template class ValueVector<double>;

@@ -18,6 +18,9 @@ struct BenchmarkStats {
     ValueType lowerBound = storm::utility::zero<ValueType>(), upperBound = storm::utility::one<ValueType>();
     storm::RationalNumber leafSchedulerCount = storm::utility::zero<storm::RationalNumber>();
 
+    size_t weightedReachabilityQueries = 0, cacheHits = 0;
+    storm::utility::Stopwatch cacheRetrievalTime, cacheInsertionTime;
+
     constexpr static double NANOSECONDS_TO_SECONDS = 1e-9;
 
     storm::json<ValueType> toJson() {
@@ -49,6 +52,11 @@ struct BenchmarkStats {
         } else {
             result["leafSchedulerCount"] = storm::utility::to_string(leafSchedulerCount);
         }
+
+        result["weightedReachabilityQueries"] = weightedReachabilityQueries;
+        result["cacheHits"] = cacheHits;
+        result["cacheRetrievalTime"] = cacheRetrievalTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+        result["cacheInsertionTime"] = cacheInsertionTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
 
         return result;
     }

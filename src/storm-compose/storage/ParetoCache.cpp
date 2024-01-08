@@ -9,33 +9,37 @@
 #include "storm/modelchecker/prctl/helper/SparseDtmcPrctlHelper.h"
 #include "storm/solver/SolveGoal.h"
 #include "storm/utility/constants.h"
+#include "storm/utility/vector.h"
+#include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
 
 namespace storm {
 namespace storage {
 
 template<typename ValueType>
-boost::optional<std::vector<ValueType>> ParetoCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight) {
+boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) {
     if (!isInitialized(ptr)) {
         initializeParetoCurve(ptr);
     }
 
-    std::vector<ValueType> lowerBound(ptr->getEntranceCount());
+    ParetoPointType convertedOutputWeight = storm::utility::vector::convertNumericVector<ParetoRational>(outputWeight);
+    WeightType lowerBound(ptr->getEntranceCount());
 
     size_t weightIndex = 0;
     auto processEntrances = [&](const auto& entrances, storage::EntranceExit entrance) {
         for (size_t i = 0; i < entrances.size(); ++i) {
             Position pos = {entrance, i};
-            auto paretoEntry = getLowerUpper(ptr, outputWeight, pos);
-            if (!paretoEntry)
-                return false;
+            auto paretoEntry = getLowerUpper(ptr, convertedOutputWeight, pos);
 
-            const auto& lb = paretoEntry->first;
-            const auto& ub = paretoEntry->second;
+            const auto& lb = paretoEntry.first;
+            const auto& ub = paretoEntry.second;
 
-            ValueType error = getError(lb, ub);
-            if (error > this->errorTolerance)
+            ParetoRational error = getError(lb, ub);
+            //std::cout << "Error: " << storm::utility::convertNumber<double>(error) << std::endl;
+            if (error > this->errorTolerance) {
+                //std::cout << "Computing exactly" << std::endl;
                 return false;
-            lowerBound[weightIndex] = innerProduct(lb, outputWeight);
+            }
+            lowerBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(lb, convertedOutputWeight));
 
             ++weightIndex;
         }
@@ -43,12 +47,12 @@ boost::optional<std::vector<ValueType>> ParetoCache<ValueType>::getLowerBound(mo
     };
 
     bool result1 = processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
-    if (!result1)
-        return boost::none;
+    if (!result1) return boost::none;
 
     bool result2 = processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
-    if (!result2)
-        return boost::none;
+    if (!result2) return boost::none;
+
+    std::cout << "Cache hit" << std::endl;
 
     return lowerBound;
 }
@@ -57,6 +61,11 @@ template<typename ValueType>
 void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight, std::vector<ValueType> inputWeight,
                                         boost::optional<storm::storage::Scheduler<ValueType>> sched) {
     STORM_LOG_THROW(sched, storm::exceptions::InvalidArgumentException, "need scheduler present");
+    ParetoPointType convertedOutputWeight = storm::utility::vector::convertNumericVector<ParetoRational>(outputWeight);
+    ParetoPointType normalizedOutputWeight = ParetoPointType(convertedOutputWeight);
+    storm::utility::vector::normalizeInPlace(normalizedOutputWeight);
+
+    std::cout << "Adding something to the cache of concrete mdp " << ptr->getName() << std::endl;
 
     if (!isInitialized(ptr)) {
         initializeParetoCurve(ptr);
@@ -64,16 +73,16 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
 
     size_t stateCount = ptr->getMdp()->getTransitionMatrix().getRowGroupCount();
     storage::BitVector phi(stateCount, true);
-    storm::Environment env;
 
+    storm::Environment env; // TODO optimistic?
     // Store point for each entrance
-    std::vector<std::vector<ValueType>> points(ptr->getEntranceCount());
+    std::vector<ParetoPointType> points(ptr->getEntranceCount());
 
     // Compute induced Markov chain
     auto mc = ptr->getMdp()->applyScheduler(*sched, false);
 
     // For each exit, compute the reachability probabilty for each entrance
-    size_t weightIndex = 0;
+    //size_t weightIndex = 0;
     auto processExits = [&](const auto& exits) {
         for (size_t exitState : exits) {
             storage::BitVector psi(stateCount);
@@ -93,7 +102,7 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
                 ++entranceIndex;
             }
 
-            ++weightIndex;
+            //++weightIndex;
         }
     };
     processExits(ptr->getLExit());
@@ -109,28 +118,36 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
         Position pos{entranceExit, realEntranceIndex};
 
         std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
-
-        updateLowerUpperBounds(key, p, outputWeight);
+        updateLowerUpperBounds(key, p, normalizedOutputWeight);
 
         ++entranceIndex;
     }
 }
 
 template<typename ValueType>
-void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMdp<ValueType>*, Position> key, std::vector<ValueType> point,
-                                                    std::vector<ValueType> weight) {
+void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMdp<ValueType>*, Position> key, ParetoPointType point, ParetoPointType weight) {
+    //std::cout << "Adding the following point to the cache: <";
+    //for (const auto&v : point) {
+    //    std::cout << storm::utility::convertNumber<double>(v) << ", ";
+    //}
+    //std::cout << ">" << std::endl;
+    //std::cout << "with weight: <";
+    //for (const auto&v : weight) {
+    //    std::cout << storm::utility::convertNumber<double>(v) << ", ";
+    //}
+    //std::cout << ">" << std::endl;
+
     auto& lb = lowerBounds[key];
     auto& ub = upperBounds[key];
 
-    auto newPointPolytope = storage::geometry::Polytope<ValueType>::create({point});
-    storage::geometry::Halfspace<ValueType> newHalfspace(weight, point);
+    storage::geometry::Halfspace<ParetoRational> newHalfspace(weight, point);
 
-    lb = lb->convexUnion(newPointPolytope);
+    lb.push_back(point);
     ub = ub->intersection(newHalfspace);
 }
 
 template<typename ValueType>
-bool ParetoCache<ValueType>::isInitialized(models::ConcreteMdp<ValueType>* ptr) {
+bool ParetoCache<ValueType>::isInitialized(models::ConcreteMdp<ValueType>* ptr) const {
     Position leftPos{L_ENTRANCE, 0};
     const auto it1 = lowerBounds.find({ptr, leftPos});
     if (it1 != lowerBounds.end()) {
@@ -148,22 +165,29 @@ bool ParetoCache<ValueType>::isInitialized(models::ConcreteMdp<ValueType>* ptr) 
 
 template<typename ValueType>
 void ParetoCache<ValueType>::initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr) {
-    // TODO FIXME
-    for (size_t i = 0; i < ptr->getLEntrance().size(); ++i) {
-        Position pos{L_ENTRANCE, i};
-        std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
+    std::cout << "Initializing model " << ptr->getName() << std::endl;
+    // Initially, we know nothing about the MDP, so for every exit, the
+    // reachability probability is atleast 0 and at most 1.
+    //
+    // This means that the lower bound is the polytope that only contains the
+    // origin, while the upper bound contains the whole probabilistic simplex.
+    size_t dimension = ptr->getExitCount();
+    std::cout << "initializing with dimension: " << dimension << std::endl;
+    auto initializeEntrances = [&](const auto& entrances, storm::storage::EntranceExit entranceExit) {
+        for (size_t i = 0; i < entrances.size(); ++i) {
+            Position pos{entranceExit, i};
+            std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
 
-        lowerBounds[key] = geometry::Polytope<ValueType>::createEmptyPolytope();
-        upperBounds[key] = geometry::Polytope<ValueType>::createUniversalPolytope();
-    }
+            ParetoPointType zero(dimension, storm::utility::zero<storm::RationalNumber>());
+            auto subDistributionPolytope = geometry::Polytope<ParetoRational>::getSubdistributionPolytope(dimension);
 
-    for (size_t i = 0; i < ptr->getREntrance().size(); ++i) {
-        Position pos{R_ENTRANCE, i};
-        std::pair<models::ConcreteMdp<ValueType>*, Position> key{ptr, pos};
+            lowerBounds[key] = {zero};
+            upperBounds[key] = subDistributionPolytope;
+        }
+    };
 
-        lowerBounds[key] = geometry::Polytope<ValueType>::createEmptyPolytope();
-        upperBounds[key] = geometry::Polytope<ValueType>::createUniversalPolytope();
-    }
+    initializeEntrances(ptr->getLEntrance(), L_ENTRANCE);
+    initializeEntrances(ptr->getREntrance(), R_ENTRANCE);
 }
 
 template<typename ValueType>
@@ -172,52 +196,116 @@ bool ParetoCache<ValueType>::needScheduler() {
 }
 
 template<typename ValueType>
-boost::optional<std::pair<std::vector<ValueType>, std::vector<ValueType>>> ParetoCache<ValueType>::getLowerUpper(models::ConcreteMdp<ValueType>* ptr,
-                                                                                                                 WeightType outputWeight, Position pos) {
+std::pair<typename ParetoCache<ValueType>::ParetoPointType, typename ParetoCache<ValueType>::ParetoPointType> ParetoCache<ValueType>::getLowerUpper(
+    models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos) {
+
     std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
 
-    auto lowerBoundPolytope = lowerBounds[key];
-    auto upperBoundPolytope = upperBounds[key];
+    auto lowerBoundPoints = lowerBounds.at(key);
+    auto upperBoundPolytope = upperBounds.at(key);
 
-    size_t dim = outputWeight.size();
-    std::vector<ValueType> negativeWeight(dim);
-    for (size_t i = 0; i < dim; ++i) {
-        negativeWeight[i] = -outputWeight[i];
+    ParetoRational lbValue = storm::utility::zero<ValueType>();
+    ParetoPointType lb;
+    // Compute lb = argmax_p [p*w]
+    for (const auto& p : lowerBoundPoints) {
+        ParetoRational weightedSum = storm::utility::vector::dotProduct(p, outputWeight);
+        if (weightedSum >= lbValue) {
+            lb = p;
+        }
     }
+    auto ub = upperBoundPolytope->optimize(outputWeight);
 
-    auto lb = lowerBoundPolytope->optimize(outputWeight);
-    auto ub = upperBoundPolytope->optimize(negativeWeight);
+    STORM_LOG_ASSERT(ub.second, "optimizing in the upper bound should always be defined");
 
-    if (!ub.second || !lb.second)
-        return boost::none;
-
-    return std::make_pair(lb.first, ub.first);
+    return std::make_pair(lb, ub.first);
 }
 
 template<typename ValueType>
-ValueType ParetoCache<ValueType>::innerProduct(WeightType a, WeightType b) {
-    STORM_LOG_ASSERT(a.size() == b.size(), "vectors must have the same size");
+typename ParetoCache<ValueType>::ParetoRational ParetoCache<ValueType>::getError(ParetoPointType lower, ParetoPointType upper) const {
+    STORM_LOG_ASSERT(lower.size() == upper.size(), "size mismatch " << lower.size() << " vs " << upper.size());
 
-    ValueType result = storm::utility::zero<ValueType>();
-    for (size_t i = 0; i < a.size(); ++i) {
-        result += a[i] * b[i];
-    }
-    return result;
-}
-
-template<typename ValueType>
-ValueType ParetoCache<ValueType>::getError(WeightType lower, WeightType upper) {
-    STORM_LOG_ASSERT(lower.size() == upper.size(), "size mismatch");
-
-    ValueType maxError = -storm::utility::infinity<ValueType>();
+    ParetoRational maxError = -storm::utility::infinity<ParetoRational>();
     for (size_t i = 0; i < upper.size(); ++i) {
-        ValueType error = upper[i] - lower[i];
+        ParetoRational error = upper[i] - lower[i];
         if (error > maxError) {
             maxError = error;
         }
     }
 
     return maxError;
+}
+
+template<typename ValueType>
+std::shared_ptr<storm::models::ConcreteMdp<ValueType>> ParetoCache<ValueType>::toLowerBoundShortcutMdp(
+    std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::models::ConcreteMdp<ValueType>* model) {
+    auto reachabilityResult = getLowerBoundReachabilityResult(model);
+    return reachabilityResult.toConcreteMdp(manager);
+}
+
+template<typename ValueType>
+std::shared_ptr<storm::models::ConcreteMdp<ValueType>> ParetoCache<ValueType>::toUpperBoundShortcutMdp(
+    std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::models::ConcreteMdp<ValueType>* model) {
+    auto reachabilityResult = getUpperBoundReachabilityResult(model);
+    return reachabilityResult.toConcreteMdp(manager);
+}
+
+template<typename ValueType>
+storm::models::visitor::BidirectionalReachabilityResult<ValueType> ParetoCache<ValueType>::getLowerBoundReachabilityResult(
+    storm::models::ConcreteMdp<ValueType>* model) {
+    if (!isInitialized(model)) {
+        initializeParetoCurve(model);
+    }
+
+    storm::models::visitor::BidirectionalReachabilityResult<ValueType> reachabilityResult(*model);
+
+    auto processEntrances = [&](const auto& entrances, bool leftEntrance) {
+        EntranceExit entranceExit = leftEntrance ? L_ENTRANCE : R_ENTRANCE;
+
+        for (size_t entrance = 0; entrance < entrances.size(); ++entrance) {
+            Position pos{entranceExit, entrance};
+            const auto lb = lowerBounds.at({model, pos});
+
+            for (const auto& point : lb) {
+                auto convertedPoint = storm::utility::vector::convertNumericVector<ValueType>(point);
+                reachabilityResult.addPoint(entrance, leftEntrance, convertedPoint);
+            }
+        }
+    };
+
+    processEntrances(model->getLEntrance(), true);
+    processEntrances(model->getREntrance(), false);
+
+    return reachabilityResult;
+}
+
+template<typename ValueType>
+storm::models::visitor::BidirectionalReachabilityResult<ValueType> ParetoCache<ValueType>::getUpperBoundReachabilityResult(
+    storm::models::ConcreteMdp<ValueType>* model) {
+    if (!isInitialized(model)) {
+        initializeParetoCurve(model);
+    }
+
+    storm::models::visitor::BidirectionalReachabilityResult<ValueType> reachabilityResult(*model);
+
+    auto processEntrances = [&](const auto& entrances, bool leftEntrance) {
+        EntranceExit entranceExit = leftEntrance ? L_ENTRANCE : R_ENTRANCE;
+
+        for (size_t entrance = 0; entrance < entrances.size(); ++entrance) {
+            Position pos{entranceExit, entrance};
+            auto ub = upperBounds.at({model, pos});
+            auto ubVertices = ub->getVertices();
+
+            for (const auto& point : ubVertices) {
+                auto convertedPoint = storm::utility::vector::convertNumericVector<ValueType>(point);
+                reachabilityResult.addPoint(entrance, leftEntrance, convertedPoint);
+            }
+        }
+    };
+
+    processEntrances(model->getLEntrance(), true);
+    processEntrances(model->getREntrance(), false);
+
+    return reachabilityResult;
 }
 
 template class ParetoCache<storm::RationalNumber>;

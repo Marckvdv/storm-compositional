@@ -36,6 +36,34 @@ std::shared_ptr<Polytope<ValueType>> Polytope<ValueType>::createEmptyPolytope() 
 }
 
 template<typename ValueType>
+std::shared_ptr<Polytope<ValueType>> Polytope<ValueType>::getPositivityPolytope(size_t dimension) {
+    std::vector<Halfspace<ValueType>> halfSpaces;
+    for (size_t i = 0; i < dimension; ++i) {
+        std::vector<ValueType> normal(dimension, 0);
+        normal[i] = -1;
+        halfSpaces.push_back(Halfspace<ValueType>(normal, 0));
+    }
+
+    return create(halfSpaces);
+}
+
+template<typename ValueType>
+std::shared_ptr<Polytope<ValueType>> Polytope<ValueType>::getSubdistributionPolytope(size_t dimension) {
+    std::vector<Halfspace<ValueType>> halfSpaces;
+    // each value must be greater or equal to zero
+    for (size_t i = 0; i < dimension; ++i) {
+        std::vector<ValueType> normal(dimension, 0);
+        normal[i] = -1;
+        halfSpaces.push_back(Halfspace<ValueType>(normal, 0));
+    }
+    // the sum cannot be more than 1
+    std::vector<ValueType> normal(dimension, 1);
+    halfSpaces.push_back(Halfspace<ValueType>(normal, 1));
+
+    return create(halfSpaces);
+}
+
+template<typename ValueType>
 std::shared_ptr<Polytope<ValueType>> Polytope<ValueType>::create(boost::optional<std::vector<Halfspace<ValueType>>> const& halfspaces,
                                                                  boost::optional<std::vector<Point>> const& points) {
 #ifdef STORM_HAVE_HYPRO

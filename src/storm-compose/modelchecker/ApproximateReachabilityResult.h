@@ -9,29 +9,16 @@ namespace modelchecker {
 template<typename ValueType>
 class ApproximateReachabilityResult {
    public:
-    ApproximateReachabilityResult() : lower(0), upper(0) {}
+    ApproximateReachabilityResult();
+    ApproximateReachabilityResult(ValueType lower, ValueType upper);
+    ApproximateReachabilityResult(ValueType exactValue);
 
-    ApproximateReachabilityResult(ValueType lower, ValueType upper) : lower(lower), upper(upper), soundUpperBound(true) {
-        STORM_LOG_ASSERT(lower <= upper, "Lower bound was higher than the upper bound");
-    }
-
-    ApproximateReachabilityResult(ValueType exactValue) : lower(exactValue), upper(exactValue), soundUpperBound(false) {}
-
-    ValueType getLowerBound() {
-        return lower;
-    }
-
-    ValueType getUpperBound() {
-        return upper;
-    }
-
-    bool isExact(ValueType epsilon) {
-        return (upper - lower) < epsilon;
-    }
-
-    bool isExact() {
-        return lower == upper;
-    }
+    ValueType getLowerBound() const;
+    ValueType getUpperBound() const;
+    ValueType getError() const;
+    bool isExact(ValueType epsilon) const;
+    bool isExact() const;
+    static ApproximateReachabilityResult<ValueType> combineLowerUpper(ApproximateReachabilityResult<ValueType> const& lower, ApproximateReachabilityResult<ValueType> const& upper);
 
    private:
     template<typename T>
@@ -43,6 +30,12 @@ class ApproximateReachabilityResult {
 
 template<typename ValueType>
 std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueType> const& result) {
+    //if (result.soundUpperBound) {
+    //    os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
+    //} else {
+    //    os << "<" << result.lower << ", ?>" << std::endl;
+    //}
+
     if (result.soundUpperBound) {
         os << "<" << storm::utility::convertNumber<double>(result.lower) << ", " << storm::utility::convertNumber<double>(result.upper) << ">" << std::endl;
     } else {

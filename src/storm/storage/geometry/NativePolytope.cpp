@@ -238,7 +238,9 @@ std::shared_ptr<Polytope<ValueType>> NativePolytope<ValueType>::convexUnion(std:
         return std::make_shared<NativePolytope<ValueType>>(std::vector<Halfspace<ValueType>>());
     }
 
-    STORM_LOG_WARN_COND_DEBUG(false, "Implementation of convex union of two polytopes only works if the polytopes are bounded. This is not checked.");
+    static bool FIRST_LOG = true;
+    STORM_LOG_WARN_COND_DEBUG(!FIRST_LOG, "Implementation of convex union of two polytopes only works if the polytopes are bounded. This is not checked.");
+    FIRST_LOG = false;
 
     std::vector<EigenVector> rhsVertices = dynamic_cast<NativePolytope<ValueType> const&>(*rhs).getEigenVertices();
     std::vector<EigenVector> resultVertices = this->getEigenVertices();

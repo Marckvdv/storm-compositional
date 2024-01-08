@@ -9,7 +9,21 @@ namespace visitor {
 template<typename ValueType>
 ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<ConcreteMdp<ValueType>*> leaves, std::map<Key, size_t> mapping, std::set<Key> outerPositions,
                                                   size_t highestIndex)
-    : leaves(leaves), mapping(mapping), outerPositions(outerPositions), highestIndex(highestIndex) {}
+    : leaves(leaves), leafMapping(), mapping(mapping), modelMapping(leaves.size()), outerPositions(outerPositions), highestIndex(highestIndex) {
+    for (size_t i = 0; i < leaves.size(); ++i) {
+        leafMapping[leaves[i]] = i;
+    }
+
+    for (const auto& entry : mapping) {
+        const auto& key = entry.first;
+        const auto& value = entry.second;
+
+        size_t leafId = key.first;
+        storage::Position pos = key.second;
+
+        modelMapping[leafId][pos] = value;
+    }
+}
 
 template<typename ValueType>
 void ValueVectorMapping<ValueType>::print() const {
@@ -42,6 +56,16 @@ size_t ValueVectorMapping<ValueType>::getLeafCount() const {
 template<typename ValueType>
 std::set<std::pair<size_t, storage::Position>> const& ValueVectorMapping<ValueType>::getOuterPositions() const {
     return outerPositions;
+}
+
+template<typename ValueType>
+std::vector<ConcreteMdp<ValueType>*>& ValueVectorMapping<ValueType>::getLeaves() {
+    return leaves;
+}
+
+template<typename ValueType>
+size_t ValueVectorMapping<ValueType>::getLeafId(ConcreteMdp<ValueType>* model) {
+    return leafMapping[model];
 }
 
 template<typename ValueType>

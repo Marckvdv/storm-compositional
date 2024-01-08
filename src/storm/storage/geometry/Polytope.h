@@ -42,6 +42,10 @@ class Polytope {
      */
     static std::shared_ptr<Polytope<ValueType>> createEmptyPolytope();
 
+    static std::shared_ptr<Polytope<ValueType>> getPositivityPolytope(size_t dimension);
+
+    static std::shared_ptr<Polytope<ValueType>> getSubdistributionPolytope(size_t dimension);
+
     /*!
      * Creates the downward closure of the given points (i.e., the set { x | ex. y \in conv(points) : x<=y }
      * If the vector of points is empty, the resulting polytope is empty.

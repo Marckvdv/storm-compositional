@@ -25,34 +25,6 @@ using storm::models::OpenMdp;
 using storm::models::sparse::Mdp;
 
 template<typename ValueType>
-std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getPositivityPolytope(size_t dimension) {
-    std::vector<storm::storage::geometry::Halfspace<ValueType>> halfSpaces;
-    for (size_t i = 0; i < dimension; ++i) {
-        std::vector<ValueType> normal(dimension, 0);
-        normal[i] = -1;
-        halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 0));
-    }
-
-    return storm::storage::geometry::Polytope<ValueType>::create(halfSpaces);
-}
-
-template<typename ValueType>
-std::shared_ptr<storm::storage::geometry::Polytope<ValueType>> getSubdistributionPolytope(size_t dimension) {
-    std::vector<storm::storage::geometry::Halfspace<ValueType>> halfSpaces;
-    // each value must be greater or equal to zero
-    for (size_t i = 0; i < dimension; ++i) {
-        std::vector<ValueType> normal(dimension, 0);
-        normal[i] = -1;
-        halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 0));
-    }
-    // the sum cannot be more than 1
-    std::vector<ValueType> normal(dimension, 1);
-    halfSpaces.push_back(storm::storage::geometry::Halfspace<ValueType>(normal, 1));
-
-    return storm::storage::geometry::Polytope<ValueType>::create(halfSpaces);
-}
-
-template<typename ValueType>
 bool isDominating(std::vector<ValueType>& a, std::vector<ValueType>& b) {
     for (size_t i = 0; i < a.size(); ++i) {
         if (a[i] < b[i])
@@ -138,9 +110,7 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
     storm::parser::FormulaParser formulaParser;
     auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
 
-    BidirectionalReachabilityResult<ValueType> lowerResults(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(),
-                                                            model.getRExit().size()),
-        upperResults(model.getLEntrance().size(), model.getREntrance().size(), model.getLExit().size(), model.getRExit().size());
+    BidirectionalReachabilityResult<ValueType> lowerResults(model), upperResults(model);
 
     auto& stateLabeling = model.getMdp()->getStateLabeling();
     if (!stateLabeling.containsLabel("init")) {
@@ -166,7 +136,7 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
                 STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
 
-                auto subdistributionPolytope = getSubdistributionPolytope<ValueType>(lowerResults.getPointDimension());
+                auto subdistributionPolytope = storm::storage::geometry::Polytope<ValueType>::getSubdistributionPolytope(lowerResults.getPointDimension());
                 auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
                 auto lowerPoints = lowerPolytope->getVertices();
 
@@ -484,6 +454,83 @@ std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChec
 
     return query->check(env);
 }
+
+//template<typename ValueType>
+//ConcreteMdp<ValueType> LowerUpperParetoVisitor<ValueType>::toShortcutMdp(const ConcreteMdp<ValueType>& model, storm::Environment const& env) {
+//    std::string formulaString = getFormula(model);
+//    storm::parser::FormulaParser formulaParser;
+//    auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
+//
+//    BidirectionalReachabilityResult<ValueType> lowerResults(model), upperResults(model);
+//
+//    auto& stateLabeling = model.getMdp()->getStateLabeling();
+//    if (!stateLabeling.containsLabel("init")) {
+//        stateLabeling.addLabel("init");
+//    } else {
+//        stateLabeling.setStates("init", storm::storage::BitVector(model.getMdp()->getNumberOfStates()));
+//    }
+//
+//    auto checkEntrances = [&](const auto& entrances, bool leftEntrance) {
+//        size_t entranceNumber = 0;
+//        for (auto const& entrance : entrances) {
+//            stateLabeling.addLabelToState("init", entrance);
+//
+//            //stats.reachabilityComputationTime.start();
+//            std::unique_ptr<storm::modelchecker::CheckResult> result =
+//                storm::modelchecker::multiobjective::performMultiObjectiveModelChecking(env, *model.getMdp(), formula->asMultiObjectiveFormula());
+//            //stats.reachabilityComputationTime.stop();
+//            stateLabeling.removeLabelFromState("init", entrance);
+//
+//            if (result->isExplicitParetoCurveCheckResult()) {
+//                auto paretoResult = result->template asExplicitParetoCurveCheckResult<ValueType>();
+//
+//                STORM_LOG_THROW(paretoResult.hasUnderApproximation(), storm::exceptions::InvalidOperationException, "expected under approximation");
+//                STORM_LOG_THROW(paretoResult.hasOverApproximation(), storm::exceptions::InvalidOperationException, "expected over approximation");
+//
+//                auto subdistributionPolytope = storm::storage::geometry::Polytope<ValueType>::getSubdistributionPolytope(lowerResults.getPointDimension());
+//                auto lowerPolytope = paretoResult.getUnderApproximation()->intersection(subdistributionPolytope);
+//                auto lowerPoints = lowerPolytope->getVertices();
+//
+//                auto upperPolytope = paretoResult.getOverApproximation()->intersection(subdistributionPolytope);
+//                auto upperPoints = upperPolytope->getVertices();
+//
+//                removeDominatedPoints<ValueType>(lowerPoints);
+//                // TODO fix below
+//                // removeDominatingPoints<ValueType>(upperPoints);
+//
+//                //this->stats.paretoPoints += lowerPoints.size();
+//                //this->stats.paretoPoints += upperPoints.size();
+//
+//                for (size_t j = 0; j < lowerPoints.size(); ++j) {
+//                    const auto& point = lowerPoints[j];
+//                    lowerResults.addPoint(entranceNumber, leftEntrance, point);
+//                }
+//
+//                for (size_t j = 0; j < upperPoints.size(); ++j) {
+//                    const auto& point = upperPoints[j];
+//                    upperResults.addPoint(entranceNumber, leftEntrance, point);
+//                }
+//            } else {
+//                STORM_LOG_THROW(result->isExplicitQuantitativeCheckResult(), storm::exceptions::InvalidOperationException,
+//                                "result was not pareto nor quantitative");
+//                STORM_LOG_THROW(model.getLExit().size() + model.getRExit().size() == 1, storm::exceptions::InvalidOperationException, "Expected only 1 exit");
+//                auto quantitativeResult = result->template asExplicitQuantitativeCheckResult<ValueType>();
+//
+//                // TODO double check below
+//                std::vector<ValueType> point{quantitativeResult[entrance]};
+//                lowerResults.addPoint(entranceNumber, leftEntrance, point);
+//                upperResults.addPoint(entranceNumber, leftEntrance, point);
+//            }
+//
+//            entranceNumber++;
+//        }
+//    };
+//
+//    checkEntrances(model.getLEntrance(), true);
+//    checkEntrances(model.getREntrance(), false);
+//
+//    // TODO
+//}
 
 template class LowerUpperParetoVisitor<double>;
 template class LowerUpperParetoVisitor<storm::RationalNumber>;

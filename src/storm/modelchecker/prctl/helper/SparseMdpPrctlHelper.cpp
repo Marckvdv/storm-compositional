@@ -847,8 +847,6 @@ MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType
             return computeReachabilityRewards(env, std::move(goal), transitionMatrix, backwardTransitions, rewardModel, rew0AStates, qualitative,
                                               produceScheduler, hint);
         } else {
-            // The transformation of schedulers for the ec-eliminated system back to the original one is not implemented.
-            STORM_LOG_ERROR_COND(!produceScheduler, "Can not produce scheduler for this property (functionality not implemented");
             storm::storage::BitVector choicesWithoutReward = rewardModel.getChoicesWithZeroReward(transitionMatrix);
             auto ecElimResult = storm::transformer::EndComponentEliminator<ValueType>::transform(
                 transitionMatrix, storm::storage::BitVector(transitionMatrix.getRowGroupCount(), true), choicesWithoutReward, rew0AStates, true);
@@ -880,7 +878,7 @@ MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType
                     STORM_LOG_ASSERT(result.size() == rowCount, "Unexpected size of reward vector.");
                     return result;
                 },
-                newRew0AStates, qualitative, false,
+                newRew0AStates, qualitative, produceScheduler,
                 [&]() {
                     storm::storage::BitVector newStatesWithoutReward(ecElimResult.matrix.getRowGroupCount(), false);
                     for (auto oldStateWithoutRew : statesWithoutReward) {
@@ -897,6 +895,27 @@ MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType
                     }
                     return newChoicesWithoutReward;
                 });
+
+            if (produceScheduler) {
+                STORM_LOG_ASSERT(result.scheduler, "Requested scheduler was not given");
+
+                // Produce scheduler for original model
+                size_t oldStateCount = transitionMatrix.getRowGroupCount();
+                auto newScheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(oldStateCount);
+
+                // Copy actions that are present in both the eliminated model and the original
+                for (size_t oldState = 0; oldState < oldStateCount; ++oldState) {
+                    uint_fast64_t newIndex = ecElimResult.oldToNewStateMapping[oldState];
+                    if (newIndex != std::numeric_limits<uint_fast64_t>::max()) {
+                        auto choice = result.scheduler->getChoice(newIndex);
+                        newScheduler->setChoice(choice, oldState);
+                    } else {
+                        // State was part of a reward=0 EC, play the first action
+                        newScheduler->setChoice(storm::storage::SchedulerChoice<ValueType>(0), oldState);
+                    }
+                }
+                result.scheduler = std::move(newScheduler);
+            }
 
             std::vector<ValueType> resultInEcQuotient = std::move(result.values);
             result.values.resize(ecElimResult.oldToNewStateMapping.size());

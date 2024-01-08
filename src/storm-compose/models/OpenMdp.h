@@ -52,8 +52,8 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
     virtual ~OpenMdp() = 0;
     OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager);
 
-    bool hasName();
-    std::string getName();
+    bool hasName() const;
+    std::string getName() const;
     void setName(std::string const& name);
 
     /// Follow references until a non-reference type is found

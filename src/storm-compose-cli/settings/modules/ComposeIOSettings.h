@@ -1,5 +1,6 @@
 #pragma once
 
+#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-config.h"
 #include "storm/settings/modules/ModuleSettings.h"
 
@@ -32,6 +33,10 @@ class ComposeIOSettings : public ModuleSettings {
     bool isParetoPrecisionTypeSet() const;
     bool isParetoStepsSet() const;
     bool isOVIEpsilonSet() const;
+    bool isCacheMethodSet() const;
+    bool isParetoCacheEpsilonSet() const;
+    bool useOvi() const;
+    bool useBottomUp() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -43,6 +48,8 @@ class ComposeIOSettings : public ModuleSettings {
     std::string getParetoPrecisionType() const;
     size_t getParetoSteps() const;
     double getOVIEpsilon() const;
+    storm::modelchecker::CacheMethod getCacheMethod() const;
+    double getParetoCacheEpsilon() const;
 
     // The name of the module.
     static const std::string moduleName;
@@ -56,6 +63,10 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string paretoPrecisionTypeName;
     static const std::string paretoStepsName;
     static const std::string oviEpsilonName;
+    static const std::string cacheMethodName;
+    static const std::string useOviName;
+    static const std::string useBottomUpName;
+    static const std::string paretoCacheEpsilonName;
 };
 
 }  // namespace modules

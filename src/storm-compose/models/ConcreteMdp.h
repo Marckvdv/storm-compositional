@@ -40,6 +40,10 @@ class ConcreteMdp : public OpenMdp<ValueType> {
     std::vector<size_t> const& getRExit() const;
     size_t getEntranceCount() const;
     size_t getExitCount() const;
+    size_t getLEntranceCount() const;
+    size_t getREntranceCount() const;
+    size_t getLExitCount() const;
+    size_t getRExitCount() const;
 
    private:
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;

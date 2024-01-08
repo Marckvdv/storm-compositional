@@ -20,6 +20,7 @@ class BidirectionalReachabilityResult {
 
     BidirectionalReachabilityResult() = default;
     BidirectionalReachabilityResult(size_t lEntrances, size_t rEntrances, size_t lExits, size_t rExits);
+    BidirectionalReachabilityResult(ConcreteMdp<ValueType> const& mdp);
     void addPoint(size_t entrance, bool leftEntrance, point paretoOptimalPoint);
     const std::vector<point>& getPoints(size_t entrance, bool leftEntrance) const;
     std::shared_ptr<ConcreteMdp<ValueType>> toConcreteMdp(std::shared_ptr<OpenMdpManager<ValueType>> manager);

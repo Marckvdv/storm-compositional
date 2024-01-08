@@ -1,11 +1,14 @@
 #include "MonolithicOpenMdpChecker.h"
 
+#include "io/DirectEncodingExporter.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"
-#include "storm/environment/Environment.h"
+#include "storm/environment/solver/MinMaxSolverEnvironment.h"
 #include "storm/modelchecker/prctl/SparseMdpPrctlModelChecker.h"
 #include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
+#include "storm/solver/SolverSelectionOptions.h"
+#include "storm/io/DirectEncodingExporter.h"
 
 namespace storm {
 namespace modelchecker {
@@ -25,13 +28,25 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     this->stats.modelBuildingTime.stop();
 
     auto concreteMdp = flatVisitor.getCurrent();
+
+    auto& stateLabeling = concreteMdp.getMdp()->getStateLabeling();
+    auto len0States = stateLabeling.getStates("len0");
+    stateLabeling.setStates("init", len0States);
+
+    STORM_LOG_WARN("Currently assuming len0 is the initial state");
+
+    return checkConcreteMdp(concreteMdp, task);
+}
+
+template<typename ValueType>
+ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::checkConcreteMdp(storm::models::ConcreteMdp<ValueType> const& concreteMdp, OpenMdpReachabilityTask task) {
     auto mdp = concreteMdp.getMdp();
 
-    // bool exportToDot = true;
-    // if (exportToDot) {
-    //     std::ofstream out("test.dot");
-    //     mdp->writeDotToStream(out);
-    // }
+    if (true) {
+        std::ofstream f("out.drn");
+        storm::exporter::explicitExportSparseModel<ValueType>(f, mdp, {});
+        f.close();
+    }
 
     std::string formulaString = "Pmax=? [F ( \"" + task.getExitLabel() + "\" )]";
     storm::parser::FormulaParser formulaParser;
@@ -45,19 +60,26 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
 
     size_t entranceState = *labeling.getStates(task.getEntranceLabel()).begin();
     labeling.addLabelToState("init", entranceState);
-    std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;
+    //std::cout << "Labeling of the MDP created: " << mdp->getStateLabeling() << std::endl;
 
     CheckTask<storm::logic::Formula, ValueType> checkTask(*formula, false);
 
     this->stats.reachabilityComputationTime.start();
     storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> checker(*mdp);
+
+    ValueType precision = 1e-4;
     storm::Environment env;
+    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    //env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
+    env.solver().minMax().setPrecision(precision);
+
     auto sparseResult = checker.check(env, checkTask);
     this->stats.reachabilityComputationTime.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& explicitResult = sparseResult->template asExplicitQuantitativeCheckResult<ValueType>();
-    ValueType& exactValue = explicitResult[entranceState];
+    ValueType& lowerBound = explicitResult[entranceState];
+    ValueType upperBound = storm::utility::min<ValueType>(lowerBound+precision, storm::utility::one<ValueType>());
 
-    return ApproximateReachabilityResult<ValueType>(exactValue);
+    return ApproximateReachabilityResult<ValueType>(lowerBound, upperBound);
 }
 
 template class MonolithicOpenMdpChecker<storm::RationalNumber>;

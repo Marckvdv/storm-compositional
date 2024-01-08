@@ -82,6 +82,26 @@ size_t ConcreteMdp<ValueType>::getExitCount() const {
     return lExit.size() + rExit.size();
 }
 
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getLEntranceCount() const {
+    return lEntrance.size();
+}
+
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getREntranceCount() const {
+    return rEntrance.size();
+}
+
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getLExitCount() const {
+    return lExit.size();
+}
+
+template<typename ValueType>
+size_t ConcreteMdp<ValueType>::getRExitCount() const {
+    return rExit.size();
+}
+
 template class ConcreteMdp<double>;
 template class ConcreteMdp<storm::RationalNumber>;
 

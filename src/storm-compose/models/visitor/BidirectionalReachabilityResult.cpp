@@ -16,6 +16,10 @@ BidirectionalReachabilityResult<ValueType>::BidirectionalReachabilityResult(size
     : lEntrances(lEntrances), rEntrances(rEntrances), lExits(lExits), rExits(rExits), points(lEntrances + rEntrances) {}
 
 template<typename ValueType>
+BidirectionalReachabilityResult<ValueType>::BidirectionalReachabilityResult(ConcreteMdp<ValueType> const& mdp)
+    : BidirectionalReachabilityResult<ValueType>(mdp.getLEntranceCount(), mdp.getREntranceCount(), mdp.getLExitCount(), mdp.getRExitCount()) {}
+
+template<typename ValueType>
 size_t BidirectionalReachabilityResult<ValueType>::getIndex(size_t entrance, bool leftEntrance) const {
     if (leftEntrance) {
         return entrance;

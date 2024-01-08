@@ -1,5 +1,6 @@
 #include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
 
+#include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm/settings/ArgumentBuilder.h"
 #include "storm/settings/Option.h"
 #include "storm/settings/OptionBuilder.h"
@@ -23,6 +24,10 @@ const std::string ComposeIOSettings::paretoPrecisionName = "paretoPrecision";
 const std::string ComposeIOSettings::paretoPrecisionTypeName = "paretoPrecisionType";
 const std::string ComposeIOSettings::paretoStepsName = "paretoSteps";
 const std::string ComposeIOSettings::oviEpsilonName = "oviEpsilon";
+const std::string ComposeIOSettings::cacheMethodName = "cacheMethod";
+const std::string ComposeIOSettings::useOviName = "useOvi";
+const std::string ComposeIOSettings::useBottomUpName = "useBottomUp";
+const std::string ComposeIOSettings::paretoCacheEpsilonName = "paretoCacheEpsilon";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     auto addStringOption = [&](std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
@@ -31,15 +36,16 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
                             .build());
     };
 
-    addStringOption(stringDiagramOption, "model check the given string diagram", "filename", "The name of the file to model check (json).");
+    addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
     addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance",
                     "<l|r><number> e.g. l5 is left entrance 5, default: l0");
     addStringOption(exitName, "exit to consider as the target state of the string diagram", "exit", "<l|r><number> e.g. r3 is right exit 3, default: r0");
     addStringOption(approachName, "approach to use for computing reachability in the string diagram", "approach",
-                    "(choose from {monolithic, naive, weight}, default: monolithic");
+                    "(choose from {monolithic, naive2}, default: monolithic");
     addStringOption(exportStringDiagramName, "export the string diagram to a dot file", "filename", "The name of the file to write the dot file");
     addStringOption(benchmarkDataName, "write benchmark results", "filename", "The path to store the benchmark results");
     addStringOption(paretoPrecisionTypeName, "multi objective computation precision type", "type", "In: {absolute, relative}");
+    addStringOption(cacheMethodName, "Cache method to use", "method", "In: {no, exact, pareto} (default=pareto)");
 
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false,
                                                    "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
@@ -50,10 +56,16 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
         storm::settings::OptionBuilder(moduleName, oviEpsilonName, false, "epsilon with which to perform optimistic (compositional) value iteration")
             .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
             .build());
+    this->addOption(
+        storm::settings::OptionBuilder(moduleName, paretoCacheEpsilonName, false, "error tolerance for using the cache")
+            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
+            .build());
 
     this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
                         .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())
                         .build());
+    this->addOption(storm::settings::OptionBuilder(moduleName, useOviName, false, "use OVI termination").build());
+    this->addOption(storm::settings::OptionBuilder(moduleName, useBottomUpName, false, "use bottom-up termination").build());
 }
 
 bool ComposeIOSettings::check() const {
@@ -100,6 +112,22 @@ bool ComposeIOSettings::isParetoStepsSet() const {
 
 bool ComposeIOSettings::isOVIEpsilonSet() const {
     return this->getOption(oviEpsilonName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isCacheMethodSet() const {
+    return this->getOption(cacheMethodName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isParetoCacheEpsilonSet() const {
+    return this->getOption(paretoCacheEpsilonName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::useOvi() const {
+    return this->getOption(useOviName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::useBottomUp() const {
+    return this->getOption(useBottomUpName).getHasOptionBeenSet();
 }
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {
@@ -156,6 +184,31 @@ std::string ComposeIOSettings::getParetoPrecisionType() const {
 
 size_t ComposeIOSettings::getParetoSteps() const {
     return this->getOption(paretoStepsName).getArgumentByName("steps").getValueAsUnsignedInteger();
+}
+
+storm::modelchecker::CacheMethod ComposeIOSettings::getCacheMethod() const {
+    if (!isCacheMethodSet()) {
+        return modelchecker::PARETO_CACHE;
+    }
+
+    auto cacheMethodString = this->getOption(cacheMethodName).getArgumentByName("method").getValueAsString();
+    if (cacheMethodString == "no") {
+        return modelchecker::NO_CACHE;
+    } else if (cacheMethodString == "exact") {
+        return modelchecker::EXACT_CACHE;
+    } else if (cacheMethodString == "pareto") {
+        return modelchecker::PARETO_CACHE;
+    } else {
+        STORM_LOG_THROW(false, storm::exceptions::InvalidArgumentException, "Unknown cache method: " << cacheMethodString);
+    }
+}
+
+double ComposeIOSettings::getParetoCacheEpsilon() const {
+    if (isParetoCacheEpsilonSet()) {
+        return this->getOption(paretoCacheEpsilonName).getArgumentByName("epsilon").getValueAsDouble();
+    } else {
+        return 1e-2;
+    }
 }
 
 }  // namespace modules

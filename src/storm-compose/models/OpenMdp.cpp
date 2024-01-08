@@ -12,12 +12,12 @@ template<typename ValueType>
 OpenMdp<ValueType>::OpenMdp(std::weak_ptr<OpenMdpManager<ValueType>> manager) : manager(manager) {}
 
 template<typename ValueType>
-bool OpenMdp<ValueType>::hasName() {
+bool OpenMdp<ValueType>::hasName() const {
     return name != boost::none;
 }
 
 template<typename ValueType>
-std::string OpenMdp<ValueType>::getName() {
+std::string OpenMdp<ValueType>::getName() const {
     return *name;
 }
 

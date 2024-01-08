@@ -30,7 +30,7 @@ class Halfspace {
     Halfspace(std::vector<ValueType> const& normalVector, std::vector<ValueType> const& offsetVector)
         : mNormalVector(normalVector), mOffset(storm::utility::vector::dotProduct(offsetVector, normalVector)) {
         // Intentionally left empty
-        // TODO check
+        // TODO double check
     }
 
     /*

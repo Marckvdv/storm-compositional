@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 
+#include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
 
@@ -19,9 +20,11 @@ class ValueVector {
     ValueType getWeight(size_t leafId, storage::Position position);
     void setWeight(size_t leafId, storage::Position position, ValueType value);
     void initializeValues();
-    void addConstant(ValueType epsilon);
+    void addConstant(ValueType epsilon, bool clamp=true);
     std::vector<ValueType>& getValues();
     bool dominates(ValueVector<ValueType> const& other);
+    ValueVectorMapping<ValueType>& getMapping();
+    std::vector<ValueType> getOutputWeights(size_t leafId);
 
    private:
     ValueVectorMapping<ValueType> mapping;

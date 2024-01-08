@@ -24,13 +24,18 @@ class ValueVectorMapping {
     size_t getHighestIndex() const;
     size_t getLeafCount() const;
     std::set<Key> const& getOuterPositions() const;
+    std::vector<ConcreteMdp<ValueType>*>& getLeaves();
+    size_t getLeafId(ConcreteMdp<ValueType>* model);
+    std::map<storage::Position, size_t>& getModelMapping(size_t leafId);
 
    private:
     // All the leaves
     std::vector<ConcreteMdp<ValueType>*> leaves;
+    std::map<ConcreteMdp<ValueType>*, size_t> leafMapping;
 
     // mapping from <leave_id, position> to value vector index
     std::map<Key, size_t> mapping;
+    std::vector<std::map<storage::Position, size_t>> modelMapping;
     std::set<Key> outerPositions;
     size_t highestIndex;
 };

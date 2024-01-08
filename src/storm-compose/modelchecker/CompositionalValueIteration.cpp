@@ -1,11 +1,12 @@
 #include "CompositionalValueIteration.h"
+#include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/modelchecker/CompositionalValueVector.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
 #include "storm-compose/models/visitor/OuterEntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoInitializerVisitor.h"
-#include "storm-compose/models/visitor/PropertyDrivenVisitor.h"
+#include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/storage/EntranceExit.h"
 #include "storm-compose/storage/ExactCache.h"
 #include "storm-compose/storage/NoCache.h"
@@ -21,12 +22,12 @@ namespace modelchecker {
 template<typename ValueType>
 CompositionalValueIteration<ValueType>::CompositionalValueIteration(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
                                                                     storm::compose::benchmark::BenchmarkStats<ValueType>& stats, Options options)
-    : AbstractOpenMdpChecker<ValueType>(manager, stats), options(options) {}
+    : AbstractOpenMdpChecker<ValueType>(manager, stats), options(options), env() {}
 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeParetoCurves() {
-    models::visitor::ParetoInitializerVisitor<ValueType> visitor;
-    this->manager->getRoot()->accept(visitor);
+    //models::visitor::ParetoInitializerVisitor<ValueType> visitor;
+    //this->manager->getRoot()->accept(visitor);
 }
 
 /*
@@ -55,38 +56,59 @@ template<typename ValueType>
 ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::check(OpenMdpReachabilityTask task) {
     initialize(task);
 
-    //std::cout << "initial values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
-    //          << " )" << std::endl;
-    //for (const auto& v : valueVector.getValues()) {
-    //    std::cout << " " << storm::utility::convertNumber<double>(v);
-    //}
-    //std::cout << std::endl;
+    bool oviStop = false, bottomUpStop = false;
+    boost::optional<ValueType> lowerBound, upperBound;
 
     auto noCache = std::make_shared<storage::NoCache<ValueType>>();
     auto root = this->manager->getRoot();
     do {
-        models::visitor::CVIVisitor<ValueType> cviVisitor(this->manager, valueVector, cache);
+        models::visitor::CVIVisitor<ValueType> cviVisitor(this->manager, valueVector, cache, this->stats);
         root->accept(cviVisitor);
 
-        //std::cout << "current values:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
-        //          << " )" << std::endl;
+        std::cout << "Size of value: " << valueVector.getValues().size() << std::endl;
+        std::cout << "current value:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
+                  << " )" << std::endl;
         //for (const auto& v : valueVector.getValues()) {
-        //    std::cout << " " << storm::utility::convertNumber<double>(v);
+        //    std::cout << storm::utility::convertNumber<double>(v) << ", ";
         //}
         //std::cout << std::endl;
 
-        // Compute v + epsilon
-        auto newValue = valueVector;
-        newValue.addConstant(options.epsilon);
-        auto newValueCopy = newValue;
+        if (options.useOvi) {
+            // Compute v + epsilon
+            auto newValue = valueVector;
+            newValue.addConstant(options.epsilon);
+            auto newValueCopy = newValue;
 
-        // models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache);
-        models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, cache);
-        root->accept(upperboundVisitor);
-        if (newValueCopy.dominates(newValue)) {
-            // optimistic value iteration stopping criterion
-            std::cout << "OVI stopping criterion hit" << std::endl;
-            break;
+            // TODO make sure that the upper bound is actually computed.
+            // models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache);
+            models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, cache, this->stats);
+            root->accept(upperboundVisitor);
+            if (newValueCopy.dominates(newValue)) {
+                // optimistic value iteration stopping criterion
+                oviStop = true;
+
+                lowerBound = valueVector.getValues()[0]; // TODO FIXME don't hardcode this 0
+                upperBound = utility::min<ValueType>(*lowerBound + options.epsilon, utility::one<ValueType>());
+
+                break;
+            }
+        }
+
+        if (options.useBottomUp) {
+            // Cache is guaranteed to be a Pareto cache at this point.
+            storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&> (*cache);
+            models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
+            root->accept(bottomUpVisitor);
+            auto result = bottomUpVisitor.getReachabilityResult(task, *root);
+
+            if (result.getError() < options.epsilon) {
+                bottomUpStop = true;
+
+                lowerBound = result.getLowerBound();
+                upperBound = result.getUpperBound();
+
+                break;
+            }
         }
 
         ++currentStep;
@@ -95,10 +117,21 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     std::cout << "WARN for now assuming we are only interested in the first left entrance" << std::endl;
     std::cout << "WARN assuming first entrance is the one of interest" << std::endl;
 
-    auto lowerBound = valueVector.getValues()[0];
-    auto upperBound = utility::min<ValueType>(lowerBound + options.epsilon, utility::one<ValueType>());
-    ApproximateReachabilityResult<ValueType> result(lowerBound, upperBound);
-    return result;
+    if (oviStop) {
+        std::cout << "OVI stopping criterion hit" << std::endl;
+    } else if (bottomUpStop) {
+        std::cout << "Bottom-up stopping criterion hit" << std::endl;
+    }
+
+
+    if (lowerBound && upperBound) {
+        return ApproximateReachabilityResult<ValueType>(*lowerBound, *upperBound);
+    } else if (lowerBound) {
+        return ApproximateReachabilityResult<ValueType>(*lowerBound);
+    } else {
+        lowerBound = valueVector.getValues()[0]; // TODO FIXME don't hardcode this 0
+        return ApproximateReachabilityResult<ValueType>(*lowerBound);
+    }
 }
 
 template<typename ValueType>
@@ -106,15 +139,16 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
     initializeParetoCurves();
     initializeCache();
 
+    this->stats.modelBuildingTime.start();
     this->manager->constructConcreteMdps();
+    this->stats.modelBuildingTime.stop();
+
     auto root = this->manager->getRoot();
 
     models::visitor::MappingVisitor<ValueType> mappingVisitor;
     root->accept(mappingVisitor);
     auto mapping = mappingVisitor.getMapping();
-    //mapping.print();
-
-    models::visitor::PropertyDrivenVisitor visitor(this->manager);
+    // mapping.print();
 
     models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
     root->accept(entranceExitMappingVisitor);
@@ -136,8 +170,17 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeCache() {
-    cache = std::make_shared<storm::storage::ExactCache<ValueType>>();
-    // cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
+    // Bottom-up apprach requires Pareto cache
+    STORM_LOG_THROW(!(options.useBottomUp && options.cacheMethod != PARETO_CACHE), storm::exceptions::NotSupportedException, "Bottom-up termination requires Pareto cache");
+
+    if (options.cacheMethod == NO_CACHE) {
+        cache = std::make_shared<storm::storage::NoCache<ValueType>>();
+    } else if (options.cacheMethod == EXACT_CACHE) {
+        cache = std::make_shared<storm::storage::ExactCache<ValueType>>();
+    } else if (options.cacheMethod == PARETO_CACHE) {
+        cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
+        cache->setErrorTolerance(options.cacheErrorTolerance);
+    }
 }
 
 template<typename ValueType>
