@@ -43,22 +43,18 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     std::vector<ValueType> weights;
     bool allZero = true;
     for (size_t i = 0; i < model.getLExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, currentLeftExitPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, i};
         ValueType weight = valueVector.getWeight(currentLeafId, pos);
         if (weight != 0)
             allZero = false;
         weights.push_back(weight);
-
-        ++currentLeftExitPosition;
     }
     for (size_t i = 0; i < model.getRExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, currentRightExitPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, i};
         ValueType weight = valueVector.getWeight(currentLeafId, pos);
         if (weight != 0)
             allZero = false;
         weights.push_back(weight);
-
-        ++currentRightExitPosition;
     }
 
     std::vector<ValueType> inputValues;
@@ -87,19 +83,17 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
 
     size_t weightIndex = 0;
     for (size_t i = 0; i < model.getLEntrance().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::L_ENTRANCE, currentLeftPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_ENTRANCE, i};
         valueVector.setWeight(currentLeafId, pos, inputValues[weightIndex]);
 
         ++weightIndex;
-        ++currentLeftPosition;
     }
 
     for (size_t i = 0; i < model.getREntrance().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::R_ENTRANCE, currentRightPosition};
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_ENTRANCE, i};
         valueVector.setWeight(currentLeafId, pos, inputValues[weightIndex]);
 
         ++weightIndex;
-        ++currentRightPosition;
     }
 
     ++currentLeafId;
@@ -107,17 +101,9 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
 
 template<typename ValueType>
 void CVIVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
-    currentSequencePosition = 0;
-
     auto& values = model.getValues();
     for (const auto& v : values) {
-        currentLeftPosition = 0;
-        currentRightPosition = 0;
-        currentLeftExitPosition = 0;
-        currentRightExitPosition = 0;
-
         v->accept(*this);
-        ++currentSequencePosition;
     }
 }
 

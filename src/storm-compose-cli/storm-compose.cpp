@@ -1,4 +1,5 @@
 #include "adapters/RationalNumberForward.h"
+#include "exceptions/InvalidArgumentException.h"
 #include "storage/SparseMatrix.h"
 #include "storage/geometry/NativePolytope.h"
 #include "storm-cli-utilities/cli.h"
@@ -99,6 +100,8 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
         else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "approach " << approach << " is not supported");
     }
+
+    STORM_LOG_THROW(composeSettings.isStringDiagramSet(), storm::exceptions::InvalidArgumentException, "Missing stringdiagram");
 
     std::string fileName = composeSettings.getStringDiagramFilename();
     STORM_PRINT_AND_LOG("Reading string diagram " << fileName << "\n");

@@ -42,6 +42,8 @@ class ValueVectorMapping {
 
 template<typename ValueType>
 class MappingVisitor : public OpenMdpVisitor<ValueType> {
+    typedef std::pair<size_t, storage::Position> Key;
+
    public:
     MappingVisitor() {}
     virtual ~MappingVisitor() override {}
@@ -54,12 +56,16 @@ class MappingVisitor : public OpenMdpVisitor<ValueType> {
     virtual void visitTraceModel(TraceModel<ValueType>& model) override;
 
     ValueVectorMapping<ValueType> getMapping();
+    void performPostProcessing();
 
    private:
     void resetPos();
 
-    std::map<std::pair<size_t, storage::Position>, size_t> localMapping;
-    std::set<std::pair<size_t, storage::Position>> outerPositions;
+    std::map<Key, size_t> localMapping;
+    std::set<Key> outerPositions;
+
+    /// Maps leafId -> <lEntranceStart, rEntranceStart, lExitStart, rExitStart>
+    std::map<size_t, std::tuple<size_t, size_t, size_t, size_t>> entranceExitStartIndices;
     std::vector<ConcreteMdp<ValueType>*> leaves;
 
     size_t leftEntrancePos = 0, rightEntrancePos = 0, leftExitPos = 0, rightExitPos = 0;

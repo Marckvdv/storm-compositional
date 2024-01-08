@@ -44,11 +44,7 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
     ValueVector<ValueType>& valueVector;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
 
-    size_t currentLeftPosition = 0, currentRightPosition = 0;
-    size_t currentLeftExitPosition = 0, currentRightExitPosition = 0;
-    size_t currentSequencePosition = 0;
     size_t currentLeafId = 0;
-    // Scope currentScope;
     storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 };
 

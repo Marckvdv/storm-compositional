@@ -1,5 +1,7 @@
 #include "MappingVisitor.h"
+#include "exceptions/InvalidArgumentException.h"
 #include "exceptions/InvalidOperationException.h"
+#include "exceptions/NotSupportedException.h"
 #include "storm-compose/storage/EntranceExit.h"
 
 namespace storm {
@@ -38,8 +40,6 @@ void ValueVectorMapping<ValueType>::print() const {
 
 template<typename ValueType>
 size_t ValueVectorMapping<ValueType>::lookup(const Key& key) const {
-    //    std::cout << "Key: <" << key.first << ", " << storage::positionToString(key.second) << "> " << std::endl;
-    //    std::cout << "Key: <" << leaves[key.first]->getName() << ", " << storage::positionToString(key.second) << "> " << std::endl;
     return mapping.at(key);
 }
 
@@ -77,6 +77,7 @@ template<typename ValueType>
 void MappingVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
     localMapping = {};
     outerPositions = {};
+    entranceExitStartIndices[currentLeafId] = {leftEntrancePos, rightEntrancePos, leftExitPos, rightExitPos};
     leaves.push_back(&model);
 
     auto processEntranceExit = [&](const auto& list, storage::EntranceExit entranceExit, auto& entranceExitPos) {
@@ -104,10 +105,7 @@ void MappingVisitor<ValueType>::visitReference(Reference<ValueType>& reference) 
 
 template<typename ValueType>
 void MappingVisitor<ValueType>::visitSequenceModel(SequenceModel<ValueType>& model) {
-    if (model.getValues().size() == 0) {
-        localMapping = {};
-        return;
-    }
+    STORM_LOG_THROW(model.getValues().size() > 0, storm::exceptions::InvalidArgumentException, "expected >0 children");
 
     std::map<std::pair<size_t, storage::Position>, size_t> mapping;
     std::set<std::pair<size_t, storage::Position>> outer;
@@ -205,6 +203,7 @@ void MappingVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
 template<typename ValueType>
 void MappingVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
+    STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Trace operator is currently not supported");
     model.getValue()->accept(*this);
 
     size_t left = model.getLeft();
@@ -229,6 +228,60 @@ ValueVectorMapping<ValueType> MappingVisitor<ValueType>::getMapping() {
     }
 
     return ValueVectorMapping<ValueType>(leaves, localMapping, outerPositions, highestIndex);
+}
+
+template<typename ValueType>
+void MappingVisitor<ValueType>::performPostProcessing() {
+    std::cout << "entranceExitStartIndices: " << std::endl;
+    for (const auto& entry : entranceExitStartIndices) {
+        size_t leafId = entry.first;
+        const auto& tuple = entry.second;
+
+        std::cout << leafId << " -> <" << std::get<0>(tuple) << ", " << std::get<1>(tuple) << ", " << std::get<2>(tuple) << ", " << std::get<3>(tuple) << ">" << std::endl;
+    }
+
+    decltype(outerPositions) newOuterPositions;
+    decltype(localMapping) newLocalMapping;
+
+    for (auto& entry : localMapping) {
+        const auto& key = entry.first;
+        size_t leafId = key.first;
+        storage::Position pos = key.second;
+        std::cout << "leafId: " << leafId << ", pos: " << storage::positionToString(pos) << std::endl;
+
+        const auto& offsets = entranceExitStartIndices[leafId];
+
+        size_t lEnOffset, rEnOffset, lExOffset, rExOffset;
+        std::tie(lEnOffset, rEnOffset, lExOffset, rExOffset) = offsets;
+
+        size_t offset;
+        if (pos.first == storage::L_ENTRANCE) {
+            offset = lEnOffset;
+        } else if (pos.first == storage::R_ENTRANCE) {
+            offset = rEnOffset;
+        } else if (pos.first == storage::L_EXIT) {
+            offset = lExOffset;
+        } else if (pos.first == storage::R_EXIT) {
+            offset = rExOffset;
+        } else {
+            STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "sanity check failed");
+        }
+        size_t newIndex = pos.second - offset;
+        std::cout << "NI: " << newIndex << std::endl;
+        storage::Position newPosition {pos.first, newIndex};
+        Key newKey {leafId, newPosition};
+
+        newLocalMapping[newKey] = entry.second;
+
+        bool isOuter = outerPositions.count(key) > 0;
+        if (isOuter) {
+            newOuterPositions.insert(newKey);
+            std::cout << "nOuter: " << newKey.first << " " << storage::positionToString(newKey.second) << std::endl;
+        }
+    }
+
+    localMapping = newLocalMapping;
+    outerPositions = newOuterPositions;
 }
 
 template<typename ValueType>

@@ -19,6 +19,8 @@ template<typename ValueType>
 void HeuristicValueIterator<ValueType>::updateModel(models::ConcreteMdp<ValueType>* model) {
     auto& valueVectorMapping = valueVector.getMapping();
     size_t leafId = valueVectorMapping.getLeafId(model);
+
+
 }
 
 template class HeuristicValueIterator<double>;

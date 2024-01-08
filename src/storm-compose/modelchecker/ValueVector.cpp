@@ -24,7 +24,7 @@ void ValueVector<ValueType>::setWeight(size_t leafId, storage::Position position
 
 template<typename ValueType>
 void ValueVector<ValueType>::initializeValues() {
-    auto outerPositions = mapping.getOuterPositions();
+    const auto& outerPositions = mapping.getOuterPositions();
 
     size_t index = 0;
     for (const auto& entry : outerPositions) {

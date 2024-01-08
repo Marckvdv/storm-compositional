@@ -146,8 +146,9 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 
     models::visitor::MappingVisitor<ValueType> mappingVisitor;
     root->accept(mappingVisitor);
+    mappingVisitor.performPostProcessing();
     auto mapping = mappingVisitor.getMapping();
-    // mapping.print();
+    mapping.print();
 
     models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
     root->accept(entranceExitMappingVisitor);
