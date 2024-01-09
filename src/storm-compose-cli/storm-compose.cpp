@@ -167,11 +167,12 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
         case COMPOSITIONAL_VI:
             // STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
             typename modelchecker::CompositionalValueIteration<ValueType>::Options modelcheckerOptions;
-            modelcheckerOptions.epsilon = composeSettings.getOVIEpsilon();
+            modelcheckerOptions.epsilon = composeSettings.getOviEpsilon();
             modelcheckerOptions.cacheMethod = composeSettings.getCacheMethod();
             modelcheckerOptions.useOvi = composeSettings.useOvi();
             modelcheckerOptions.useBottomUp = composeSettings.useBottomUp();
             modelcheckerOptions.cacheErrorTolerance = composeSettings.getParetoCacheEpsilon();
+            modelcheckerOptions.maxSteps = composeSettings.getCviSteps();
             checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);
             break;
     }

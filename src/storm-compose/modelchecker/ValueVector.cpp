@@ -76,26 +76,17 @@ std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
     std::vector<ValueType> weights;
     ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
 
-    /*
-    for (size_t i = 0; i < model->getLExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, currentLeftExitPosition};
-        ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0)
-            allZero = false;
+    for (size_t leftPos = 0; leftPos < model->getLExit().size(); ++leftPos) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, leftPos};
+        ValueType weight = getWeight(leafId, pos);
         weights.push_back(weight);
-
-        ++currentLeftExitPosition;
     }
-    for (size_t i = 0; i < model.getRExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, currentRightExitPosition};
-        ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0)
-            allZero = false;
+
+    for (size_t rightPos = 0; rightPos < model->getRExit().size(); ++rightPos) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, rightPos};
+        ValueType weight = getWeight(leafId, pos);
         weights.push_back(weight);
-
-        ++currentRightExitPosition;
     }
-    */
 
     return weights;
 }

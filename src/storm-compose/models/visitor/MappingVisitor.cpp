@@ -248,7 +248,7 @@ void MappingVisitor<ValueType>::performPostProcessing() {
         const auto& key = entry.first;
         size_t leafId = key.first;
         storage::Position pos = key.second;
-        std::cout << "leafId: " << leafId << ", pos: " << storage::positionToString(pos) << std::endl;
+        // std::cout << "leafId: " << leafId << ", pos: " << storage::positionToString(pos) << std::endl;
 
         const auto& offsets = entranceExitStartIndices[leafId];
 
@@ -268,7 +268,7 @@ void MappingVisitor<ValueType>::performPostProcessing() {
             STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "sanity check failed");
         }
         size_t newIndex = pos.second - offset;
-        std::cout << "NI: " << newIndex << std::endl;
+        // std::cout << "NI: " << newIndex << std::endl;
         storage::Position newPosition{pos.first, newIndex};
         Key newKey{leafId, newPosition};
 

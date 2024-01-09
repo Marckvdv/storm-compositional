@@ -31,16 +31,10 @@ class ApproximateReachabilityResult {
 
 template<typename ValueType>
 std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueType> const& result) {
-    // if (result.soundUpperBound) {
-    //     os << "<" << result.lower << ", " << result.upper << ">" << std::endl;
-    // } else {
-    //     os << "<" << result.lower << ", ?>" << std::endl;
-    // }
-
     if (result.soundUpperBound) {
         os << "<" << storm::utility::convertNumber<double>(result.lower) << ", " << storm::utility::convertNumber<double>(result.upper) << ">" << std::endl;
     } else {
-        os << "<" << storm::utility::convertNumber<double>(result.lower) << ", ?>" << std::endl;
+        os << "<" << storm::utility::convertNumber<double>(result.lower) << ", 1?>" << std::endl;
     }
     return os;
 }

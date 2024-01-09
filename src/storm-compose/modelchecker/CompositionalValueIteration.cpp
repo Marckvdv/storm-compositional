@@ -22,7 +22,10 @@ namespace modelchecker {
 template<typename ValueType>
 CompositionalValueIteration<ValueType>::CompositionalValueIteration(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
                                                                     storm::compose::benchmark::BenchmarkStats<ValueType>& stats, Options options)
-    : AbstractOpenMdpChecker<ValueType>(manager, stats), options(options), env() {}
+    : AbstractOpenMdpChecker<ValueType>(manager, stats), options(options), env() {
+    STORM_LOG_WARN_COND(!(options.useOvi && options.maxSteps % options.oviInterval != 0), "OVI interval not a multiple of max steps");
+    STORM_LOG_WARN_COND(!(options.useBottomUp && options.maxSteps % options.bottomUpInterval != 0), "Bottom-up interval not a multiple of max steps");
+}
 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initializeParetoCurves() {
@@ -68,12 +71,17 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "Size of value: " << valueVector.getValues().size() << std::endl;
         std::cout << "current value:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
                   << " )" << std::endl;
+
         // for (const auto& v : valueVector.getValues()) {
-        //     std::cout << storm::utility::convertNumber<double>(v) << ", ";
+        //     if (v == storm::utility::zero<ValueType>()) {
+        //         std::cout << "#";
+        //     } else {
+        //         std::cout << storm::utility::convertNumber<double>(v) << ", ";
+        //     }
         // }
         // std::cout << std::endl;
 
-        if (options.useOvi) {
+        if (shouldCheckOVITermination()) {
             // Compute v + epsilon
             auto newValue = valueVector;
             newValue.addConstant(options.epsilon);
@@ -94,7 +102,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
             }
         }
 
-        if (options.useBottomUp) {
+        if (shouldCheckBottomUpTermination()) {
             // Cache is guaranteed to be a Pareto cache at this point.
             storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
             models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
@@ -148,7 +156,7 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
     root->accept(mappingVisitor);
     mappingVisitor.performPostProcessing();
     auto mapping = mappingVisitor.getMapping();
-    mapping.print();
+    // mapping.print();
 
     models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
     root->accept(entranceExitMappingVisitor);
@@ -187,6 +195,16 @@ void CompositionalValueIteration<ValueType>::initializeCache() {
 template<typename ValueType>
 bool CompositionalValueIteration<ValueType>::shouldTerminate() {
     return currentStep > options.maxSteps || storm::utility::resources::isTerminate();
+}
+
+template<typename ValueType>
+bool CompositionalValueIteration<ValueType>::shouldCheckOVITermination() {
+    return options.useOvi && currentStep % options.oviInterval == 0;
+}
+
+template<typename ValueType>
+bool CompositionalValueIteration<ValueType>::shouldCheckBottomUpTermination() {
+    return options.useBottomUp && currentStep % options.bottomUpInterval == 0;
 }
 
 template class CompositionalValueIteration<storm::RationalNumber>;

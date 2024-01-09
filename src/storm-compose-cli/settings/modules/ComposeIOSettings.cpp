@@ -23,19 +23,16 @@ const std::string ComposeIOSettings::benchmarkDataName = "benchmarkData";
 const std::string ComposeIOSettings::paretoPrecisionName = "paretoPrecision";
 const std::string ComposeIOSettings::paretoPrecisionTypeName = "paretoPrecisionType";
 const std::string ComposeIOSettings::paretoStepsName = "paretoSteps";
+const std::string ComposeIOSettings::cviStepsName = "cviSteps";
 const std::string ComposeIOSettings::oviEpsilonName = "oviEpsilon";
 const std::string ComposeIOSettings::cacheMethodName = "cacheMethod";
 const std::string ComposeIOSettings::useOviName = "useOvi";
 const std::string ComposeIOSettings::useBottomUpName = "useBottomUp";
 const std::string ComposeIOSettings::paretoCacheEpsilonName = "paretoCacheEpsilon";
+const std::string ComposeIOSettings::oviIntervalName = "oviInterval";
+const std::string ComposeIOSettings::bottomUpIntervalName = "bottomUpInterval";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
-    auto addStringOption = [&](std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
-        this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description)
-                            .addArgument(storm::settings::ArgumentBuilder::createStringArgument(fieldName, fieldDescription).build())
-                            .build());
-    };
-
     addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
     addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance",
                     "<l|r><number> e.g. l5 is left entrance 5, default: l0");
@@ -47,24 +44,16 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(paretoPrecisionTypeName, "multi objective computation precision type", "type", "In: {absolute, relative}");
     addStringOption(cacheMethodName, "Cache method to use", "method", "In: {no, exact, pareto} (default=pareto)");
 
-    this->addOption(storm::settings::OptionBuilder(moduleName, paretoPrecisionName, false,
-                                                   "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType")
-                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("precision", "the relative or absolution precision").build())
-                        .build());
+    addDoubleOption(paretoPrecisionName, "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType", "precision",
+                    "the relative or absolution precision");
+    addDoubleOption(oviEpsilonName, "epsilon with which to perform optimistic (compositional) value iteration", "epsilon", "");
+    addDoubleOption(paretoCacheEpsilonName, "error tolerance for using the cache", "epsilon", "");
 
-    this->addOption(
-        storm::settings::OptionBuilder(moduleName, oviEpsilonName, false, "epsilon with which to perform optimistic (compositional) value iteration")
-            .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
-            .build());
-    this->addOption(storm::settings::OptionBuilder(moduleName, paretoCacheEpsilonName, false, "error tolerance for using the cache")
-                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("epsilon", "").build())
-                        .build());
+    addUnsignedOption(paretoStepsName, "maximum number of steps to perform in the multiobjective optimisation", "steps", "number of steps");
+    addUnsignedOption(cviStepsName, "maximum number of steps to perform in CVI", "steps", "number of steps");
 
-    this->addOption(storm::settings::OptionBuilder(moduleName, paretoStepsName, false, "maximum number of steps to perform in the multiobjective optimisation")
-                        .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument("steps", "number of steps").build())
-                        .build());
-    this->addOption(storm::settings::OptionBuilder(moduleName, useOviName, false, "use OVI termination").build());
-    this->addOption(storm::settings::OptionBuilder(moduleName, useBottomUpName, false, "use bottom-up termination").build());
+    addFlag(useOviName, "use OVI termination");
+    addFlag(useBottomUpName, "use bottom-up termination");
 }
 
 bool ComposeIOSettings::check() const {
@@ -109,7 +98,11 @@ bool ComposeIOSettings::isParetoStepsSet() const {
     return this->getOption(paretoStepsName).getHasOptionBeenSet();
 }
 
-bool ComposeIOSettings::isOVIEpsilonSet() const {
+bool ComposeIOSettings::isCviStepsSet() const {
+    return this->getOption(cviStepsName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isOviEpsilonSet() const {
     return this->getOption(oviEpsilonName).getHasOptionBeenSet();
 }
 
@@ -127,6 +120,14 @@ bool ComposeIOSettings::useOvi() const {
 
 bool ComposeIOSettings::useBottomUp() const {
     return this->getOption(useBottomUpName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isOviIntervalSet() const {
+    return this->getOption(oviIntervalName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isBottomUpIntervalSet() const {
+    return this->getOption(bottomUpIntervalName).getHasOptionBeenSet();
 }
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {
@@ -169,8 +170,8 @@ double ComposeIOSettings::getParetoPrecision() const {
     return this->getOption(paretoPrecisionName).getArgumentByName("precision").getValueAsDouble();
 }
 
-double ComposeIOSettings::getOVIEpsilon() const {
-    if (isOVIEpsilonSet()) {
+double ComposeIOSettings::getOviEpsilon() const {
+    if (isOviEpsilonSet()) {
         return this->getOption(oviEpsilonName).getArgumentByName("epsilon").getValueAsDouble();
     } else {
         return 1e-4;
@@ -208,6 +209,51 @@ double ComposeIOSettings::getParetoCacheEpsilon() const {
     } else {
         return 1e-2;
     }
+}
+size_t ComposeIOSettings::getCviSteps() const {
+    if (isCviStepsSet()) {
+        return this->getOption(cviStepsName).getArgumentByName("steps").getValueAsUnsignedInteger();
+    } else {
+        return 200;
+    }
+}
+
+size_t ComposeIOSettings::getOviInterval() const {
+    if (isOviIntervalSet()) {
+        return this->getOption(oviIntervalName).getArgumentByName("steps").getValueAsUnsignedInteger();
+    } else {
+        return 10;
+    }
+}
+
+size_t ComposeIOSettings::getBottomUpInterval() const {
+    if (isBottomUpIntervalSet()) {
+        return this->getOption(bottomUpIntervalName).getArgumentByName("steps").getValueAsUnsignedInteger();
+    } else {
+        return 10;
+    }
+}
+
+void ComposeIOSettings::addStringOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
+    this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description)
+                        .addArgument(storm::settings::ArgumentBuilder::createStringArgument(fieldName, fieldDescription).build())
+                        .build());
+}
+
+void ComposeIOSettings::addDoubleOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
+    this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description)
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument(fieldName, fieldDescription).build())
+                        .build());
+}
+
+void ComposeIOSettings::addUnsignedOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription) {
+    this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description)
+                        .addArgument(storm::settings::ArgumentBuilder::createUnsignedIntegerArgument(fieldName, fieldDescription).build())
+                        .build());
+}
+
+void ComposeIOSettings::addFlag(std::string optionName, std::string description) {
+    this->addOption(storm::settings::OptionBuilder(moduleName, optionName, false, description).build());
 }
 
 }  // namespace modules

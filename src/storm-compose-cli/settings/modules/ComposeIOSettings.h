@@ -32,11 +32,14 @@ class ComposeIOSettings : public ModuleSettings {
     bool isParetoPrecisionSet() const;
     bool isParetoPrecisionTypeSet() const;
     bool isParetoStepsSet() const;
-    bool isOVIEpsilonSet() const;
+    bool isCviStepsSet() const;
+    bool isOviEpsilonSet() const;
     bool isCacheMethodSet() const;
     bool isParetoCacheEpsilonSet() const;
     bool useOvi() const;
     bool useBottomUp() const;
+    bool isOviIntervalSet() const;
+    bool isBottomUpIntervalSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -47,9 +50,12 @@ class ComposeIOSettings : public ModuleSettings {
     double getParetoPrecision() const;
     std::string getParetoPrecisionType() const;
     size_t getParetoSteps() const;
-    double getOVIEpsilon() const;
+    size_t getCviSteps() const;
+    double getOviEpsilon() const;
     storm::modelchecker::CacheMethod getCacheMethod() const;
     double getParetoCacheEpsilon() const;
+    size_t getOviInterval() const;
+    size_t getBottomUpInterval() const;
 
     // The name of the module.
     static const std::string moduleName;
@@ -62,11 +68,20 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string paretoPrecisionName;
     static const std::string paretoPrecisionTypeName;
     static const std::string paretoStepsName;
+    static const std::string cviStepsName;
     static const std::string oviEpsilonName;
     static const std::string cacheMethodName;
     static const std::string useOviName;
     static const std::string useBottomUpName;
     static const std::string paretoCacheEpsilonName;
+    static const std::string oviIntervalName;
+    static const std::string bottomUpIntervalName;
+
+   private:
+    void addStringOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);
+    void addDoubleOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);
+    void addUnsignedOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);
+    void addFlag(std::string optionName, std::string description);
 };
 
 }  // namespace modules

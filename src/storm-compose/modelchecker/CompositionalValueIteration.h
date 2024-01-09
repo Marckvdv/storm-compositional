@@ -41,6 +41,8 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
         ValueType epsilon = 1e-4;
         bool useOvi = true;
         bool useBottomUp = true;
+        size_t oviInterval = 10;
+        size_t bottomUpInterval = 10;
 
         CacheMethod cacheMethod = PARETO_CACHE;
         ValueType cacheErrorTolerance = storm::utility::convertNumber<ValueType>(0.1);
@@ -56,6 +58,8 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
     void initializeCache();
     void initializeParetoCurves();
     bool shouldTerminate();
+    bool shouldCheckOVITermination();
+    bool shouldCheckBottomUpTermination();
     bool isUpperbound(std::vector<ValueType> valueVector);
 
     size_t currentStep = 0;

@@ -40,26 +40,12 @@ void CVIVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
 
 template<typename ValueType>
 void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
-    std::vector<ValueType> weights;
-    bool allZero = true;
-    for (size_t i = 0; i < model.getLExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, i};
-        ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0)
-            allZero = false;
-        weights.push_back(weight);
-    }
-    for (size_t i = 0; i < model.getRExit().size(); ++i) {
-        std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, i};
-        ValueType weight = valueVector.getWeight(currentLeafId, pos);
-        if (weight != 0)
-            allZero = false;
-        weights.push_back(weight);
-    }
+    std::vector<ValueType> weights = valueVector.getOutputWeights(currentLeafId);
+    bool allZero = std::all_of(weights.begin(), weights.end(), [](ValueType v) { return v == storm::utility::zero<ValueType>(); });
 
     std::vector<ValueType> inputValues;
     if (allZero) {
-        inputValues = std::vector<ValueType>(model.getLEntrance().size() + model.getREntrance().size(), 0);
+        inputValues = std::vector<ValueType>(model.getEntranceCount(), 0);
     } else {
         boost::optional<std::vector<ValueType>> result;
         result = queryCache(&model, weights);
@@ -70,8 +56,7 @@ void CVIVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
             ++stats.cacheHits;
         } else {
             stats.reachabilityComputationTime.start();
-            auto newResult = weightedReachability2(weights, model, cache->needScheduler(), env);
-            // auto newResult = weightedReachability(weights, model, cache->needScheduler(), env);
+            auto newResult = weightedReachability(weights, model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
             auto weight = newResult.first;
             auto scheduler = newResult.second;
@@ -117,52 +102,6 @@ void CVIVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
 template<typename ValueType>
 std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<ValueType>>> CVIVisitor<ValueType>::weightedReachability(
-    std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp, bool returnScheduler, storm::Environment env) {
-    using storm::modelchecker::multiobjective::StandardMdpPcaaWeightVectorChecker;
-    using storm::modelchecker::multiobjective::preprocessing::SparseMultiObjectivePreprocessor;
-    using storm::models::sparse::Mdp;
-
-    std::string formulaString = ParetoVisitor<ValueType>::getFormula(concreteMdp);
-
-    storm::parser::FormulaParser formulaParser;
-    auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
-    auto mdp = concreteMdp.getMdp();
-
-    std::vector<ValueType> newWeights;
-    boost::optional<storm::storage::Scheduler<ValueType>> scheduler;
-    auto computeReachability = [&](const auto& entrances) {
-        for (size_t entrance : entrances) {
-            // TODO make efficient
-            mdp->getStateLabeling().setStates("init", storage::BitVector(mdp->getNumberOfStates()));
-            mdp->getStateLabeling().addLabelToState("init", entrance);
-
-            // env.solver().setLinearEquationSolverPrecision(storm::RationalNumber(1e-6));
-            auto preprocessResult = SparseMultiObjectivePreprocessor<Mdp<ValueType>>::preprocess(env, *mdp, formula->asMultiObjectiveFormula());
-            StandardMdpPcaaWeightVectorChecker checker(preprocessResult);
-
-            checker.check(env, weights);
-            auto underApprox = checker.getUnderApproximationOfInitialStateResults();
-
-            if (returnScheduler && !scheduler) {
-                scheduler = checker.computeScheduler();
-            }
-
-            ValueType sum = 0;
-            for (size_t i = 0; i < weights.size(); ++i) {
-                sum += weights[i] * underApprox[i];
-            }
-
-            newWeights.push_back(sum);
-        }
-    };
-    computeReachability(concreteMdp.getLEntrance());
-    computeReachability(concreteMdp.getREntrance());
-
-    return {newWeights, scheduler};
-}
-
-template<typename ValueType>
-std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<ValueType>>> CVIVisitor<ValueType>::weightedReachability2(
     std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp, bool returnScheduler, storm::Environment env) {
     static size_t EXACT_QUERIES = 0;
     std::cout << "Exact queries: " << EXACT_QUERIES << " Mdp size: " << concreteMdp.getMdp()->getTransitionMatrix().getRowGroupCount() << std::endl;
