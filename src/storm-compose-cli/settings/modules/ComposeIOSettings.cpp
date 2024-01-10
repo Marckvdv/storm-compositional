@@ -51,6 +51,8 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
 
     addUnsignedOption(paretoStepsName, "maximum number of steps to perform in the multiobjective optimisation", "steps", "number of steps");
     addUnsignedOption(cviStepsName, "maximum number of steps to perform in CVI", "steps", "number of steps");
+    addUnsignedOption(oviIntervalName, "perform OVI termination check every <steps> steps", "steps", "number of steps");
+    addUnsignedOption(bottomUpIntervalName, "perform bottom-up termination check every <steps> steps", "steps", "number of steps");
 
     addFlag(useOviName, "use OVI termination");
     addFlag(useBottomUpName, "use bottom-up termination");

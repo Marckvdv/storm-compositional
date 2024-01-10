@@ -3,8 +3,7 @@
 #include "storm-compose/storage/EntranceExit.h"
 
 namespace storm {
-namespace models {
-namespace visitor {
+namespace storage {
 
 template<typename ValueType>
 ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight)
@@ -74,7 +73,7 @@ ValueVectorMapping<ValueType>& ValueVector<ValueType>::getMapping() {
 template<typename ValueType>
 std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
     std::vector<ValueType> weights;
-    ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
+    models::ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
 
     for (size_t leftPos = 0; leftPos < model->getLExit().size(); ++leftPos) {
         std::pair<storage::EntranceExit, size_t> pos{storage::L_EXIT, leftPos};
@@ -94,6 +93,5 @@ std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
 template class ValueVector<double>;
 template class ValueVector<storm::RationalNumber>;
 
-}  // namespace visitor
-}  // namespace models
+}  // namespace storage
 }  // namespace storm

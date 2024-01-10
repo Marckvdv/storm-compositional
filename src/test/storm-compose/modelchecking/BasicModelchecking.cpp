@@ -1,6 +1,6 @@
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
-#include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
+#include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
 #include "storm-compose/models/OpenMdp.h"
 #include "storm-compose/parser/JsonStringDiagramParser.h"
 #include "storm-config.h"
@@ -78,7 +78,7 @@ TYPED_TEST(BasicModelcheckingTest, MonolithicRightwardReachability) {
 
         auto monolithicResult = monolithicChecker.check(task).getLowerBound();
 
-        NaiveOpenMdpChecker2<ValueType> naiveChecker(manager, stats, this->lowerUpperSettings());
+        NaiveOpenMdpChecker<ValueType> naiveChecker(manager, stats, this->lowerUpperSettings());
         auto naiveResult = naiveChecker.check(task);
 
         EXPECT_TRUE(naiveResult.getLowerBound() <= monolithicResult && naiveResult.getUpperBound() >= monolithicResult);

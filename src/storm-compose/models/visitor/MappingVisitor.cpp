@@ -9,66 +9,6 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<ConcreteMdp<ValueType>*> leaves, std::map<Key, size_t> mapping, std::set<Key> outerPositions,
-                                                  size_t highestIndex)
-    : leaves(leaves), leafMapping(), mapping(mapping), modelMapping(leaves.size()), outerPositions(outerPositions), highestIndex(highestIndex) {
-    for (size_t i = 0; i < leaves.size(); ++i) {
-        leafMapping[leaves[i]] = i;
-    }
-
-    for (const auto& entry : mapping) {
-        const auto& key = entry.first;
-        const auto& value = entry.second;
-
-        size_t leafId = key.first;
-        storage::Position pos = key.second;
-
-        modelMapping[leafId][pos] = value;
-    }
-}
-
-template<typename ValueType>
-void ValueVectorMapping<ValueType>::print() const {
-    for (const auto& entry : mapping) {
-        size_t leafId = entry.first.first;
-        storage::Position position = entry.first.second;
-        size_t index = entry.second;
-
-        std::cout << leaves[leafId]->getName() << " " << storage::positionToString(position) << " -> " << index << std::endl;
-    }
-}
-
-template<typename ValueType>
-size_t ValueVectorMapping<ValueType>::lookup(const Key& key) const {
-    return mapping.at(key);
-}
-
-template<typename ValueType>
-size_t ValueVectorMapping<ValueType>::getHighestIndex() const {
-    return highestIndex;
-}
-
-template<typename ValueType>
-size_t ValueVectorMapping<ValueType>::getLeafCount() const {
-    return leaves.size();
-}
-
-template<typename ValueType>
-std::set<std::pair<size_t, storage::Position>> const& ValueVectorMapping<ValueType>::getOuterPositions() const {
-    return outerPositions;
-}
-
-template<typename ValueType>
-std::vector<ConcreteMdp<ValueType>*>& ValueVectorMapping<ValueType>::getLeaves() {
-    return leaves;
-}
-
-template<typename ValueType>
-size_t ValueVectorMapping<ValueType>::getLeafId(ConcreteMdp<ValueType>* model) {
-    return leafMapping[model];
-}
-
-template<typename ValueType>
 void MappingVisitor<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
     STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "Concretize MDPs first");
 }
@@ -219,19 +159,22 @@ void MappingVisitor<ValueType>::visitTraceModel(TraceModel<ValueType>& model) {
 }
 
 template<typename ValueType>
-ValueVectorMapping<ValueType> MappingVisitor<ValueType>::getMapping() {
+storage::ValueVectorMapping<ValueType> MappingVisitor<ValueType>::getMapping() {
     size_t highestIndex = 0;
     for (const auto& entry : localMapping) {
         if (entry.second > highestIndex) {
             highestIndex = entry.second;
         }
     }
+    std::cout << "Here: " << localMapping.size() << std::endl;
 
-    return ValueVectorMapping<ValueType>(leaves, localMapping, outerPositions, highestIndex);
+    return storage::ValueVectorMapping<ValueType>(leaves, localMapping, outerPositions, highestIndex);
 }
 
 template<typename ValueType>
 void MappingVisitor<ValueType>::performPostProcessing() {
+    std::cout << "Before: " << localMapping.size() << std::endl;
+
     std::cout << "entranceExitStartIndices: " << std::endl;
     for (const auto& entry : entranceExitStartIndices) {
         size_t leafId = entry.first;
@@ -280,9 +223,10 @@ void MappingVisitor<ValueType>::performPostProcessing() {
             std::cout << "nOuter: " << newKey.first << " " << storage::positionToString(newKey.second) << std::endl;
         }
     }
-
     localMapping = newLocalMapping;
     outerPositions = newOuterPositions;
+
+    std::cout << "After: " << localMapping.size() << std::endl;
 }
 
 template<typename ValueType>
@@ -295,8 +239,6 @@ void MappingVisitor<ValueType>::resetPos() {
 
 template class MappingVisitor<double>;
 template class MappingVisitor<storm::RationalNumber>;
-template class ValueVectorMapping<double>;
-template class ValueVectorMapping<storm::RationalNumber>;
 
 }  // namespace visitor
 }  // namespace models

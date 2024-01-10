@@ -6,10 +6,10 @@
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
+#include "storm-compose/storage/ValueVectorMapping.h"
 
 namespace storm {
-namespace models {
-namespace visitor {
+namespace storage {
 
 template<typename ValueType>
 class ValueVector {
@@ -31,6 +31,5 @@ class ValueVector {
     std::vector<ValueType> values, finalWeight;
 };
 
-}  // namespace visitor
-}  // namespace models
+}  // namespace storage
 }  // namespace storm

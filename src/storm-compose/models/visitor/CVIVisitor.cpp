@@ -26,9 +26,11 @@ namespace models {
 namespace visitor {
 
 template<typename ValueType>
-CVIVisitor<ValueType>::CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, ValueVector<ValueType>& valueVector,
+CVIVisitor<ValueType>::CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
                                   std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats)
-    : manager(manager), valueVector(valueVector), cache(cache), stats(stats) {}
+    : manager(manager), valueVector(valueVector), cache(cache), stats(stats) {
+    // TODO FIXME make sure env is using optimistic value iteration.
+}
 
 template<typename ValueType>
 CVIVisitor<ValueType>::~CVIVisitor() {}
@@ -102,10 +104,10 @@ void CVIVisitor<ValueType>::visitSumModel(SumModel<ValueType>& model) {
 
 template<typename ValueType>
 std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<ValueType>>> CVIVisitor<ValueType>::weightedReachability(
-    std::vector<ValueType> weights, ConcreteMdp<ValueType> concreteMdp, bool returnScheduler, storm::Environment env) {
-    static size_t EXACT_QUERIES = 0;
-    std::cout << "Exact queries: " << EXACT_QUERIES << " Mdp size: " << concreteMdp.getMdp()->getTransitionMatrix().getRowGroupCount() << std::endl;
-    ++EXACT_QUERIES;
+    std::vector<ValueType> weights, ConcreteMdp<ValueType> const& concreteMdp, bool returnScheduler, storm::Environment env) {
+    // static size_t EXACT_QUERIES = 0;
+    // std::cout << "Exact queries: " << EXACT_QUERIES << " Mdp size: " << concreteMdp.getMdp()->getTransitionMatrix().getRowGroupCount() << std::endl;
+    //++EXACT_QUERIES;
 
     if (false) {
         std::ofstream f("out.dot");

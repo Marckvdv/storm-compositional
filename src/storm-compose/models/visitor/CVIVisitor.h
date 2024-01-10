@@ -16,7 +16,7 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
     typedef std::vector<ValueType> WeightType;
 
    public:
-    CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, ValueVector<ValueType>& valueVector,
+    CVIVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
                std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats);
     virtual ~CVIVisitor();
 
@@ -28,7 +28,7 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
     void visitTraceModel(TraceModel<ValueType>& model) override;
 
     static std::pair<WeightType, boost::optional<storm::storage::Scheduler<ValueType>>> weightedReachability(WeightType weights,
-                                                                                                             ConcreteMdp<ValueType> concreteMdp,
+                                                                                                             ConcreteMdp<ValueType> const& concreteMdp,
                                                                                                              bool returnScheduler, storm::Environment env);
 
    private:
@@ -38,7 +38,7 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
 
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
-    ValueVector<ValueType>& valueVector;
+    storage::ValueVector<ValueType>& valueVector;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
 
     size_t currentLeafId = 0;

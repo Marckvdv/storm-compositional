@@ -29,8 +29,6 @@
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/modelchecker/NaiveOpenMdpChecker.h"
-#include "storm-compose/modelchecker/NaiveOpenMdpChecker2.h"
-#include "storm-compose/modelchecker/WeightedOpenMdpChecker.h"
 
 #include "storm-parsers/parser/ExpressionParser.h"
 
@@ -43,8 +41,6 @@ namespace cli {
 enum ReachabilityCheckingApproach {
     MONOLITHIC,
     NAIVE,
-    NAIVE2,
-    WEIGHTED,
     COMPOSITIONAL_VI,
 };
 
@@ -91,10 +87,6 @@ boost::optional<ReachabilityCheckingOptions<ValueType>> processOptions() {
             options.approach = MONOLITHIC;
         else if (approach == "naive")
             options.approach = NAIVE;
-        else if (approach == "naive2")
-            options.approach = NAIVE2;
-        else if (approach == "weighted")
-            options.approach = WEIGHTED;
         else if (approach == "cvi")
             options.approach = COMPOSITIONAL_VI;
         else
@@ -155,14 +147,7 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             checker = std::make_unique<storm::modelchecker::MonolithicOpenMdpChecker<ValueType>>(options.omdpManager, stats);
             break;
         case NAIVE:
-            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager, stats);
-            break;
-        case NAIVE2:
-            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker2<ValueType>>(options.omdpManager, stats, settings);
-            break;
-        case WEIGHTED:
-            STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
-            checker = std::make_unique<storm::modelchecker::WeightedOpenMdpChecker<ValueType>>(options.omdpManager, stats);
+            checker = std::make_unique<storm::modelchecker::NaiveOpenMdpChecker<ValueType>>(options.omdpManager, stats, settings);
             break;
         case COMPOSITIONAL_VI:
             // STORM_LOG_ASSERT(options.omdpManager->getRoot()->isRightward(), "Weighted model checking is currently only supported on rightward open MDPs");
@@ -173,6 +158,8 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             modelcheckerOptions.useBottomUp = composeSettings.useBottomUp();
             modelcheckerOptions.cacheErrorTolerance = composeSettings.getParetoCacheEpsilon();
             modelcheckerOptions.maxSteps = composeSettings.getCviSteps();
+            modelcheckerOptions.oviInterval = composeSettings.getOviInterval();
+            modelcheckerOptions.bottomUpInterval = composeSettings.getBottomUpInterval();
             checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);
             break;
     }
@@ -210,46 +197,47 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
  * @return Return code, 0 if successfull, not 0 otherwise.
  */
 int main(const int argc, const char** argv) {
-    // try {
-    storm::utility::setUp();
-    storm::cli::printHeader("Storm-compose", argc, argv);
-    storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
+    try {
+        storm::utility::setUp();
+        storm::cli::printHeader("Storm-compose", argc, argv);
+        storm::settings::initializeComposeSettings("Storm-compose", "storm-compose");
 
-    bool optionsCorrect = storm::cli::parseOptions(argc, argv);
-    if (!optionsCorrect) {
-        return -1;
-    }
-    storm::utility::Stopwatch totalTimer(true);
-    storm::cli::setUrgentOptions();
-
-    // Invoke storm-compose with obtained settings
-    auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
-
-    if (generalSettings.isExactSet()) {
-        auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
-        if (!options) {
-            std::cout << "failed parsing options" << std::endl;
-            return 1;
+        bool optionsCorrect = storm::cli::parseOptions(argc, argv);
+        if (!optionsCorrect) {
+            return -1;
         }
-        performModelChecking(*options);
-    } else {
-        auto options = storm::compose::cli::processOptions<double>();
-        if (!options) {
-            std::cout << "failed parsing options" << std::endl;
-            return 1;
-        }
-        performModelChecking(*options);
-    }
+        storm::utility::Stopwatch totalTimer(true);
+        storm::cli::setUrgentOptions();
 
-    totalTimer.stop();
-    if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
-        storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
+        // Invoke storm-compose with obtained settings
+        auto const& generalSettings = storm::settings::getModule<storm::settings::modules::GeneralSettings>();
+
+        if (generalSettings.isExactSet()) {
+            auto options = storm::compose::cli::processOptions<storm::RationalNumber>();
+            if (!options) {
+                std::cout << "failed parsing options" << std::endl;
+                return 1;
+            }
+            performModelChecking(*options);
+        } else {
+            auto options = storm::compose::cli::processOptions<double>();
+            if (!options) {
+                std::cout << "failed parsing options" << std::endl;
+                return 1;
+            }
+            performModelChecking(*options);
+        }
+
+        totalTimer.stop();
+        if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
+            storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
+        }
+    } catch (std::bad_alloc e) {
+        std::cout << "Bad alloc: " << e.what() << std::endl;
+        return 23;
     }
-    //} catch (std::bad_alloc e) {
-    //    std::cout << "Got an exception: " << e.what() << std::endl;
-    //    return 23;
     //} catch (std::exception e) {
-    //    std::cerr << "Got an exception " << e.what() << std::endl;
+    //    std::cerr << "Got an exception: " << e.what() << std::endl;
     //    return -1;
     //} catch (...) {
     //    std::cerr << "Got an unknown exception." << std::endl;

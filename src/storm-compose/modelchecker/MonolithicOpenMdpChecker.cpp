@@ -43,7 +43,7 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
                                                                                                OpenMdpReachabilityTask task) {
     auto mdp = concreteMdp.getMdp();
 
-    if (true) {
+    if (false) {
         std::ofstream f("out.drn");
         storm::exporter::explicitExportSparseModel<ValueType>(f, mdp, {});
         f.close();

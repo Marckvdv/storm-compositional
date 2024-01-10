@@ -1,6 +1,6 @@
 #include "CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
-#include "storm-compose/modelchecker/CompositionalValueVector.h"
+#include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
@@ -64,22 +64,11 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
     auto noCache = std::make_shared<storage::NoCache<ValueType>>();
     auto root = this->manager->getRoot();
+
+    HeuristicValueIterator<ValueType> hvi(this->manager, valueVector, cache, this->stats);
     do {
-        models::visitor::CVIVisitor<ValueType> cviVisitor(this->manager, valueVector, cache, this->stats);
-        root->accept(cviVisitor);
-
-        std::cout << "Size of value: " << valueVector.getValues().size() << std::endl;
-        std::cout << "current value:" << storm::utility::convertNumber<double>(valueVector.getValues()[0]) << "( " << currentStep << "/" << options.maxSteps
-                  << " )" << std::endl;
-
-        // for (const auto& v : valueVector.getValues()) {
-        //     if (v == storm::utility::zero<ValueType>()) {
-        //         std::cout << "#";
-        //     } else {
-        //         std::cout << storm::utility::convertNumber<double>(v) << ", ";
-        //     }
-        // }
-        // std::cout << std::endl;
+        hvi.performIteration();
+        std::cout << "iteration " << currentStep << "/" << options.maxSteps << std::endl;
 
         if (shouldCheckOVITermination()) {
             // Compute v + epsilon
@@ -152,12 +141,6 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 
     auto root = this->manager->getRoot();
 
-    models::visitor::MappingVisitor<ValueType> mappingVisitor;
-    root->accept(mappingVisitor);
-    mappingVisitor.performPostProcessing();
-    auto mapping = mappingVisitor.getMapping();
-    // mapping.print();
-
     models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
     root->accept(entranceExitMappingVisitor);
 
@@ -171,8 +154,14 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
     root->accept(entranceExitVisitor);
     size_t rOuterExitCount = entranceExitVisitor.getCollected().size();
 
+    models::visitor::MappingVisitor<ValueType> mappingVisitor;
+    root->accept(mappingVisitor);
+    mappingVisitor.performPostProcessing();
+    auto mapping = mappingVisitor.getMapping();
+    std::cout << "M: " << mapping.size() << std::endl;
+
     auto finalWeight = task.toExitWeights<ValueType>(lOuterExitCount, rOuterExitCount);
-    valueVector = models::visitor::ValueVector<ValueType>(mappingVisitor.getMapping(), finalWeight);
+    valueVector = storage::ValueVector<ValueType>(std::move(mapping), finalWeight);
     valueVector.initializeValues();
 }
 
