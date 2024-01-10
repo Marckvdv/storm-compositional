@@ -5,6 +5,7 @@
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/storage/AbstractCache.h"
+#include "storm-compose/storage/ValueVector.h"
 #include "storm/environment/Environment.h"
 
 namespace storm {
