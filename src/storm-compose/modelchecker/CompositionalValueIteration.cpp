@@ -65,7 +65,10 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     auto noCache = std::make_shared<storage::NoCache<ValueType>>();
     auto root = this->manager->getRoot();
 
-    HeuristicValueIterator<ValueType> hvi(this->manager, valueVector, cache, this->stats);
+    typename HeuristicValueIterator<ValueType>::Options hviOptions;
+    hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
+
+    HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
     do {
         hvi.performIteration();
         std::cout << "iteration " << currentStep << "/" << options.maxSteps << std::endl;

@@ -160,6 +160,8 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             modelcheckerOptions.maxSteps = composeSettings.getCviSteps();
             modelcheckerOptions.oviInterval = composeSettings.getOviInterval();
             modelcheckerOptions.bottomUpInterval = composeSettings.getBottomUpInterval();
+            modelcheckerOptions.iterationOrder = composeSettings.getIterationOrder();
+
             checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);
             break;
     }

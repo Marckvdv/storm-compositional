@@ -45,6 +45,7 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
 
         CacheMethod cacheMethod = PARETO_CACHE;
         ValueType cacheErrorTolerance = storm::utility::convertNumber<ValueType>(0.1);
+        std::string iterationOrder = "backward";
     };
 
     CompositionalValueIteration(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats,

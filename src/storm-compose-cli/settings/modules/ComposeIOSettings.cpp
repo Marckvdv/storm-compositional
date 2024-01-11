@@ -31,6 +31,7 @@ const std::string ComposeIOSettings::useBottomUpName = "useBottomUp";
 const std::string ComposeIOSettings::paretoCacheEpsilonName = "paretoCacheEpsilon";
 const std::string ComposeIOSettings::oviIntervalName = "oviInterval";
 const std::string ComposeIOSettings::bottomUpIntervalName = "bottomUpInterval";
+const std::string ComposeIOSettings::iterationOrderName = "iterationOrder";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
@@ -43,6 +44,7 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(benchmarkDataName, "write benchmark results", "filename", "The path to store the benchmark results");
     addStringOption(paretoPrecisionTypeName, "multi objective computation precision type", "type", "In: {absolute, relative}");
     addStringOption(cacheMethodName, "Cache method to use", "method", "In: {no, exact, pareto} (default=pareto)");
+    addStringOption(iterationOrderName, "Iteration order to use", "order", "In: {forward, backward, heuristic} (default=backward)");
 
     addDoubleOption(paretoPrecisionName, "the precision with which to perform multiobjective optimisation, see also --paretoPrecisionType", "precision",
                     "the relative or absolution precision");
@@ -132,6 +134,10 @@ bool ComposeIOSettings::isBottomUpIntervalSet() const {
     return this->getOption(bottomUpIntervalName).getHasOptionBeenSet();
 }
 
+bool ComposeIOSettings::isIterationOrderSet() const {
+    return this->getOption(iterationOrderName).getHasOptionBeenSet();
+}
+
 std::string ComposeIOSettings::getStringDiagramFilename() const {
     return this->getOption(stringDiagramOption).getArgumentByName("filename").getValueAsString();
 }
@@ -182,6 +188,14 @@ double ComposeIOSettings::getOviEpsilon() const {
 
 std::string ComposeIOSettings::getParetoPrecisionType() const {
     return this->getOption(paretoPrecisionTypeName).getArgumentByName("type").getValueAsString();
+}
+
+std::string ComposeIOSettings::getIterationOrder() const {
+    if (isIterationOrderSet()) {
+        return this->getOption(iterationOrderName).getArgumentByName("order").getValueAsString();
+    } else {
+        return "backward";
+    }
 }
 
 size_t ComposeIOSettings::getParetoSteps() const {

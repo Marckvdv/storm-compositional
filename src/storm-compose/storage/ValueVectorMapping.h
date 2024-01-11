@@ -24,13 +24,18 @@ class ValueVectorMapping {
     std::set<Key> const& getOuterPositions() const;
     std::vector<models::ConcreteMdp<ValueType>*>& getLeaves();
     std::map<Position, size_t>& getModelMapping(size_t leafId);
+    boost::optional<size_t> getConnectedLeafId(size_t leafId, Position pos);
+    models::ConcreteMdp<ValueType> const* getLeaf(size_t leaf) const;
 
    private:
     // All the leaves
     std::vector<models::ConcreteMdp<ValueType>*> leaves;
 
-    // mapping from <leave_id, position> to value vector index
+    // mapping from <leaf_id, position> to value vector index
     std::map<Key, size_t> mapping;
+
+    // mapping from <leaf_id, output position> to leaf_id
+    std::map<Key, size_t> connectedMapping;
     std::vector<std::map<Position, size_t>> modelMapping;
     std::set<Key> outerPositions;
     size_t highestIndex;

@@ -40,6 +40,7 @@ class ComposeIOSettings : public ModuleSettings {
     bool useBottomUp() const;
     bool isOviIntervalSet() const;
     bool isBottomUpIntervalSet() const;
+    bool isIterationOrderSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -47,8 +48,9 @@ class ComposeIOSettings : public ModuleSettings {
     std::string getApproach() const;
     std::string getExportStringDiagramFilename() const;
     std::string getBenchmarkDataFilename() const;
-    double getParetoPrecision() const;
     std::string getParetoPrecisionType() const;
+    std::string getIterationOrder() const;
+    double getParetoPrecision() const;
     size_t getParetoSteps() const;
     size_t getCviSteps() const;
     double getOviEpsilon() const;
@@ -76,6 +78,7 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string paretoCacheEpsilonName;
     static const std::string oviIntervalName;
     static const std::string bottomUpIntervalName;
+    static const std::string iterationOrderName;
 
    private:
     void addStringOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);
