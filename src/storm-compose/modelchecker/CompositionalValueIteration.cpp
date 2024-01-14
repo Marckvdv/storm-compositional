@@ -67,6 +67,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
     typename HeuristicValueIterator<ValueType>::Options hviOptions;
     hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
+    hviOptions.localOviEpsilon = options.localOviEpsilon;
 
     HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
     do {
@@ -74,13 +75,14 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "iteration " << currentStep << "/" << options.maxSteps << std::endl;
 
         if (shouldCheckOVITermination()) {
+            std::cout << "Checking OVI" << std::endl;
             // Compute v + epsilon
             auto newValue = valueVector;
             newValue.addConstant(options.epsilon);
             auto newValueCopy = newValue;
 
             // TODO make sure that the upper bound is actually computed.
-            // models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache);
+            //models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache, this->stats);
             models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, cache, this->stats);
             root->accept(upperboundVisitor);
             if (newValueCopy.dominates(newValue)) {
@@ -128,8 +130,9 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     } else if (lowerBound) {
         return ApproximateReachabilityResult<ValueType>(*lowerBound);
     } else {
-        lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-        return ApproximateReachabilityResult<ValueType>(*lowerBound);
+        //lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
+        //return ApproximateReachabilityResult<ValueType>(*lowerBound);
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced");
     }
 }
 
@@ -177,7 +180,7 @@ void CompositionalValueIteration<ValueType>::initializeCache() {
     if (options.cacheMethod == NO_CACHE) {
         cache = std::make_shared<storm::storage::NoCache<ValueType>>();
     } else if (options.cacheMethod == EXACT_CACHE) {
-        cache = std::make_shared<storm::storage::ExactCache<ValueType>>();
+        cache = std::make_shared<storm::storage::ExactCache<ValueType>>(options.localOviEpsilon);
     } else if (options.cacheMethod == PARETO_CACHE) {
         cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
         cache->setErrorTolerance(options.cacheErrorTolerance);

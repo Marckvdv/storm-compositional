@@ -21,6 +21,7 @@ HeuristicValueIterator<ValueType>::HeuristicValueIterator(Options options, std::
     : options(options), env(), manager(manager), valueVector(valueVector), mapping(valueVector.getMapping()), cache(cache), stats(stats) {
     // Intentionally left empty
     env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    env.solver().minMax().setPrecision(options.localOviEpsilon);
     initializeLeafScores();
 }
 

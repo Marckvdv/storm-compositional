@@ -45,6 +45,7 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
 
         CacheMethod cacheMethod = PARETO_CACHE;
         ValueType cacheErrorTolerance = storm::utility::convertNumber<ValueType>(0.1);
+        ValueType localOviEpsilon = 1e-4;
         std::string iterationOrder = "backward";
     };
 

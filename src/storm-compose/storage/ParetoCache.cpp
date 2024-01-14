@@ -60,6 +60,50 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
     return lowerBound;
 }
 
+// TODO reuse code above instead of copying
+template<typename ValueType>
+boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueType>::getUpperBound(models::ConcreteMdp<ValueType>* ptr,
+                                                                                                   WeightType outputWeight) {
+    if (!isInitialized(ptr)) {
+        initializeParetoCurve(ptr);
+    }
+
+    ParetoPointType convertedOutputWeight = storm::utility::vector::convertNumericVector<ParetoRational>(outputWeight);
+    WeightType upperBound(ptr->getEntranceCount());
+
+    size_t weightIndex = 0;
+    auto processEntrances = [&](const auto& entrances, storage::EntranceExit entrance) {
+        for (size_t i = 0; i < entrances.size(); ++i) {
+            Position pos = {entrance, i};
+            auto paretoEntry = getLowerUpper(ptr, convertedOutputWeight, pos);
+
+            const auto& lb = paretoEntry.first;
+            const auto& ub = paretoEntry.second;
+
+            ParetoRational error = getError(lb, ub);
+            if (error > this->errorTolerance) {
+                return false;
+            }
+            upperBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(ub, convertedOutputWeight));
+
+            ++weightIndex;
+        }
+        return true;
+    };
+
+    bool result1 = processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
+    if (!result1)
+        return boost::none;
+
+    bool result2 = processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
+    if (!result2)
+        return boost::none;
+
+    std::cout << "Cache hit" << std::endl;
+
+    return upperBound;
+}
+
 template<typename ValueType>
 void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight, std::vector<ValueType> inputWeight,
                                         boost::optional<storm::storage::Scheduler<ValueType>> sched) {

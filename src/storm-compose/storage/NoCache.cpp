@@ -9,6 +9,11 @@ boost::optional<std::vector<ValueType>> NoCache<ValueType>::getLowerBound(models
 }
 
 template<typename ValueType>
+boost::optional<std::vector<ValueType>> NoCache<ValueType>::getUpperBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) {
+    return boost::none;
+}
+
+template<typename ValueType>
 void NoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
                                     boost::optional<storm::storage::Scheduler<ValueType>> sched) {}
 

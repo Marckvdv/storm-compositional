@@ -13,6 +13,7 @@ class AbstractCache {
     typedef std::vector<ValueType> WeightType;
 
     virtual boost::optional<WeightType> getLowerBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) = 0;
+    virtual boost::optional<WeightType> getUpperBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) = 0;
     virtual void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
                             boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none) = 0;
 

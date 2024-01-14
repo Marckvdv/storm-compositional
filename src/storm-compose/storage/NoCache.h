@@ -12,6 +12,7 @@ class NoCache : public AbstractCache<ValueType> {
     typedef std::vector<ValueType> WeightType;
 
     boost::optional<WeightType> getLowerBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) override;
+    boost::optional<WeightType> getUpperBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) override;
     void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
                     boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none) override;
     bool needScheduler() override;
