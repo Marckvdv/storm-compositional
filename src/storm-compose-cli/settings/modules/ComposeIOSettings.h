@@ -41,6 +41,7 @@ class ComposeIOSettings : public ModuleSettings {
     bool isOviIntervalSet() const;
     bool isBottomUpIntervalSet() const;
     bool isIterationOrderSet() const;
+    bool isLocalOviEpsilonSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -54,6 +55,7 @@ class ComposeIOSettings : public ModuleSettings {
     size_t getParetoSteps() const;
     size_t getCviSteps() const;
     double getOviEpsilon() const;
+    double getLocalOviEpsilon() const;
     storm::modelchecker::CacheMethod getCacheMethod() const;
     double getParetoCacheEpsilon() const;
     size_t getOviInterval() const;
@@ -79,6 +81,7 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string oviIntervalName;
     static const std::string bottomUpIntervalName;
     static const std::string iterationOrderName;
+    static const std::string localOviEpsilonName;
 
    private:
     void addStringOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);

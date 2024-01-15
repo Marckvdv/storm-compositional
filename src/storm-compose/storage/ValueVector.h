@@ -29,6 +29,7 @@ class ValueVector {
    private:
     ValueVectorMapping<ValueType> mapping;
     std::vector<ValueType> values, finalWeight;
+    std::set<size_t> exitIndices;
 };
 
 }  // namespace storage

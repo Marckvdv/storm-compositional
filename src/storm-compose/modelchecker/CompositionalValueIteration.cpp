@@ -1,6 +1,7 @@
 #include "CompositionalValueIteration.h"
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/modelchecker/HeuristicValueIterator.h"
+#include "storm-compose/modelchecker/OviStepUpdater.h"
 #include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
@@ -72,7 +73,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
     do {
         hvi.performIteration();
-        std::cout << "iteration " << currentStep << "/" << options.maxSteps << std::endl;
+        std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << valueVector.getValues()[0] << std::endl;
 
         if (shouldCheckOVITermination()) {
             std::cout << "Checking OVI" << std::endl;
@@ -81,10 +82,8 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
             newValue.addConstant(options.epsilon);
             auto newValueCopy = newValue;
 
-            // TODO make sure that the upper bound is actually computed.
-            //models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, noCache, this->stats);
-            models::visitor::CVIVisitor<ValueType> upperboundVisitor(this->manager, newValue, cache, this->stats);
-            root->accept(upperboundVisitor);
+            OviStepUpdater<ValueType> upperboundVisitor(hviOptions, this->manager, newValue, cache, this->stats);
+            upperboundVisitor.performIteration();
             if (newValueCopy.dominates(newValue)) {
                 // optimistic value iteration stopping criterion
                 oviStop = true;
@@ -123,16 +122,17 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "OVI stopping criterion hit" << std::endl;
     } else if (bottomUpStop) {
         std::cout << "Bottom-up stopping criterion hit" << std::endl;
+    } else {
+        std::cout << "Neither stopping criterion hit" << std::endl;
+        lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
     }
 
     if (lowerBound && upperBound) {
         return ApproximateReachabilityResult<ValueType>(*lowerBound, *upperBound);
     } else if (lowerBound) {
-        return ApproximateReachabilityResult<ValueType>(*lowerBound);
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced (lower bound=" << *lowerBound << ")");
     } else {
-        //lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-        //return ApproximateReachabilityResult<ValueType>(*lowerBound);
-        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced");
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper or lower bound produced");
     }
 }
 

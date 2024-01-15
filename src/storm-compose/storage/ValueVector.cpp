@@ -31,8 +31,10 @@ void ValueVector<ValueType>::initializeValues() {
         if (entranceExit == storage::L_ENTRANCE || entranceExit == storage::R_ENTRANCE)
             continue;
         std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
+        size_t valueIndex = mapping.lookup(entry);
+        values[valueIndex] = finalWeight[index];
+        exitIndices.insert(valueIndex);
 
-        setWeight(entry.first, entry.second, finalWeight[index]);
         ++index;  // TODO make sure this lines up
     }
 }
@@ -44,12 +46,16 @@ std::vector<ValueType>& ValueVector<ValueType>::getValues() {
 
 template<typename ValueType>
 void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
-    if (clamp) {
-        for (auto& v : values) {
-            v = storm::utility::min<ValueType>(v + epsilon, storm::utility::one<ValueType>());
+    for (size_t i = 0; i < values.size(); ++i) {
+        // Do not add epsilon to (outer) exits
+        if (exitIndices.count(i) > 0) {
+            continue;
         }
-    } else {
-        for (auto& v : values) {
+
+        auto& v = values[i];
+        if (clamp) {
+            v = storm::utility::min<ValueType>(v + epsilon, storm::utility::one<ValueType>());
+        } else {
             v += epsilon;
         }
     }
@@ -57,12 +63,15 @@ void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
 
 template<typename ValueType>
 bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) {
+    bool dominates = true;
     for (size_t i = 0; i < values.size(); ++i) {
         if (values[i] < other.values[i]) {
-            return false;
+            dominates = false;
+            std::cout << values[i] << " < " << other.values[i] << " " << i << "/" << values.size() << ", no OVI" << std::endl;
+            // break;
         }
     }
-    return true;
+    return dominates;
 }
 
 template<typename ValueType>

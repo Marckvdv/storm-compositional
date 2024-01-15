@@ -17,7 +17,6 @@ class HeuristicValueIterator {
     typedef std::vector<ValueType> WeightType;
 
    public:
-
     struct Options {
         size_t stepsPerIteration = 100;
         enum IterationOrder { FORWARD, BACKWARD, HEURISTIC } iterationOrder = BACKWARD;

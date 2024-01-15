@@ -7,8 +7,7 @@ namespace storm {
 namespace storage {
 
 template<typename ValueType>
-ExactCache<ValueType>::ExactCache(ValueType oviEpsilon) : oviEpsilon(oviEpsilon) {
-}
+ExactCache<ValueType>::ExactCache(ValueType oviEpsilon) : oviEpsilon(oviEpsilon) {}
 
 template<typename ValueType>
 boost::optional<std::vector<ValueType>> ExactCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr, std::vector<ValueType> outputWeight) {
@@ -25,7 +24,7 @@ boost::optional<std::vector<ValueType>> ExactCache<ValueType>::getUpperBound(mod
     const auto it = cache.find({outputWeight, ptr});
     if (it != cache.end()) {
         auto values = it->second;
-        for (auto &v : values) {
+        for (auto& v : values) {
             v = storm::utility::min<ValueType>(v + oviEpsilon, storm::utility::one<ValueType>());
         }
         return values;

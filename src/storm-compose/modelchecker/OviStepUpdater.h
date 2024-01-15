@@ -4,6 +4,7 @@
 
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
+#include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/storage/AbstractCache.h"
 #include "storm-compose/storage/ValueVectorMapping.h"
@@ -17,15 +18,9 @@ class OviStepUpdater {
     typedef std::vector<ValueType> WeightType;
 
    public:
-
-    struct Options {
-        size_t stepsPerIteration = 100;
-        enum IterationOrder { FORWARD, BACKWARD, HEURISTIC } iterationOrder = BACKWARD;
-        ValueType localOviEpsilon = 1e-4;
-    };
-
-    OviStepUpdater(Options options, std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
-                           std::shared_ptr<storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats);
+    OviStepUpdater(typename HeuristicValueIterator<ValueType>::Options options, std::shared_ptr<models::OpenMdpManager<ValueType>> manager,
+                   storage::ValueVector<ValueType>& valueVector, std::shared_ptr<storage::AbstractCache<ValueType>> cache,
+                   compose::benchmark::BenchmarkStats<ValueType>& stats);
 
     void performIteration();
 
@@ -37,7 +32,7 @@ class OviStepUpdater {
     void storeInputWeights(size_t leafId, WeightType const& inputWeights);
     WeightType performStep(size_t leafId, WeightType const& weights);
 
-    Options options;
+    typename HeuristicValueIterator<ValueType>::Options options;
     storm::Environment env;
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
     storage::ValueVector<ValueType>& valueVector;

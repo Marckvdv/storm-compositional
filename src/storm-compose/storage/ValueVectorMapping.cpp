@@ -8,7 +8,6 @@ template<typename ValueType>
 ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<models::ConcreteMdp<ValueType>*> leaves, std::map<Key, size_t> mapping,
                                                   std::set<Key> outerPositions, size_t highestIndex)
     : leaves(leaves), mapping(mapping), modelMapping(leaves.size()), outerPositions(outerPositions), highestIndex(highestIndex) {
-
     // Maps value vector indices to their exit
     std::map<size_t, Key> reverseMap;
     for (const auto& entry : mapping) {
@@ -24,8 +23,8 @@ ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<models::ConcreteMd
         modelMapping[leafId][pos] = value;
     }
 
-    //std::cout << "Mapping " << std::endl;
-    // Populate connectedMapping
+    // std::cout << "Mapping " << std::endl;
+    //  Populate connectedMapping
     for (const auto& entry : mapping) {
         const auto& key = entry.first;
         const auto& value = entry.second;
@@ -36,7 +35,7 @@ ValueVectorMapping<ValueType>::ValueVectorMapping(std::vector<models::ConcreteMd
             size_t connectedLeaf = connectedKey.first;
             connectedMapping[key] = connectedLeaf;
 
-            //std::cout << "leafId " << key.first << " " << storage::positionToString(pos) << " -> " << connectedLeaf << std::endl;
+            // std::cout << "leafId " << key.first << " " << storage::positionToString(pos) << " -> " << connectedLeaf << std::endl;
         }
     }
 }
@@ -91,7 +90,7 @@ template<typename ValueType>
 boost::optional<size_t> ValueVectorMapping<ValueType>::getConnectedLeafId(size_t leafId, Position pos) {
     STORM_LOG_ASSERT(pos.first == L_ENTRANCE || pos.first == R_ENTRANCE, "Only supported for entrance positions");
 
-    const Key key {leafId, pos};
+    const Key key{leafId, pos};
     const auto it = connectedMapping.find(key);
     if (it == connectedMapping.end()) {
         return boost::none;

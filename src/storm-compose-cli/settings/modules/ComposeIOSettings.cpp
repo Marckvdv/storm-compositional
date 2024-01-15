@@ -32,6 +32,7 @@ const std::string ComposeIOSettings::paretoCacheEpsilonName = "paretoCacheEpsilo
 const std::string ComposeIOSettings::oviIntervalName = "oviInterval";
 const std::string ComposeIOSettings::bottomUpIntervalName = "bottomUpInterval";
 const std::string ComposeIOSettings::iterationOrderName = "iterationOrder";
+const std::string ComposeIOSettings::localOviEpsilonName = "localOviEpsilon";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
@@ -50,6 +51,7 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
                     "the relative or absolution precision");
     addDoubleOption(oviEpsilonName, "epsilon with which to perform optimistic (compositional) value iteration", "epsilon", "");
     addDoubleOption(paretoCacheEpsilonName, "error tolerance for using the cache", "epsilon", "");
+    addDoubleOption(localOviEpsilonName, "local OVI epsilon", "epsilon", "");
 
     addUnsignedOption(paretoStepsName, "maximum number of steps to perform in the multiobjective optimisation", "steps", "number of steps");
     addUnsignedOption(cviStepsName, "maximum number of steps to perform in CVI", "steps", "number of steps");
@@ -138,6 +140,10 @@ bool ComposeIOSettings::isIterationOrderSet() const {
     return this->getOption(iterationOrderName).getHasOptionBeenSet();
 }
 
+bool ComposeIOSettings::isLocalOviEpsilonSet() const {
+    return this->getOption(localOviEpsilonName).getHasOptionBeenSet();
+}
+
 std::string ComposeIOSettings::getStringDiagramFilename() const {
     return this->getOption(stringDiagramOption).getArgumentByName("filename").getValueAsString();
 }
@@ -183,6 +189,14 @@ double ComposeIOSettings::getOviEpsilon() const {
         return this->getOption(oviEpsilonName).getArgumentByName("epsilon").getValueAsDouble();
     } else {
         return 1e-4;
+    }
+}
+
+double ComposeIOSettings::getLocalOviEpsilon() const {
+    if (isLocalOviEpsilonSet()) {
+        return this->getOption(localOviEpsilonName).getArgumentByName("epsilon").getValueAsDouble();
+    } else {
+        return 1e-5;
     }
 }
 

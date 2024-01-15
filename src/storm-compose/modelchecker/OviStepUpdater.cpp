@@ -2,6 +2,7 @@
 #include "exceptions/NotSupportedException.h"
 #include "exceptions/OutOfRangeException.h"
 #include "solver/SolverSelectionOptions.h"
+#include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/CVIVisitor.h"
 #include "storm-compose/storage/EntranceExit.h"
@@ -14,10 +15,9 @@ namespace storm {
 namespace modelchecker {
 
 template<typename ValueType>
-OviStepUpdater<ValueType>::OviStepUpdater(Options options, std::shared_ptr<models::OpenMdpManager<ValueType>> manager,
-                                                          storage::ValueVector<ValueType>& valueVector,
-                                                          std::shared_ptr<storage::AbstractCache<ValueType>> cache,
-                                                          compose::benchmark::BenchmarkStats<ValueType>& stats)
+OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueType>::Options options,
+                                          std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
+                                          std::shared_ptr<storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats)
     : options(options), env(), manager(manager), valueVector(valueVector), mapping(valueVector.getMapping()), cache(cache), stats(stats) {
     // Intentionally left empty
     env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
@@ -79,10 +79,15 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
             auto weight = newResult.first;
+            auto upperboundWeight = newResult.first;
+            for (auto& v : upperboundWeight) {
+                v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
+                // v += options.localOviEpsilon;
+            }
             auto scheduler = newResult.second;
 
-            inputWeights = weight;
-            addToCache(model, weights, inputWeights, scheduler);
+            inputWeights = upperboundWeight;
+            addToCache(model, weights, weight, scheduler);
         }
     }
 
@@ -91,9 +96,9 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
 
 template<typename ValueType>
 boost::optional<typename OviStepUpdater<ValueType>::WeightType> OviStepUpdater<ValueType>::queryCache(models::ConcreteMdp<ValueType>* ptr,
-                                                                                                                      WeightType outputWeight) {
+                                                                                                      WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
-    auto result = cache->getLowerBound(ptr, outputWeight);
+    auto result = cache->getUpperBound(ptr, outputWeight);
     stats.cacheRetrievalTime.stop();
 
     return result;
@@ -101,7 +106,7 @@ boost::optional<typename OviStepUpdater<ValueType>::WeightType> OviStepUpdater<V
 
 template<typename ValueType>
 void OviStepUpdater<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
-                                                   boost::optional<storm::storage::Scheduler<ValueType>> sched) {
+                                           boost::optional<storm::storage::Scheduler<ValueType>> sched) {
     stats.cacheInsertionTime.start();
     cache->addToCache(ptr, outputWeight, inputWeight, sched);
     stats.cacheInsertionTime.stop();

@@ -47,17 +47,24 @@ void HeuristicValueIterator<ValueType>::performIteration() {
 
 template<typename ValueType>
 typename HeuristicValueIterator<ValueType>::Options::IterationOrder HeuristicValueIterator<ValueType>::orderFromString(std::string const& string) {
-    if (string == "forward") return Options::IterationOrder::FORWARD;
-    else if (string == "backward") return Options::IterationOrder::BACKWARD;
-    else if (string == "heuristic") return Options::IterationOrder::HEURISTIC;
-    else STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Unknown iteration order " << string);
+    if (string == "forward")
+        return Options::IterationOrder::FORWARD;
+    else if (string == "backward")
+        return Options::IterationOrder::BACKWARD;
+    else if (string == "heuristic")
+        return Options::IterationOrder::HEURISTIC;
+    else
+        STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Unknown iteration order " << string);
 }
 
 template<typename ValueType>
 void HeuristicValueIterator<ValueType>::updateModel(size_t leafId) {
     WeightType weights = valueVector.getOutputWeights(leafId);
     WeightType inputWeights = performStep(leafId, weights);
-    updateLeafScores(inputWeights, leafId);
+
+    if (options.iterationOrder == Options::HEURISTIC) {
+        updateLeafScores(inputWeights, leafId);
+    }
     storeInputWeights(leafId, inputWeights);
 }
 
@@ -134,7 +141,7 @@ void HeuristicValueIterator<ValueType>::initializeLeafScores() {
         reverseLeafScore.insert({defaultScore, leaf});
     }
 
-    updateLeafScore(leafCount-1, 1);
+    updateLeafScore(leafCount - 1, 1);
 }
 
 template<typename ValueType>
@@ -172,7 +179,7 @@ void HeuristicValueIterator<ValueType>::updateLeafScores(WeightType const& input
     size_t weightIndex = 0;
     auto processEntrances = [&](size_t entranceCount, storage::EntranceExit entranceExit) {
         for (size_t i = 0; i < entranceCount; ++i) {
-            storage::Position outPos {entranceExit, i};
+            storage::Position outPos{entranceExit, i};
             ValueType oldProbability = valueVector.getWeight(leafId, outPos);
             ValueType newProbability = inputWeights[weightIndex];
             ValueType difference = newProbability - oldProbability;
