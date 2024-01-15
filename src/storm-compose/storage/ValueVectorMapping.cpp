@@ -52,6 +52,41 @@ void ValueVectorMapping<ValueType>::print() const {
 }
 
 template<typename ValueType>
+void ValueVectorMapping<ValueType>::printValueVector(ValueVector<ValueType>& value) const {
+    std::vector<std::pair<Key, Key>> reverseLookup(mapping.size());
+    for (size_t i = 0; i < reverseLookup.size(); ++i) {
+        reverseLookup[i] = {{999, {}}, {999, {}}}; // TODO
+    }
+
+    for (const auto& entry : mapping) {
+        size_t index = entry.second;
+        const auto& key = entry.first;
+        const auto& pos = key.second;
+        if (pos.first == EntranceExit::L_ENTRANCE || pos.first == EntranceExit::R_ENTRANCE) {
+            reverseLookup[index].first = key;
+        } else {
+            reverseLookup[index].second = key;
+        }
+    }
+
+    const auto printKey = [&](const auto& key) {
+        const size_t leaf = key.first;
+        const auto& pos = key.second;
+
+        std::cout << "<" << leaf << ", " << storage::positionToString(pos) << ">";
+    };
+
+    for (size_t i = 0; i < mapping.size(); ++i) {
+        std::pair<Key, Key> const& keys = reverseLookup[i];
+        std::cout << "Value" << i << "\t";
+        if (keys.first.first != 999) printKey(keys.first);
+        if (keys.second.first != 999) printKey(keys.second);
+
+        std::cout << " = " << value.getValues()[i] << std::endl;
+    }
+}
+
+template<typename ValueType>
 size_t ValueVectorMapping<ValueType>::lookup(const Key& key) const {
     return mapping.at(key);
 }

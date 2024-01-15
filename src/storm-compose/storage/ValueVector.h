@@ -12,6 +12,9 @@ namespace storm {
 namespace storage {
 
 template<typename ValueType>
+class ValueVectorMapping;
+
+template<typename ValueType>
 class ValueVector {
    public:
     ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight);
@@ -22,9 +25,11 @@ class ValueVector {
     void initializeValues();
     void addConstant(ValueType epsilon, bool clamp = true);
     std::vector<ValueType>& getValues();
-    bool dominates(ValueVector<ValueType> const& other);
+    bool dominates(ValueVector<ValueType> const& other) const;
+    bool dominatedBy(ValueVector<ValueType> const& other) const;
     ValueVectorMapping<ValueType>& getMapping();
     std::vector<ValueType> getOutputWeights(size_t leafId);
+    void print();
 
    private:
     ValueVectorMapping<ValueType> mapping;

@@ -15,7 +15,7 @@ template<typename ValueType>
 BottomUpTermination<ValueType>::BottomUpTermination(std::shared_ptr<OpenMdpManager<ValueType>> manager,
                                                     storm::compose::benchmark::BenchmarkStats<ValueType>& stats, storm::Environment const& env,
                                                     storm::storage::ParetoCache<ValueType>& cache)
-    : env(env), manager(manager), cache(cache) {}
+    : env(env), manager(manager), cache(cache), stats(stats) {}
 
 template<typename ValueType>
 void BottomUpTermination<ValueType>::visitPrismModel(PrismModel<ValueType>& model) {
@@ -31,6 +31,8 @@ void BottomUpTermination<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& 
 template<typename ValueType>
 storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTermination<ValueType>::getReachabilityResult(
     storm::modelchecker::OpenMdpReachabilityTask task, storm::models::OpenMdp<ValueType>& openMdp) {
+
+    stats.bottomUpTerminationTime.start();
     LeafTransformer<ValueType> lowerBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *lowerBounds[&concreteMdp]; });
     LeafTransformer<ValueType> upperBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *upperBounds[&concreteMdp]; });
     openMdp.accept(lowerBoundTransform);
@@ -46,6 +48,7 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
 
     auto lowerResult = lowerChecker.check(task);
     auto upperResult = upperChecker.check(task);
+    stats.bottomUpTerminationTime.stop();
 
     return storm::modelchecker::ApproximateReachabilityResult<ValueType>::combineLowerUpper(lowerResult, upperResult);
 }

@@ -11,7 +11,7 @@ template<class ValueType>
 struct BenchmarkStats {
     BenchmarkStats() = default;
 
-    storm::utility::Stopwatch totalTime, modelBuildingTime, reachabilityComputationTime;
+    storm::utility::Stopwatch totalTime, modelBuildingTime, reachabilityComputationTime, bottomUpTerminationTime;
     size_t stateCount = 0, stringDiagramDepth = 0, uniqueLeaves = 0, leafStates = 0;
     size_t sequenceCount = 0, sumCount = 0, traceCount = 0;
     size_t paretoPoints = 0;
@@ -29,6 +29,7 @@ struct BenchmarkStats {
         result["totalTime"] = totalTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
         result["modelBuildingTime"] = modelBuildingTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
         result["reachabilityComputationTime"] = reachabilityComputationTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+        result["bottomUpTerminationTime"] = bottomUpTerminationTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
 
         result["stateCount"] = stateCount;
         result["stringDiagramDepth"] = stringDiagramDepth;

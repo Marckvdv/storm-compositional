@@ -4,9 +4,13 @@
 
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/storage/EntranceExit.h"
+#include "storm-compose/storage/ValueVector.h"
 
 namespace storm {
 namespace storage {
+
+template<typename ValueType>
+class ValueVector;
 
 template<typename ValueType>
 class ValueVectorMapping {
@@ -17,6 +21,7 @@ class ValueVectorMapping {
     ValueVectorMapping() = default;
 
     void print() const;
+    void printValueVector(ValueVector<ValueType>& value) const;
     size_t lookup(const Key& key) const;
     size_t getHighestIndex() const;
     size_t getLeafCount() const;

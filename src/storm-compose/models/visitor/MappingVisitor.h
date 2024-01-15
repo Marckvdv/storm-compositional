@@ -9,6 +9,13 @@
 #include "storm-compose/storage/ValueVectorMapping.h"
 
 namespace storm {
+
+namespace storage {
+template<typename ValueType>
+class ValueVectorMapping;
+
+}
+
 namespace models {
 namespace visitor {
 

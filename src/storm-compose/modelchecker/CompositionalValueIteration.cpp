@@ -76,14 +76,24 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << valueVector.getValues()[0] << std::endl;
 
         if (shouldCheckOVITermination()) {
+            std::cout << std::endl;
             std::cout << "Checking OVI" << std::endl;
             // Compute v + epsilon
+            std::cout << "Intial VV:" << std::endl;
+            valueVector.print();
+
             auto newValue = valueVector;
             newValue.addConstant(options.epsilon);
             auto newValueCopy = newValue;
 
+            std::cout << "VV + epsilon:" << std::endl;
+            newValue.print();
+
             OviStepUpdater<ValueType> upperboundVisitor(hviOptions, this->manager, newValue, cache, this->stats);
             upperboundVisitor.performIteration();
+
+            std::cout << "Phi(VV + epsilon):" << std::endl;
+            newValue.print();
             if (newValueCopy.dominates(newValue)) {
                 // optimistic value iteration stopping criterion
                 oviStop = true;
@@ -93,6 +103,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
                 break;
             }
+            std::cout << std::endl;
         }
 
         if (shouldCheckBottomUpTermination()) {
@@ -165,6 +176,7 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
     mappingVisitor.performPostProcessing();
     auto mapping = mappingVisitor.getMapping();
     std::cout << "M: " << mapping.size() << std::endl;
+    mapping.print();
 
     auto finalWeight = task.toExitWeights<ValueType>(lOuterExitCount, rOuterExitCount);
     valueVector = storage::ValueVector<ValueType>(std::move(mapping), finalWeight);

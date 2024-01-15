@@ -49,6 +49,7 @@ void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
     for (size_t i = 0; i < values.size(); ++i) {
         // Do not add epsilon to (outer) exits
         if (exitIndices.count(i) > 0) {
+            std::cout << "Skipping index: " << i << std::endl;
             continue;
         }
 
@@ -62,16 +63,24 @@ void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
 }
 
 template<typename ValueType>
-bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) {
+bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) const {
     bool dominates = true;
     for (size_t i = 0; i < values.size(); ++i) {
+        std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
+
         if (values[i] < other.values[i]) {
             dominates = false;
-            std::cout << values[i] << " < " << other.values[i] << " " << i << "/" << values.size() << ", no OVI" << std::endl;
+            std::cout << ", no OVI";
             // break;
         }
+        std::cout << std::endl;
     }
     return dominates;
+}
+
+template<typename ValueType>
+bool ValueVector<ValueType>::dominatedBy(ValueVector<ValueType> const& other) const {
+    return other.dominates(*this);
 }
 
 template<typename ValueType>
@@ -97,6 +106,11 @@ std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
     }
 
     return weights;
+}
+
+template<typename ValueType>
+void ValueVector<ValueType>::print() {
+    mapping.printValueVector(*this);
 }
 
 template class ValueVector<double>;

@@ -29,6 +29,7 @@ class BottomUpTermination : public OpenMdpVisitor<ValueType> {
     storm::Environment env;
     std::shared_ptr<OpenMdpManager<ValueType>> manager;
     storm::storage::ParetoCache<ValueType>& cache;
+    storm::compose::benchmark::BenchmarkStats<ValueType>& stats;
 };
 
 }  // namespace visitor
