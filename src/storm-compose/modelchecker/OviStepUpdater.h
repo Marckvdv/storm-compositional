@@ -35,7 +35,8 @@ class OviStepUpdater {
     typename HeuristicValueIterator<ValueType>::Options options;
     storm::Environment env;
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
-    storage::ValueVector<ValueType>& valueVector;
+    storage::ValueVector<ValueType>& originalValueVector;
+    storage::ValueVector<ValueType> valueVector;
     storage::ValueVectorMapping<ValueType> mapping;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
     compose::benchmark::BenchmarkStats<ValueType>& stats;

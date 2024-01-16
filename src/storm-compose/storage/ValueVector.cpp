@@ -30,7 +30,7 @@ void ValueVector<ValueType>::initializeValues() {
         storm::storage::EntranceExit entranceExit = entry.second.first;
         if (entranceExit == storage::L_ENTRANCE || entranceExit == storage::R_ENTRANCE)
             continue;
-        std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
+        //std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
         size_t valueIndex = mapping.lookup(entry);
         values[valueIndex] = finalWeight[index];
         exitIndices.insert(valueIndex);
@@ -47,12 +47,6 @@ std::vector<ValueType>& ValueVector<ValueType>::getValues() {
 template<typename ValueType>
 void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
     for (size_t i = 0; i < values.size(); ++i) {
-        // Do not add epsilon to (outer) exits
-        if (exitIndices.count(i) > 0) {
-            std::cout << "Skipping index: " << i << std::endl;
-            continue;
-        }
-
         auto& v = values[i];
         if (clamp) {
             v = storm::utility::min<ValueType>(v + epsilon, storm::utility::one<ValueType>());
