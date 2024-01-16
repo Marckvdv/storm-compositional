@@ -166,19 +166,19 @@ storage::ValueVectorMapping<ValueType> MappingVisitor<ValueType>::getMapping() {
             highestIndex = entry.second;
         }
     }
-    //std::cout << "Here: " << localMapping.size() << std::endl;
+    // std::cout << "Here: " << localMapping.size() << std::endl;
 
     return storage::ValueVectorMapping<ValueType>(leaves, localMapping, outerPositions, highestIndex);
 }
 
 template<typename ValueType>
 void MappingVisitor<ValueType>::performPostProcessing() {
-    //std::cout << "Before: " << localMapping.size() << std::endl;
+    // std::cout << "Before: " << localMapping.size() << std::endl;
 
-    //std::cout << "entranceExitStartIndices: " << std::endl;
-    //for (const auto& entry : entranceExitStartIndices) {
-    //    size_t leafId = entry.first;
-    //    const auto& tuple = entry.second;
+    // std::cout << "entranceExitStartIndices: " << std::endl;
+    // for (const auto& entry : entranceExitStartIndices) {
+    //     size_t leafId = entry.first;
+    //     const auto& tuple = entry.second;
 
     //    std::cout << leafId << " -> <" << std::get<0>(tuple) << ", " << std::get<1>(tuple) << ", " << std::get<2>(tuple) << ", " << std::get<3>(tuple) << ">"
     //              << std::endl;
@@ -220,13 +220,13 @@ void MappingVisitor<ValueType>::performPostProcessing() {
         bool isOuter = outerPositions.count(key) > 0;
         if (isOuter) {
             newOuterPositions.insert(newKey);
-            //std::cout << "nOuter: " << newKey.first << " " << storage::positionToString(newKey.second) << std::endl;
+            // std::cout << "nOuter: " << newKey.first << " " << storage::positionToString(newKey.second) << std::endl;
         }
     }
     localMapping = newLocalMapping;
     outerPositions = newOuterPositions;
 
-    //std::cout << "After: " << localMapping.size() << std::endl;
+    // std::cout << "After: " << localMapping.size() << std::endl;
 }
 
 template<typename ValueType>

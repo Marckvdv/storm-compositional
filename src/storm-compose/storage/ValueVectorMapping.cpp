@@ -55,7 +55,7 @@ template<typename ValueType>
 void ValueVectorMapping<ValueType>::printValueVector(ValueVector<ValueType>& value) const {
     std::vector<std::pair<Key, Key>> reverseLookup(mapping.size());
     for (size_t i = 0; i < reverseLookup.size(); ++i) {
-        reverseLookup[i] = {{999, {}}, {999, {}}}; // TODO
+        reverseLookup[i] = {{999, {}}, {999, {}}};  // TODO
     }
 
     for (const auto& entry : mapping) {
@@ -79,8 +79,10 @@ void ValueVectorMapping<ValueType>::printValueVector(ValueVector<ValueType>& val
     for (size_t i = 0; i < mapping.size(); ++i) {
         std::pair<Key, Key> const& keys = reverseLookup[i];
         std::cout << "Value" << i << "\t";
-        if (keys.first.first != 999) printKey(keys.first);
-        if (keys.second.first != 999) printKey(keys.second);
+        if (keys.first.first != 999)
+            printKey(keys.first);
+        if (keys.second.first != 999)
+            printKey(keys.second);
 
         std::cout << " = " << value.getValues()[i] << std::endl;
     }

@@ -18,7 +18,14 @@ template<typename ValueType>
 OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueType>::Options options,
                                           std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
                                           std::shared_ptr<storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats)
-    : options(options), env(), manager(manager), originalValueVector(valueVector), valueVector(valueVector), mapping(valueVector.getMapping()), cache(cache), stats(stats) {
+    : options(options),
+      env(),
+      manager(manager),
+      originalValueVector(valueVector),
+      valueVector(valueVector),
+      mapping(valueVector.getMapping()),
+      cache(cache),
+      stats(stats) {
     // Intentionally left empty
     env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
     env.solver().minMax().setPrecision(options.localOviEpsilon);
@@ -81,7 +88,7 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
             for (auto& v : upperboundWeight) {
                 v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
-                //v += options.localOviEpsilon;
+                // v += options.localOviEpsilon;
             }
             auto scheduler = newResult.second;
 

@@ -55,7 +55,7 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
     if (!result2)
         return boost::none;
 
-    std::cout << "Cache hit" << std::endl;
+    // std::cout << "Cache hit" << std::endl;
 
     return lowerBound;
 }
@@ -99,7 +99,7 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
     if (!result2)
         return boost::none;
 
-    std::cout << "Cache hit" << std::endl;
+    // std::cout << "Cache hit" << std::endl;
 
     return upperBound;
 }
@@ -112,7 +112,7 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
     ParetoPointType normalizedOutputWeight = ParetoPointType(convertedOutputWeight);
     storm::utility::vector::normalizeInPlace(normalizedOutputWeight);
 
-    std::cout << "Adding something to the cache of concrete mdp " << ptr->getName() << std::endl;
+    // std::cout << "Adding something to the cache of concrete mdp " << ptr->getName() << std::endl;
 
     if (!isInitialized(ptr)) {
         initializeParetoCurve(ptr);

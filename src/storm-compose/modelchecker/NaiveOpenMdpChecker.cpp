@@ -21,13 +21,6 @@ ApproximateReachabilityResult<ValueType> NaiveOpenMdpChecker<ValueType>::check(O
 
     auto currentPareto = paretoVisitor.getCurrentPareto();
 
-    // STORM_LOG_ASSERT(currentPareto.hasEntrance(task.getEntranceId(), task.isLeftEntrance()), "Pareto curve not defined for the requested entrance");
-    // std::cout << "lower pareto: " << std::endl << currentPareto.first << std::endl;
-    // std::cout << "upper pareto: " << std::endl << currentPareto.second << std::endl;
-
-    // TODO check that below is correct
-    // TODO replace with: find point on polytope that maximizes the weight vector indicated by the chosen exit.
-    // TODO actually use the ParetoCurveCheckResult to store pareto curves OR new class that stores the over and under approximation polytopes.
     ValueType lowerBound = currentPareto.first.getLowerBound(task.getEntranceId(), task.isLeftEntrance(), task.getExitId(), task.isLeftExit());
     ValueType upperBound = currentPareto.second.getLowerBound(task.getEntranceId(), task.isLeftEntrance(), task.getExitId(), task.isLeftExit());
     // return ApproximateReachabilityResult<ValueType>(lowerBound, storm::utility::one<ValueType>());

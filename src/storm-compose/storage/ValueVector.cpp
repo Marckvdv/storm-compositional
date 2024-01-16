@@ -30,7 +30,7 @@ void ValueVector<ValueType>::initializeValues() {
         storm::storage::EntranceExit entranceExit = entry.second.first;
         if (entranceExit == storage::L_ENTRANCE || entranceExit == storage::R_ENTRANCE)
             continue;
-        //std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
+        // std::cout << "Outer: " << entry.first << " " << storage::positionToString(entry.second) << std::endl;
         size_t valueIndex = mapping.lookup(entry);
         values[valueIndex] = finalWeight[index];
         exitIndices.insert(valueIndex);
@@ -60,14 +60,14 @@ template<typename ValueType>
 bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) const {
     bool dominates = true;
     for (size_t i = 0; i < values.size(); ++i) {
-        std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
+        // std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
 
         if (values[i] < other.values[i]) {
             dominates = false;
-            std::cout << ", no OVI";
-            // break;
+            // std::cout << ", no OVI";
+            break;
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     return dominates;
 }
