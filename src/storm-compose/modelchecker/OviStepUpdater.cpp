@@ -85,14 +85,19 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             stats.reachabilityComputationTime.start();
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
-            std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
-            for (auto& v : upperboundWeight) {
-                v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
-                // v += options.localOviEpsilon;
-            }
+            // std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
+            std::vector<ValueType> weight(newResult.first);
+            // std::cout << "UB WEIGHT:" << std::endl;
+            // for (auto& v : upperboundWeight) {
+            // v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
+            //  v += options.localOviEpsilon;
+            // std::cout << v << " ";
+            //}
+            // std::cout << std::endl;
             auto scheduler = newResult.second;
 
-            inputWeights = upperboundWeight;
+            // inputWeights = upperboundWeight;
+            inputWeights = weight;
             addToCache(model, weights, weight, scheduler);
         }
     }

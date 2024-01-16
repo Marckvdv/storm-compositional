@@ -69,6 +69,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     typename HeuristicValueIterator<ValueType>::Options hviOptions;
     hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
     hviOptions.localOviEpsilon = options.localOviEpsilon;
+    hviOptions.stepsPerIteration = 1;
 
     HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
     do {
@@ -78,7 +79,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         if (shouldCheckOVITermination()) {
             // std::cout << std::endl;
             // std::cout << "Checking OVI" << std::endl;
-            //  Compute v + epsilon
+            //   Compute v + epsilon
             // std::cout << "Intial VV:" << std::endl;
             // valueVector.print();
 
@@ -99,7 +100,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                 oviStop = true;
 
                 lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-                upperBound = utility::min<ValueType>(*lowerBound + options.epsilon, utility::one<ValueType>());
+                upperBound = utility::min<ValueType>(*lowerBound + options.epsilon + options.localOviEpsilon, utility::one<ValueType>());
 
                 break;
             }
