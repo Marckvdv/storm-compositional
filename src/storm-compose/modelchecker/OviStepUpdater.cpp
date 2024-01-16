@@ -1,4 +1,5 @@
 #include "OviStepUpdater.h"
+#include <memory>
 #include "exceptions/NotSupportedException.h"
 #include "exceptions/OutOfRangeException.h"
 #include "solver/SolverSelectionOptions.h"
@@ -6,6 +7,7 @@
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/CVIVisitor.h"
 #include "storm-compose/storage/EntranceExit.h"
+#include "storm-compose/storage/ExactCache.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
 #include "utility/constants.h"
@@ -31,13 +33,35 @@ OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueT
     env.solver().minMax().setPrecision(options.localOviEpsilon);
 }
 
+// template<typename ValueType>
+// void OviStepUpdater<ValueType>::performIteration() {
+//     const auto& leaves = mapping.getLeaves();
+//
+//     for (size_t leaf = 0; leaf < leaves.size(); ++leaf) {
+//         updateModel(leaf);
+//     }
+// }
+
 template<typename ValueType>
-void OviStepUpdater<ValueType>::performIteration() {
+bool OviStepUpdater<ValueType>::performIteration() {
     const auto& leaves = mapping.getLeaves();
 
     for (size_t leaf = 0; leaf < leaves.size(); ++leaf) {
-        updateModel(leaf);
+        WeightType weights = originalValueVector.getOutputWeights(leaf);
+        WeightType inputWeights = performStep(leaf, weights);
+
+        auto originalInputWeights = originalValueVector.getInputWeights(leaf);
+
+        for (size_t i = 0; i < inputWeights.size(); ++i) {
+            if (inputWeights[i] > originalInputWeights[i] + 1e-6) {
+                std::cout << "No OVI: " << inputWeights[i] << " vs " << originalInputWeights[i] << ": difference " << inputWeights[i] - originalInputWeights[i]
+                          << std::endl;
+                return false;
+            }
+        }
     }
+
+    return true;
 }
 
 template<typename ValueType>
@@ -85,19 +109,20 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             stats.reachabilityComputationTime.start();
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
-            // std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
-            std::vector<ValueType> weight(newResult.first);
-            // std::cout << "UB WEIGHT:" << std::endl;
+            std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
+            // std::vector<ValueType> weight(newResult.first);
+            //  std::cout << "UB WEIGHT:" << std::endl;
             // for (auto& v : upperboundWeight) {
             // v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
+            // v = storm::utility::max<ValueType>(v - options.localOviEpsilon, storm::utility::zero<ValueType>());
             //  v += options.localOviEpsilon;
             // std::cout << v << " ";
             //}
             // std::cout << std::endl;
             auto scheduler = newResult.second;
 
-            // inputWeights = upperboundWeight;
-            inputWeights = weight;
+            inputWeights = upperboundWeight;
+            // inputWeights = weight;
             addToCache(model, weights, weight, scheduler);
         }
     }
@@ -109,7 +134,14 @@ template<typename ValueType>
 boost::optional<typename OviStepUpdater<ValueType>::WeightType> OviStepUpdater<ValueType>::queryCache(models::ConcreteMdp<ValueType>* ptr,
                                                                                                       WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
-    auto result = cache->getUpperBound(ptr, outputWeight);
+    // TODO find proper solution:
+    auto casted = std::dynamic_pointer_cast<storage::ExactCache<ValueType>>(cache);
+    boost::optional<typename OviStepUpdater<ValueType>::WeightType> result;
+    if (casted) {
+        result = cache->getLowerBound(ptr, outputWeight);
+    } else {
+        result = cache->getUpperBound(ptr, outputWeight);
+    }
     stats.cacheRetrievalTime.stop();
 
     return result;

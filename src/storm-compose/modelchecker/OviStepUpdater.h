@@ -22,7 +22,7 @@ class OviStepUpdater {
                    storage::ValueVector<ValueType>& valueVector, std::shared_ptr<storage::AbstractCache<ValueType>> cache,
                    compose::benchmark::BenchmarkStats<ValueType>& stats);
 
-    void performIteration();
+    bool performIteration();
 
    private:
     boost::optional<WeightType> queryCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);

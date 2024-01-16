@@ -29,6 +29,7 @@ class ValueVector {
     bool dominatedBy(ValueVector<ValueType> const& other) const;
     ValueVectorMapping<ValueType>& getMapping();
     std::vector<ValueType> getOutputWeights(size_t leafId);
+    std::vector<ValueType> getInputWeights(size_t leafId);
     void print();
 
    private:

@@ -60,14 +60,14 @@ template<typename ValueType>
 bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) const {
     bool dominates = true;
     for (size_t i = 0; i < values.size(); ++i) {
-        // std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
+        std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
 
         if (values[i] < other.values[i]) {
             dominates = false;
-            // std::cout << ", no OVI";
+            std::cout << ", no OVI, difference " << other.values[i] - values[i];
             break;
         }
-        // std::cout << std::endl;
+        std::cout << std::endl;
     }
     return dominates;
 }
@@ -95,6 +95,26 @@ std::vector<ValueType> ValueVector<ValueType>::getOutputWeights(size_t leafId) {
 
     for (size_t rightPos = 0; rightPos < model->getRExit().size(); ++rightPos) {
         std::pair<storage::EntranceExit, size_t> pos{storage::R_EXIT, rightPos};
+        ValueType weight = getWeight(leafId, pos);
+        weights.push_back(weight);
+    }
+
+    return weights;
+}
+
+template<typename ValueType>
+std::vector<ValueType> ValueVector<ValueType>::getInputWeights(size_t leafId) {
+    std::vector<ValueType> weights;
+    models::ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
+
+    for (size_t leftPos = 0; leftPos < model->getLEntrance().size(); ++leftPos) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::L_ENTRANCE, leftPos};
+        ValueType weight = getWeight(leafId, pos);
+        weights.push_back(weight);
+    }
+
+    for (size_t rightPos = 0; rightPos < model->getREntrance().size(); ++rightPos) {
+        std::pair<storage::EntranceExit, size_t> pos{storage::R_ENTRANCE, rightPos};
         ValueType weight = getWeight(leafId, pos);
         weights.push_back(weight);
     }

@@ -70,7 +70,8 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
 
     ValueType precision = 1e-4;
     storm::Environment env;
-    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::Topological);
     // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
     env.solver().minMax().setPrecision(precision);
 

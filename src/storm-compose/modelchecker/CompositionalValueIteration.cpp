@@ -77,25 +77,37 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << valueVector.getValues()[0] << std::endl;
 
         if (shouldCheckOVITermination()) {
-            // std::cout << std::endl;
-            // std::cout << "Checking OVI" << std::endl;
+            std::cout << std::endl;
+            std::cout << "Checking OVI" << std::endl;
             //   Compute v + epsilon
             // std::cout << "Intial VV:" << std::endl;
             // valueVector.print();
 
             auto newValue = valueVector;
             newValue.addConstant(options.epsilon);
-            auto newValueCopy = newValue;
+            // auto newValueCopy = newValue;
 
             // std::cout << "VV + epsilon:" << std::endl;
             // newValue.print();
 
+            std::cout << "Start OVI check!" << std::endl;
             OviStepUpdater<ValueType> upperboundVisitor(hviOptions, this->manager, newValue, cache, this->stats);
-            upperboundVisitor.performIteration();
+            bool terminate = upperboundVisitor.performIteration();
+            std::cout << "End OVI check!" << std::endl;
 
             // std::cout << "Phi(VV + epsilon):" << std::endl;
             // newValue.print();
-            if (newValueCopy.dominates(newValue)) {
+            // if (newValueCopy.dominates(newValue)) {
+            //     // optimistic value iteration stopping criterion
+            //     oviStop = true;
+
+            //    lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
+            //    upperBound = utility::min<ValueType>(*lowerBound + options.epsilon + options.localOviEpsilon, utility::one<ValueType>());
+
+            //    break;
+            //}
+            // std::cout << std::endl;
+            if (terminate) {
                 // optimistic value iteration stopping criterion
                 oviStop = true;
 
@@ -104,7 +116,6 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
                 break;
             }
-            // std::cout << std::endl;
         }
 
         if (shouldCheckBottomUpTermination()) {
