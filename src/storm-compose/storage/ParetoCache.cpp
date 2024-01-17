@@ -296,6 +296,26 @@ std::shared_ptr<storm::models::ConcreteMdp<ValueType>> ParetoCache<ValueType>::t
 }
 
 template<typename ValueType>
+size_t ParetoCache<ValueType>::getLowerParetoPointCount() {
+    size_t total = 0;
+    for (const auto& entry : lowerBounds) {
+        total += entry.second.size();
+    }
+
+    return total;
+}
+
+template<typename ValueType>
+size_t ParetoCache<ValueType>::getUpperParetoPointCount() {
+    size_t total = 0;
+    for (const auto& entry : upperBounds) {
+        total += entry.second->getVertices().size();
+    }
+
+    return total;
+}
+
+template<typename ValueType>
 storm::models::visitor::BidirectionalReachabilityResult<ValueType> ParetoCache<ValueType>::getLowerBoundReachabilityResult(
     storm::models::ConcreteMdp<ValueType>* model) {
     if (!isInitialized(model)) {

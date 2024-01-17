@@ -69,7 +69,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     typename HeuristicValueIterator<ValueType>::Options hviOptions;
     hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
     hviOptions.localOviEpsilon = options.localOviEpsilon;
-    hviOptions.stepsPerIteration = 1;
+    hviOptions.stepsPerIteration = 100;
 
     HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
     do {

@@ -14,8 +14,9 @@ struct BenchmarkStats {
     storm::utility::Stopwatch totalTime, modelBuildingTime, reachabilityComputationTime, bottomUpTerminationTime;
     size_t stateCount = 0, stringDiagramDepth = 0, uniqueLeaves = 0, leafStates = 0;
     size_t sequenceCount = 0, sumCount = 0, traceCount = 0;
-    size_t paretoPoints = 0;
+    size_t lowerParetoPoints = 0, upperParetoPoints = 0;
     ValueType lowerBound = storm::utility::zero<ValueType>(), upperBound = storm::utility::one<ValueType>();
+    ValueType cacheHitRate = 0;
     storm::RationalNumber leafSchedulerCount = storm::utility::zero<storm::RationalNumber>();
 
     size_t weightedReachabilityQueries = 0, cacheHits = 0;
@@ -45,7 +46,8 @@ struct BenchmarkStats {
         ValueType gap = upperBound - lowerBound;
         result["gap"] = gap;
 
-        result["paretoPoints"] = paretoPoints;
+        result["lowerParetoPoints"] = lowerParetoPoints;
+        result["upperParetoPoints"] = upperParetoPoints;
 
         storm::RationalNumber schedulerLimit = storm::utility::pow(storm::RationalNumber(2), 64);
         if (leafSchedulerCount > schedulerLimit) {
@@ -58,6 +60,7 @@ struct BenchmarkStats {
         result["cacheHits"] = cacheHits;
         result["cacheRetrievalTime"] = cacheRetrievalTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
         result["cacheInsertionTime"] = cacheInsertionTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
+        result["cacheHitRatio"] = (double)cacheHits / (double)weightedReachabilityQueries;
 
         return result;
     }

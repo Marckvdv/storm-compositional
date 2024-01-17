@@ -114,6 +114,11 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
         concreteMdp.getMdp()->writeDotToStream(f);
         f.close();
     }
+    // std::cout << "V: ";
+    // for (const auto& v : weights) {
+    //     std::cout << v << " " << std::endl;
+    // }
+    // std::cout << std::endl;
 
     using storm::models::sparse::Mdp;
 

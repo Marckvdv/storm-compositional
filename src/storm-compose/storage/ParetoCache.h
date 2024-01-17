@@ -30,6 +30,8 @@ class ParetoCache : public AbstractCache<ValueType> {
                                                                                    storm::models::ConcreteMdp<ValueType>* model);
     std::shared_ptr<storm::models::ConcreteMdp<ValueType>> toUpperBoundShortcutMdp(std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager,
                                                                                    storm::models::ConcreteMdp<ValueType>* model);
+    size_t getLowerParetoPointCount();
+    size_t getUpperParetoPointCount();
 
    private:
     void initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr);

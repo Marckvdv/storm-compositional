@@ -24,6 +24,8 @@ class BottomUpTermination : public OpenMdpVisitor<ValueType> {
     storm::modelchecker::ApproximateReachabilityResult<ValueType> getReachabilityResult(storm::modelchecker::OpenMdpReachabilityTask task,
                                                                                         storm::models::OpenMdp<ValueType>& openMdp);
 
+    void updateParetoStats();
+
    private:
     std::map<ConcreteMdp<ValueType>*, std::shared_ptr<ConcreteMdp<ValueType>>> lowerBounds, upperBounds;
     storm::Environment env;

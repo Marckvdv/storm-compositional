@@ -147,8 +147,8 @@ void LowerUpperParetoVisitor<ValueType>::visitConcreteModel(ConcreteMdp<ValueTyp
                 // TODO fix below
                 // removeDominatingPoints<ValueType>(upperPoints);
 
-                this->stats.paretoPoints += lowerPoints.size();
-                this->stats.paretoPoints += upperPoints.size();
+                this->stats.lowerParetoPoints += lowerPoints.size();
+                this->stats.upperParetoPoints += upperPoints.size();
 
                 for (size_t j = 0; j < lowerPoints.size(); ++j) {
                     const auto& point = lowerPoints[j];

@@ -1,7 +1,9 @@
 #include "OviStepUpdater.h"
 #include <memory>
+#include "exceptions/InvalidArgumentException.h"
 #include "exceptions/NotSupportedException.h"
 #include "exceptions/OutOfRangeException.h"
+#include "io/DirectEncodingExporter.h"
 #include "solver/SolverSelectionOptions.h"
 #include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/models/ConcreteMdp.h"
@@ -29,8 +31,11 @@ OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueT
       cache(cache),
       stats(stats) {
     // Intentionally left empty
-    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
-    env.solver().minMax().setPrecision(options.localOviEpsilon);
+    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    // env.solver().minMax().setPrecision(options.localOviEpsilon);
+
+    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::LinearProgramming);
+    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
 }
 
 // template<typename ValueType>
@@ -102,29 +107,40 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
         result = queryCache(model, weights);
 
         ++stats.weightedReachabilityQueries;
-        if (result) {
-            inputWeights = *result;
-            ++stats.cacheHits;
-        } else {
-            stats.reachabilityComputationTime.start();
-            auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
-            stats.reachabilityComputationTime.stop();
-            std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
-            // std::vector<ValueType> weight(newResult.first);
-            //  std::cout << "UB WEIGHT:" << std::endl;
-            // for (auto& v : upperboundWeight) {
-            // v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
-            // v = storm::utility::max<ValueType>(v - options.localOviEpsilon, storm::utility::zero<ValueType>());
-            //  v += options.localOviEpsilon;
-            // std::cout << v << " ";
-            //}
-            // std::cout << std::endl;
-            auto scheduler = newResult.second;
+        // if (result) {
+        //     inputWeights = *result;
+        //     ++stats.cacheHits;
+        // } else {
+        STORM_LOG_THROW(model->getMdp()->getTransitionMatrix().isProbabilistic(), storm::exceptions::InvalidArgumentException, "Not probabilistic");
+        if (true) {
+            // model->getMdp()->printModelInformationToStream(std::cout);
+            // std::ofstream f("out.dot");
+            // model->getMdp()->writeDotToStream(f);
+            // f.close();
 
-            inputWeights = upperboundWeight;
-            // inputWeights = weight;
-            addToCache(model, weights, weight, scheduler);
+            // std::ofstream f2("out.drn");
+            // storm::exporter::explicitExportSparseModel<ValueType>(f2, model->getMdp(), {});
         }
+
+        stats.reachabilityComputationTime.start();
+        auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
+        stats.reachabilityComputationTime.stop();
+        // std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
+        std::vector<ValueType> weight(newResult.first);
+        //  std::cout << "UB WEIGHT:" << std::endl;
+        // for (auto& v : upperboundWeight) {
+        // v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
+        // v = storm::utility::max<ValueType>(v - options.localOviEpsilon, storm::utility::zero<ValueType>());
+        //  v += options.localOviEpsilon;
+        // std::cout << v << " ";
+        //}
+        // std::cout << std::endl;
+        auto scheduler = newResult.second;
+
+        // inputWeights = upperboundWeight;
+        inputWeights = weight;
+        addToCache(model, weights, weight, scheduler);
+        //}
     }
 
     return inputWeights;

@@ -74,10 +74,17 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
     reachabilityTimer.stop();
     stats.bottomUpTerminationTime.stop();
 
-    // std::cout << "Transform time: " << transformTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
-    // std::cout << "Reachability time: " << reachabilityTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
+    std::cout << "Transform time: " << transformTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
+    std::cout << "Reachability time: " << reachabilityTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
+    updateParetoStats();
 
     return storm::modelchecker::ApproximateReachabilityResult<ValueType>::combineLowerUpper(lowerResult, upperResult);
+}
+
+template<typename ValueType>
+void BottomUpTermination<ValueType>::updateParetoStats() {
+    stats.lowerParetoPoints = cache.getLowerParetoPointCount();
+    stats.upperParetoPoints = cache.getUpperParetoPointCount();
 }
 
 template class BottomUpTermination<double>;
