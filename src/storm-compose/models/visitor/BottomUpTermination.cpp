@@ -25,8 +25,12 @@ void BottomUpTermination<ValueType>::visitPrismModel(PrismModel<ValueType>& mode
 
 template<typename ValueType>
 void BottomUpTermination<ValueType>::visitConcreteModel(ConcreteMdp<ValueType>& model) {
+    storm::utility::Stopwatch shortcutTimer;
+
+    stats.shortcutMdpConstructionTime.start();
     lowerBounds[&model] = cache.toLowerBoundShortcutMdp(this->manager, &model);
     upperBounds[&model] = cache.toUpperBoundShortcutMdp(this->manager, &model);
+    stats.shortcutMdpConstructionTime.stop();
 }
 
 // template<typename ValueType>
@@ -76,7 +80,8 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
 
     std::cout << "Transform time: " << transformTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
     std::cout << "Reachability time: " << reachabilityTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
-    updateParetoStats();
+    std::cout << "(Total) shortcut construction time " << stats.shortcutMdpConstructionTime.getTimeInNanoseconds() * 1e-9 << std::endl;
+    //updateParetoStats();
 
     return storm::modelchecker::ApproximateReachabilityResult<ValueType>::combineLowerUpper(lowerResult, upperResult);
 }

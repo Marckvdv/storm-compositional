@@ -119,8 +119,13 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         }
 
         if (shouldCheckBottomUpTermination()) {
+            std::cout << "Checking Bottom-Up" << std::endl;
+
             // Cache is guaranteed to be a Pareto cache at this point.
             storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
+            //std::cout << "Cache has " << paretoCache.getLowerParetoPointCount() << " lower pareto points, and" << std::endl;
+            //std::cout << paretoCache.getUpperParetoPointCount() << " upper pareto points" << std::endl;
+
             models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
             root->accept(bottomUpVisitor);
             auto result = bottomUpVisitor.getReachabilityResult(task, *root);
