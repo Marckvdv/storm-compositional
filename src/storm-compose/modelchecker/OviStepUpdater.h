@@ -23,6 +23,7 @@ class OviStepUpdater {
                    compose::benchmark::BenchmarkStats<ValueType>& stats);
 
     bool performIteration();
+    storage::ValueVector<ValueType> getNewValueVector();
 
    private:
     boost::optional<WeightType> queryCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
@@ -35,8 +36,8 @@ class OviStepUpdater {
     typename HeuristicValueIterator<ValueType>::Options options;
     storm::Environment env;
     std::shared_ptr<storm::models::OpenMdpManager<ValueType>> manager;
-    storage::ValueVector<ValueType> originalValueVector;
-    storage::ValueVector<ValueType>& valueVector;
+    storage::ValueVector<ValueType> newValueVector;
+    storage::ValueVector<ValueType>& originalValueVector;
     storage::ValueVectorMapping<ValueType> mapping;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
     compose::benchmark::BenchmarkStats<ValueType>& stats;

@@ -22,7 +22,10 @@ HeuristicValueIterator<ValueType>::HeuristicValueIterator(Options options, std::
     // Intentionally left empty
     env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
     env.solver().minMax().setPrecision(options.localOviEpsilon);
-    initializeLeafScores();
+
+    if (options.iterationOrder == Options::HEURISTIC) {
+        initializeLeafScores();
+    }
 }
 
 template<typename ValueType>
@@ -141,7 +144,7 @@ void HeuristicValueIterator<ValueType>::initializeLeafScores() {
         reverseLeafScore.insert({defaultScore, leaf});
     }
 
-    updateLeafScore(leafCount - 1, 1);
+    updateLeafScore(leafCount - 1, 1);  // TODO replace with actual exit of interest
 }
 
 template<typename ValueType>

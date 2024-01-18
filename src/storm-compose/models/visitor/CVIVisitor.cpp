@@ -121,11 +121,6 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
     // std::cout << std::endl;
 
     using storm::models::sparse::Mdp;
-
-    std::string formulaString = ParetoVisitor<ValueType>::getFormula(concreteMdp);
-
-    storm::parser::FormulaParser formulaParser;
-    auto formula = formulaParser.parseSingleFormulaFromString(formulaString);
     auto mdp = concreteMdp.getMdp();
     auto transitionMatrix = mdp->getTransitionMatrix();
 
@@ -177,7 +172,7 @@ std::pair<std::vector<ValueType>, boost::optional<storm::storage::Scheduler<Valu
         for (size_t action = 0; action < transitionMatrix.getRowGroupSize(rowGroup); ++action) {
             auto row = transitionMatrix.getRow(rowGroup, action);
 
-            for (const auto entry : row) {
+            for (const auto& entry : row) {
                 auto column = entry.getColumn();
                 const auto it = stateToWeightMap.find(column);
                 if (it != stateToWeightMap.end()) {

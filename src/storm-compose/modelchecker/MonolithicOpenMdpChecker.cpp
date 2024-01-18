@@ -68,11 +68,11 @@ ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::ch
     this->stats.reachabilityComputationTime.start();
     storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> checker(*mdp);
 
-    ValueType precision = 1e-4;
+    ValueType precision = 1e-5;
     storm::Environment env;
-    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
-    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::Topological);
-    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
+    env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
+    // env.solver().minMax().setMethod(storm::solver::MinMaxMethod::Topological);
+    //  env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
     env.solver().minMax().setPrecision(precision);
 
     auto sparseResult = checker.check(env, checkTask);

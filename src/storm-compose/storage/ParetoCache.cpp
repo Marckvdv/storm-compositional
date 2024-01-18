@@ -129,7 +129,6 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
     auto mc = ptr->getMdp()->applyScheduler(*sched, false);
 
     // For each exit, compute the reachability probabilty for each entrance
-    // size_t weightIndex = 0;
     auto processExits = [&](const auto& exits) {
         for (size_t exitState : exits) {
             storage::BitVector psi(stateCount);
@@ -148,8 +147,6 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
                 points[entranceIndex].push_back(values[entranceState]);
                 ++entranceIndex;
             }
-
-            //++weightIndex;
         }
     };
     processExits(ptr->getLExit());
@@ -187,7 +184,7 @@ void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMd
     auto& lb = lowerBounds[key];
     auto& ub = upperBounds[key];
 
-    storage::geometry::Halfspace<ParetoRational> newHalfspace(weight, point);
+    storage::geometry::Halfspace<ParetoRational> newHalfspace(weight, point);  // TODO add OVI epsilon
 
     lb.push_back(point);
     ub = ub->intersection(newHalfspace);

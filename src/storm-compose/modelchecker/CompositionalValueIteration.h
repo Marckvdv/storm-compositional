@@ -57,15 +57,17 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
    private:
     void initialize(OpenMdpReachabilityTask const& task);
     void initializeCache();
-    void initializeParetoCurves();
     bool shouldTerminate();
     bool shouldCheckOVITermination();
     bool shouldCheckBottomUpTermination();
     bool isUpperbound(std::vector<ValueType> valueVector);
 
+    ApproximateReachabilityResult<ValueType> checkOvi(OpenMdpReachabilityTask task);
+    ApproximateReachabilityResult<ValueType> checkBottomUp(OpenMdpReachabilityTask task);
+
     size_t currentStep = 0;
     Options options;
-    storage::ValueVector<ValueType> valueVector;
+    storage::ValueVector<ValueType> lowerBound, upperBound;
     std::shared_ptr<storm::storage::AbstractCache<ValueType>> cache;
     // std::shared_ptr<storm::storage::ParetoCache<ValueType>> cache;
     storm::Environment env;

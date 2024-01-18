@@ -6,7 +6,7 @@ namespace storm {
 namespace storage {
 
 template<typename ValueType>
-ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight)
+ValueVector<ValueType>::ValueVector(ValueVectorMapping<ValueType> mapping, std::vector<ValueType> finalWeight)
     : mapping(mapping), values(mapping.getHighestIndex() + 1), finalWeight(finalWeight) {}
 
 template<typename ValueType>
@@ -48,6 +48,9 @@ template<typename ValueType>
 void ValueVector<ValueType>::addConstant(ValueType epsilon, bool clamp) {
     for (size_t i = 0; i < values.size(); ++i) {
         auto& v = values[i];
+        if (v == 0)
+            continue;
+
         if (clamp) {
             v = storm::utility::min<ValueType>(v + epsilon, storm::utility::one<ValueType>());
         } else {
@@ -60,14 +63,14 @@ template<typename ValueType>
 bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) const {
     bool dominates = true;
     for (size_t i = 0; i < values.size(); ++i) {
-        std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
+        // std::cout << values[i] << " -> " << other.values[i] << " " << i << "/" << values.size();
 
         if (values[i] < other.values[i]) {
             dominates = false;
-            std::cout << ", no OVI, difference " << other.values[i] - values[i];
+            std::cout << ", no OVI, difference " << other.values[i] - values[i] << std::endl;
             break;
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     return dominates;
 }
@@ -75,6 +78,11 @@ bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) cons
 template<typename ValueType>
 bool ValueVector<ValueType>::dominatedBy(ValueVector<ValueType> const& other) const {
     return other.dominates(*this);
+}
+
+template<typename ValueType>
+bool ValueVector<ValueType>::comparable(ValueVector<ValueType> const& other) const {
+    return dominates(other) || dominatedBy(other);
 }
 
 template<typename ValueType>

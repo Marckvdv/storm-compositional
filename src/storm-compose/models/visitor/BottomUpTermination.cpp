@@ -81,7 +81,7 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
     std::cout << "Transform time: " << transformTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
     std::cout << "Reachability time: " << reachabilityTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
     std::cout << "(Total) shortcut construction time " << stats.shortcutMdpConstructionTime.getTimeInNanoseconds() * 1e-9 << std::endl;
-    //updateParetoStats();
+    // updateParetoStats();
 
     return storm::modelchecker::ApproximateReachabilityResult<ValueType>::combineLowerUpper(lowerResult, upperResult);
 }

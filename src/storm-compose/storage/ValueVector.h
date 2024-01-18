@@ -17,7 +17,7 @@ class ValueVectorMapping;
 template<typename ValueType>
 class ValueVector {
    public:
-    ValueVector(ValueVectorMapping<ValueType>&& mapping, std::vector<ValueType> finalWeight);
+    ValueVector(ValueVectorMapping<ValueType> mapping, std::vector<ValueType> finalWeight);
     ValueVector() = default;
 
     ValueType getWeight(size_t leafId, storage::Position position);
@@ -27,6 +27,7 @@ class ValueVector {
     std::vector<ValueType>& getValues();
     bool dominates(ValueVector<ValueType> const& other) const;
     bool dominatedBy(ValueVector<ValueType> const& other) const;
+    bool comparable(ValueVector<ValueType> const& other) const;
     ValueVectorMapping<ValueType>& getMapping();
     std::vector<ValueType> getOutputWeights(size_t leafId);
     std::vector<ValueType> getInputWeights(size_t leafId);

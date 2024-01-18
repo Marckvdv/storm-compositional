@@ -2,6 +2,7 @@
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/modelchecker/OviStepUpdater.h"
+#include "storm-compose/modelchecker/ProperOviTermination.h"
 #include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
@@ -29,39 +30,87 @@ CompositionalValueIteration<ValueType>::CompositionalValueIteration(std::shared_
 }
 
 template<typename ValueType>
-void CompositionalValueIteration<ValueType>::initializeParetoCurves() {
-    // models::visitor::ParetoInitializerVisitor<ValueType> visitor;
-    // this->manager->getRoot()->accept(visitor);
-}
-
-/*
-** Current algorithm structure
-** Store 1 global value vector, which indicates the (lower bound of the) optimal value for each input.
-** Optimal in the sense of optimizing the (global) input weight.
-** Due to the way sum and sequential composition work, many ouputs are also inputs.
-**
-** In fact, we require that all entrances and exits are either:
-** a) an entrance or exit at the root of the string diagram
-** b) connected to some other entrance/exit.
-**
-** We need a mapping from each component's entrance to this value vector.
-** Such a mapping maps <component id, entrance id, left entrance> -> size_t
-**
-** Once we have such a mapping, the model checking procedure goes as follows:
-** 1) Initialize the value vector to all zeroes.
-** 2) Need to start at the edge of the string diagram as these are the only positions with non-zero values (due to the intial weight vector).
-** 3) Given a leaf node, perform standard value iteration with initial weights.
-** If there are exits at the edge, the weight is taken from the initial weight.
-** For exits that are intermediate, the weight is taken from the global value vector.
-** We obtain optimal values for the entrances, which are stored back into the global value vector.
-** 4) Repeat. Termination either using the 'optimistic VI' approach or bottom-up TACAS style
-*/
-template<typename ValueType>
 ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::check(OpenMdpReachabilityTask task) {
     initialize(task);
 
-    bool oviStop = false, bottomUpStop = false;
-    boost::optional<ValueType> lowerBound, upperBound;
+    STORM_LOG_THROW(!options.useOvi || !options.useBottomUp, storm::exceptions::NotSupportedException, "Using OVI and bottom-up together is not supported");
+    STORM_LOG_THROW(options.useOvi || options.useBottomUp, storm::exceptions::NotSupportedException, "Need either OVI or bottom-up termination");
+
+    if (options.useOvi) {
+        return checkOvi(task);
+    } else {
+        return checkBottomUp(task);
+    }
+}
+
+template<typename ValueType>
+ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::checkOvi(OpenMdpReachabilityTask task) {
+    initialize(task);
+
+    boost::optional<ValueType> lowerValue, upperValue;
+
+    // auto exactCache = std::make_shared<storage::ExactCache<ValueType>>();
+    auto noCache = std::make_shared<storage::NoCache<ValueType>>();
+    auto root = this->manager->getRoot();
+
+    typename HeuristicValueIterator<ValueType>::Options hviOptions;
+    hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
+    hviOptions.localOviEpsilon = options.localOviEpsilon;
+
+    typename HeuristicValueIterator<ValueType>::Options oviOptions;
+    oviOptions.exactOvi = options.localOviEpsilon == 0;
+    HeuristicValueIterator<ValueType> lowerBoundIterator(hviOptions, this->manager, lowerBound, cache, this->stats);
+
+    do {
+        lowerBoundIterator.performIteration();
+        std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << lowerBound.getValues()[0] << std::endl;
+
+        if (shouldCheckOVITermination()) {
+            upperBound = lowerBound;
+            upperBound.addConstant(options.epsilon);
+            while (upperBound.comparable(lowerBound)) {
+                // TODO change caching behaviour:
+                // OviStepUpdater<ValueType> oviLowerBoundIterator(oviOptions, this->manager, lowerBound, noCache, this->stats);
+                auto oviCache = oviOptions.exactOvi ? noCache : cache;
+                OviStepUpdater<ValueType> upperBoundIterator(oviOptions, this->manager, upperBound, oviCache, this->stats);
+
+                upperBoundIterator.performIteration();
+                lowerBoundIterator.performIteration();
+                auto newUpperBound = upperBoundIterator.getNewValueVector();
+
+                bool inductiveUpperBound = newUpperBound.dominatedBy(upperBound);
+                if (inductiveUpperBound) {
+                    // Done
+                    lowerValue = lowerBound.getValues()[0];  // TODO FIXME
+                    upperValue = upperBound.getValues()[0];  // TODO FIXME
+                    goto cviLoopBreak;
+                }
+
+                upperBound = newUpperBound;
+            }
+        }
+
+        ++currentStep;
+    } while (!shouldTerminate());
+cviLoopBreak:
+
+    std::cout << "WARN for now assuming we are only interested in the first left entrance" << std::endl;
+    std::cout << "WARN assuming first entrance is the one of interest" << std::endl;
+
+    if (lowerValue && upperValue) {
+        return ApproximateReachabilityResult<ValueType>(*lowerValue, *upperValue);
+    } else if (lowerValue) {
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced (lower bound=" << *lowerValue << ")");
+    } else {
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper or lower bound produced");
+    }
+}
+
+template<typename ValueType>
+ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>::checkBottomUp(OpenMdpReachabilityTask task) {
+    initialize(task);
+
+    boost::optional<ValueType> lowerValue, upperValue;
 
     auto noCache = std::make_shared<storage::NoCache<ValueType>>();
     auto root = this->manager->getRoot();
@@ -71,70 +120,26 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     hviOptions.localOviEpsilon = options.localOviEpsilon;
     hviOptions.stepsPerIteration = 100;
 
-    HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, valueVector, cache, this->stats);
+    HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, lowerBound, cache, this->stats);
     do {
         hvi.performIteration();
-        std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << valueVector.getValues()[0] << std::endl;
-
-        if (shouldCheckOVITermination()) {
-            std::cout << std::endl;
-            std::cout << "Checking OVI" << std::endl;
-            //   Compute v + epsilon
-            // std::cout << "Intial VV:" << std::endl;
-            // valueVector.print();
-
-            auto newValue = valueVector;
-            newValue.addConstant(options.epsilon);
-            // auto newValueCopy = newValue;
-
-            // std::cout << "VV + epsilon:" << std::endl;
-            // newValue.print();
-
-            std::cout << "Start OVI check!" << std::endl;
-            OviStepUpdater<ValueType> upperboundVisitor(hviOptions, this->manager, newValue, cache, this->stats);
-            bool terminate = upperboundVisitor.performIteration();
-            std::cout << "End OVI check!" << std::endl;
-
-            // std::cout << "Phi(VV + epsilon):" << std::endl;
-            // newValue.print();
-            // if (newValueCopy.dominates(newValue)) {
-            //     // optimistic value iteration stopping criterion
-            //     oviStop = true;
-
-            //    lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-            //    upperBound = utility::min<ValueType>(*lowerBound + options.epsilon + options.localOviEpsilon, utility::one<ValueType>());
-
-            //    break;
-            //}
-            // std::cout << std::endl;
-            if (terminate) {
-                // optimistic value iteration stopping criterion
-                oviStop = true;
-
-                lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-                upperBound = utility::min<ValueType>(*lowerBound + options.epsilon + options.localOviEpsilon, utility::one<ValueType>());
-
-                break;
-            }
-        }
+        std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << lowerBound.getValues()[0] << std::endl;
 
         if (shouldCheckBottomUpTermination()) {
             std::cout << "Checking Bottom-Up" << std::endl;
 
             // Cache is guaranteed to be a Pareto cache at this point.
             storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
-            //std::cout << "Cache has " << paretoCache.getLowerParetoPointCount() << " lower pareto points, and" << std::endl;
-            //std::cout << paretoCache.getUpperParetoPointCount() << " upper pareto points" << std::endl;
+            std::cout << "Cache has " << paretoCache.getLowerParetoPointCount() << " lower pareto points, and" << std::endl;
+            std::cout << paretoCache.getUpperParetoPointCount() << " upper pareto points" << std::endl;
 
             models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
             root->accept(bottomUpVisitor);
             auto result = bottomUpVisitor.getReachabilityResult(task, *root);
 
             if (result.getError() < options.epsilon) {
-                bottomUpStop = true;
-
-                lowerBound = result.getLowerBound();
-                upperBound = result.getUpperBound();
+                lowerValue = result.getLowerBound();
+                upperValue = result.getUpperBound();
 
                 break;
             }
@@ -143,22 +148,10 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         ++currentStep;
     } while (!shouldTerminate());
 
-    std::cout << "WARN for now assuming we are only interested in the first left entrance" << std::endl;
-    std::cout << "WARN assuming first entrance is the one of interest" << std::endl;
-
-    if (oviStop) {
-        std::cout << "OVI stopping criterion hit" << std::endl;
-    } else if (bottomUpStop) {
-        std::cout << "Bottom-up stopping criterion hit" << std::endl;
-    } else {
-        std::cout << "Neither stopping criterion hit" << std::endl;
-        lowerBound = valueVector.getValues()[0];  // TODO FIXME don't hardcode this 0
-    }
-
-    if (lowerBound && upperBound) {
-        return ApproximateReachabilityResult<ValueType>(*lowerBound, *upperBound);
-    } else if (lowerBound) {
-        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced (lower bound=" << *lowerBound << ")");
+    if (lowerValue && upperValue) {
+        return ApproximateReachabilityResult<ValueType>(*lowerValue, *upperValue);
+    } else if (lowerValue) {
+        STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper bound produced (lower bound=" << *lowerValue << ")");
     } else {
         STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "No upper or lower bound produced");
     }
@@ -166,7 +159,6 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
 template<typename ValueType>
 void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask const& task) {
-    initializeParetoCurves();
     initializeCache();
 
     this->stats.modelBuildingTime.start();
@@ -175,29 +167,28 @@ void CompositionalValueIteration<ValueType>::initialize(OpenMdpReachabilityTask 
 
     auto root = this->manager->getRoot();
 
-    models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
-    root->accept(entranceExitMappingVisitor);
-
-    // TODO FIXME can be retrieved from mapping visitor above
-    models::visitor::EntranceExitVisitor<ValueType> entranceExitVisitor;
-    entranceExitVisitor.setEntranceExit(storage::L_EXIT);
-    root->accept(entranceExitVisitor);
-    size_t lOuterExitCount = entranceExitVisitor.getCollected().size();
-
-    entranceExitVisitor.setEntranceExit(storage::R_EXIT);
-    root->accept(entranceExitVisitor);
-    size_t rOuterExitCount = entranceExitVisitor.getCollected().size();
-
     models::visitor::MappingVisitor<ValueType> mappingVisitor;
     root->accept(mappingVisitor);
     mappingVisitor.performPostProcessing();
     auto mapping = mappingVisitor.getMapping();
-    // std::cout << "M: " << mapping.size() << std::endl;
-    // mapping.print();
+
+    size_t lOuterExitCount = 0;
+    size_t rOuterExitCount = 0;
+    for (const auto& entry : mapping.getOuterPositions()) {
+        if (entry.second.first == storage::L_EXIT)
+            ++lOuterExitCount;
+        if (entry.second.first == storage::R_EXIT)
+            ++rOuterExitCount;
+    }
+
+    models::visitor::EntranceExitMappingVisitor<ValueType> entranceExitMappingVisitor;
+    root->accept(entranceExitMappingVisitor);
 
     auto finalWeight = task.toExitWeights<ValueType>(lOuterExitCount, rOuterExitCount);
-    valueVector = storage::ValueVector<ValueType>(std::move(mapping), finalWeight);
-    valueVector.initializeValues();
+
+    lowerBound = storage::ValueVector<ValueType>(mapping, finalWeight);
+    lowerBound.initializeValues();
+    upperBound = lowerBound;
 }
 
 template<typename ValueType>

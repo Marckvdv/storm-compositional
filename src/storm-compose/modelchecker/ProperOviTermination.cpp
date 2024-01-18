@@ -1,4 +1,5 @@
-#include "OviStepUpdater.h"
+#include "ProperOviTermination.h"
+
 #include <memory>
 #include "exceptions/InvalidArgumentException.h"
 #include "exceptions/NotSupportedException.h"
@@ -19,14 +20,15 @@ namespace storm {
 namespace modelchecker {
 
 template<typename ValueType>
-OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueType>::Options options,
-                                          std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
-                                          std::shared_ptr<storage::AbstractCache<ValueType>> cache, compose::benchmark::BenchmarkStats<ValueType>& stats)
+ProperOviTermination<ValueType>::ProperOviTermination(typename HeuristicValueIterator<ValueType>::Options options,
+                                                      std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,
+                                                      std::shared_ptr<storage::AbstractCache<ValueType>> cache,
+                                                      compose::benchmark::BenchmarkStats<ValueType>& stats)
     : options(options),
       env(),
       manager(manager),
-      newValueVector(valueVector),
       originalValueVector(valueVector),
+      valueVector(valueVector),
       mapping(valueVector.getMapping()),
       cache(cache),
       stats(stats) {
@@ -48,58 +50,56 @@ OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueT
 // }
 
 template<typename ValueType>
-bool OviStepUpdater<ValueType>::performIteration() {
+bool ProperOviTermination<ValueType>::performIteration() {
     const auto& leaves = mapping.getLeaves();
 
     for (size_t leaf = 0; leaf < leaves.size(); ++leaf) {
         WeightType weights = originalValueVector.getOutputWeights(leaf);
         WeightType inputWeights = performStep(leaf, weights);
-        storeInputWeights(leaf, inputWeights);
 
-        // auto originalInputWeights = originalValueVector.getInputWeights(leaf);
+        auto originalInputWeights = originalValueVector.getInputWeights(leaf);
 
-        // for (size_t i = 0; i < inputWeights.size(); ++i) {
-        //     //if (inputWeights[i] > originalInputWeights[i] + 1e-6) {
-        //     if (inputWeights[i] > originalInputWeights[i]) {
-        //         std::cout << "No OVI: " << inputWeights[i] << " vs " << originalInputWeights[i] << ": difference " << inputWeights[i] -
-        //         originalInputWeights[i]
-        //                   << std::endl;
-        //         return false;
-        //     }
-        // }
+        for (size_t i = 0; i < inputWeights.size(); ++i) {
+            // if (inputWeights[i] > originalInputWeights[i] + 1e-6) {
+            if (inputWeights[i] > originalInputWeights[i]) {
+                std::cout << "No OVI: " << inputWeights[i] << " vs " << originalInputWeights[i] << ": difference " << inputWeights[i] - originalInputWeights[i]
+                          << std::endl;
+                return false;
+            }
+        }
     }
 
     return true;
 }
 
 template<typename ValueType>
-void OviStepUpdater<ValueType>::updateModel(size_t leafId) {
+void ProperOviTermination<ValueType>::updateModel(size_t leafId) {
     WeightType weights = originalValueVector.getOutputWeights(leafId);
     WeightType inputWeights = performStep(leafId, weights);
     storeInputWeights(leafId, inputWeights);
 }
 
 template<typename ValueType>
-void OviStepUpdater<ValueType>::storeInputWeights(size_t leafId, WeightType const& inputWeights) {
+void ProperOviTermination<ValueType>::storeInputWeights(size_t leafId, WeightType const& inputWeights) {
     models::ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
     size_t weightIndex = 0;
     for (size_t i = 0; i < model->getLEntrance().size(); ++i) {
         std::pair<storage::EntranceExit, size_t> pos{storage::L_ENTRANCE, i};
-        newValueVector.setWeight(leafId, pos, inputWeights[weightIndex]);
+        valueVector.setWeight(leafId, pos, inputWeights[weightIndex]);
 
         ++weightIndex;
     }
 
     for (size_t i = 0; i < model->getREntrance().size(); ++i) {
         std::pair<storage::EntranceExit, size_t> pos{storage::R_ENTRANCE, i};
-        newValueVector.setWeight(leafId, pos, inputWeights[weightIndex]);
+        valueVector.setWeight(leafId, pos, inputWeights[weightIndex]);
 
         ++weightIndex;
     }
 }
 
 template<typename ValueType>
-typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::performStep(size_t leafId, WeightType const& weights) {
+typename ProperOviTermination<ValueType>::WeightType ProperOviTermination<ValueType>::performStep(size_t leafId, WeightType const& weights) {
     models::ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
     bool allZero = std::all_of(weights.begin(), weights.end(), [](ValueType v) { return v == storm::utility::zero<ValueType>(); });
     std::vector<ValueType> inputWeights;
@@ -141,12 +141,12 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
 }
 
 template<typename ValueType>
-boost::optional<typename OviStepUpdater<ValueType>::WeightType> OviStepUpdater<ValueType>::queryCache(models::ConcreteMdp<ValueType>* ptr,
-                                                                                                      WeightType outputWeight) {
+boost::optional<typename ProperOviTermination<ValueType>::WeightType> ProperOviTermination<ValueType>::queryCache(models::ConcreteMdp<ValueType>* ptr,
+                                                                                                                  WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
     // TODO find proper solution:
     auto casted = std::dynamic_pointer_cast<storage::ExactCache<ValueType>>(cache);
-    boost::optional<typename OviStepUpdater<ValueType>::WeightType> result;
+    boost::optional<typename ProperOviTermination<ValueType>::WeightType> result;
     if (casted) {
         result = cache->getLowerBound(ptr, outputWeight);
     } else {
@@ -158,20 +158,15 @@ boost::optional<typename OviStepUpdater<ValueType>::WeightType> OviStepUpdater<V
 }
 
 template<typename ValueType>
-void OviStepUpdater<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
-                                           boost::optional<storm::storage::Scheduler<ValueType>> sched) {
+void ProperOviTermination<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
+                                                 boost::optional<storm::storage::Scheduler<ValueType>> sched) {
     stats.cacheInsertionTime.start();
     cache->addToCache(ptr, outputWeight, inputWeight, sched);
     stats.cacheInsertionTime.stop();
 }
 
-template<typename ValueType>
-storage::ValueVector<ValueType> OviStepUpdater<ValueType>::getNewValueVector() {
-    return newValueVector;
-}
-
-template class OviStepUpdater<double>;
-template class OviStepUpdater<storm::RationalNumber>;
+template class ProperOviTermination<double>;
+template class ProperOviTermination<storm::RationalNumber>;
 
 }  // namespace modelchecker
 }  // namespace storm
