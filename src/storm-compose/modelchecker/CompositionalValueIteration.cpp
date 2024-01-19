@@ -66,12 +66,17 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         std::cout << "iteration " << currentStep << "/" << options.maxSteps << " current value: " << lowerBound.getValues()[0] << std::endl;
 
         if (shouldCheckOVITermination()) {
+            std::cout << "Checking OVI" << std::endl;
+
             upperBound = lowerBound;
             upperBound.addConstant(options.epsilon);
+            size_t iter = 0;
             while (upperBound.comparable(lowerBound)) {
+                std::cout << "OVI iteration " << iter << std::endl;
                 // TODO change caching behaviour:
                 // OviStepUpdater<ValueType> oviLowerBoundIterator(oviOptions, this->manager, lowerBound, noCache, this->stats);
-                auto oviCache = oviOptions.exactOvi ? noCache : cache;
+                //auto& oviCache = oviOptions.exactOvi ? noCache : cache;
+                auto& oviCache = noCache;
                 OviStepUpdater<ValueType> upperBoundIterator(oviOptions, this->manager, upperBound, oviCache, this->stats);
 
                 upperBoundIterator.performIteration();
@@ -87,6 +92,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                 }
 
                 upperBound = newUpperBound;
+                ++iter;
             }
         }
 

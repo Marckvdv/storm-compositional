@@ -99,13 +99,39 @@ typename HeuristicValueIterator<ValueType>::WeightType HeuristicValueIterator<Va
         inputWeights = std::vector<ValueType>(model->getEntranceCount(), 0);
     } else {
         boost::optional<std::vector<ValueType>> result;
-        result = queryCache(model, weights);
+        result = queryCacheLowerBound(model, weights);
 
+        bool cacheUsed = false;
         ++stats.weightedReachabilityQueries;
         if (result) {
-            inputWeights = *result;
-            ++stats.cacheHits;
-        } else {
+            // Check if the result returned by the cache is actually better.
+            const auto& result2 = *result;
+            auto oldInputWeights = valueVector.getInputWeights(leafId);
+            STORM_LOG_ASSERT(oldInputWeights.size() == result2.size(), "size mismatch");
+
+            ValueType cacheTolerance = 1e-3;
+            bool goodEnough = false;
+            for (size_t i = 0; i < oldInputWeights.size(); ++i) {
+                ValueType difference = result2[i] - oldInputWeights[i];
+                if (difference > cacheTolerance) {
+                    goodEnough = true;
+                } else if (difference < 0) {
+                    goodEnough = false;
+                    break;
+                }
+            }
+
+            if (goodEnough) {
+                inputWeights = result2;
+                cacheUsed = true;
+                ++stats.cacheHits;
+            } else {
+                // Check gap
+                result = queryCacheLowerBound(model, weights);
+            }
+        }
+
+        if (!cacheUsed) {
             stats.reachabilityComputationTime.start();
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
@@ -210,10 +236,20 @@ void HeuristicValueIterator<ValueType>::updateLeafScores(WeightType const& input
 }
 
 template<typename ValueType>
-boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCache(models::ConcreteMdp<ValueType>* ptr,
+boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheLowerBound(models::ConcreteMdp<ValueType>* ptr,
                                                                                                                       WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
     auto result = cache->getLowerBound(ptr, outputWeight);
+    stats.cacheRetrievalTime.stop();
+
+    return result;
+}
+
+template<typename ValueType>
+boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheUpperBound(models::ConcreteMdp<ValueType>* ptr,
+                                                                                                                      WeightType outputWeight) {
+    stats.cacheRetrievalTime.start();
+    auto result = cache->getUpperBound(ptr, outputWeight);
     stats.cacheRetrievalTime.stop();
 
     return result;

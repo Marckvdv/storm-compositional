@@ -32,6 +32,7 @@ OviStepUpdater<ValueType>::OviStepUpdater(typename HeuristicValueIterator<ValueT
       stats(stats) {
     if (options.exactOvi) {
         env.solver().minMax().setMethod(storm::solver::MinMaxMethod::PolicyIteration);
+        std::cout << "Exact OVI chosen" << std::endl;
     } else {
         env.solver().minMax().setMethod(storm::solver::MinMaxMethod::OptimisticValueIteration);
         env.solver().minMax().setPrecision(options.localOviEpsilon);
@@ -119,20 +120,21 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             stats.reachabilityComputationTime.start();
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
-            // std::vector<ValueType> weight(newResult.first), upperboundWeight(newResult.first);
             std::vector<ValueType> weight(newResult.first);
+            //std::vector<ValueType> weight(newResult.first);
             //  std::cout << "UB WEIGHT:" << std::endl;
-            // for (auto& v : upperboundWeight) {
-            // v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
-            // v = storm::utility::max<ValueType>(v - options.localOviEpsilon, storm::utility::zero<ValueType>());
-            //  v += options.localOviEpsilon;
-            // std::cout << v << " ";
-            //}
+            if (!options.exactOvi) {
+                std::vector<ValueType> upperboundWeight(newResult.first);
+                for (auto& v : upperboundWeight) {
+                    v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
+                // std::cout << v << " ";
+                }
+                inputWeights = upperboundWeight;
+            } else {
+                inputWeights = weight;
+            }
             // std::cout << std::endl;
             auto scheduler = newResult.second;
-
-            // inputWeights = upperboundWeight;
-            inputWeights = weight;
             addToCache(model, weights, weight, scheduler);
         }
     }

@@ -31,7 +31,8 @@ class HeuristicValueIterator {
     static typename Options::IterationOrder orderFromString(std::string const& string);
 
    private:
-    boost::optional<WeightType> queryCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
+    boost::optional<WeightType> queryCacheLowerBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
+    boost::optional<WeightType> queryCacheUpperBound(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight);
     void updateModel(size_t leafId);
     void addToCache(models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight, WeightType inputWeight,
                     boost::optional<storm::storage::Scheduler<ValueType>> sched = boost::none);

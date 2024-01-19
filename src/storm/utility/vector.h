@@ -974,6 +974,17 @@ bool equalModuloPrecision(std::vector<T> const& vectorLeft, std::vector<T> const
 }
 
 template<class T>
+bool dominates(std::vector<T> const& vectorLeft, std::vector<T> const& vectorRight) {
+    STORM_LOG_ASSERT(vectorLeft.size() == vectorRight.size(), "Lengths of vectors does not match.");
+    for (size_t i = 0; i < vectorLeft.size(); ++i) {
+        if (vectorLeft[i] < vectorRight[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<class T>
 T maximumElementAbs(std::vector<T> const& vector) {
     T res = storm::utility::zero<T>();
     for (auto const& element : vector) {

@@ -15,6 +15,51 @@
 namespace storm {
 namespace storage {
 
+//template<typename ValueType>
+//boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr,
+//                                                                                                   WeightType outputWeight) {
+//    if (!isInitialized(ptr)) {
+//        initializeParetoCurve(ptr);
+//    }
+//
+//    ParetoPointType convertedOutputWeight = storm::utility::vector::convertNumericVector<ParetoRational>(outputWeight);
+//    WeightType lowerBound(ptr->getEntranceCount());
+//
+//    size_t weightIndex = 0;
+//    auto processEntrances = [&](const auto& entrances, storage::EntranceExit entrance) {
+//        for (size_t i = 0; i < entrances.size(); ++i) {
+//            Position pos = {entrance, i};
+//            auto paretoEntry = getLowerUpper(ptr, convertedOutputWeight, pos);
+//
+//            const auto& lb = paretoEntry.first;
+//            const auto& ub = paretoEntry.second;
+//
+//            ParetoRational error = getError(lb, ub);
+//            // std::cout << "Error: " << storm::utility::convertNumber<double>(error) << std::endl;
+//            if (error > this->errorTolerance) {
+//                // std::cout << "Computing exactly" << std::endl;
+//                return false;
+//            }
+//            lowerBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(lb, convertedOutputWeight));
+//
+//            ++weightIndex;
+//        }
+//        return true;
+//    };
+//
+//    bool result1 = processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
+//    if (!result1)
+//        return boost::none;
+//
+//    bool result2 = processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
+//    if (!result2)
+//        return boost::none;
+//
+//    // std::cout << "Cache hit" << std::endl;
+//
+//    return lowerBound;
+//}
+
 template<typename ValueType>
 boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr,
                                                                                                    WeightType outputWeight) {
@@ -29,33 +74,15 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
     auto processEntrances = [&](const auto& entrances, storage::EntranceExit entrance) {
         for (size_t i = 0; i < entrances.size(); ++i) {
             Position pos = {entrance, i};
-            auto paretoEntry = getLowerUpper(ptr, convertedOutputWeight, pos);
-
-            const auto& lb = paretoEntry.first;
-            const auto& ub = paretoEntry.second;
-
-            ParetoRational error = getError(lb, ub);
-            // std::cout << "Error: " << storm::utility::convertNumber<double>(error) << std::endl;
-            if (error > this->errorTolerance) {
-                // std::cout << "Computing exactly" << std::endl;
-                return false;
-            }
+            const auto& lb = getBestLowerBound(ptr, convertedOutputWeight, pos);
             lowerBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(lb, convertedOutputWeight));
 
             ++weightIndex;
         }
-        return true;
     };
 
-    bool result1 = processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
-    if (!result1)
-        return boost::none;
-
-    bool result2 = processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
-    if (!result2)
-        return boost::none;
-
-    // std::cout << "Cache hit" << std::endl;
+    processEntrances(ptr->getLEntrance(), storage::L_ENTRANCE);
+    processEntrances(ptr->getREntrance(), storage::R_ENTRANCE);
 
     return lowerBound;
 }
@@ -170,17 +197,6 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
 
 template<typename ValueType>
 void ParetoCache<ValueType>::updateLowerUpperBounds(std::pair<models::ConcreteMdp<ValueType>*, Position> key, ParetoPointType point, ParetoPointType weight) {
-    // std::cout << "Adding the following point to the cache: <";
-    // for (const auto&v : point) {
-    //     std::cout << storm::utility::convertNumber<double>(v) << ", ";
-    // }
-    // std::cout << ">" << std::endl;
-    // std::cout << "with weight: <";
-    // for (const auto&v : weight) {
-    //     std::cout << storm::utility::convertNumber<double>(v) << ", ";
-    // }
-    // std::cout << ">" << std::endl;
-
     auto& lb = lowerBounds[key];
     auto& ub = upperBounds[key];
 
@@ -244,8 +260,20 @@ std::pair<typename ParetoCache<ValueType>::ParetoPointType, typename ParetoCache
     models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos) {
     std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
 
-    auto lowerBoundPoints = lowerBounds.at(key);
     auto upperBoundPolytope = upperBounds.at(key);
+
+    ParetoPointType lb = getBestLowerBound(ptr, outputWeight, pos);
+    auto ub = upperBoundPolytope->optimize(outputWeight);
+
+    STORM_LOG_ASSERT(ub.second, "optimizing in the upper bound should always be defined as it is (supposedly) bounded and non-empty");
+
+    return std::make_pair(lb, ub.first);
+}
+
+template<typename ValueType>
+typename ParetoCache<ValueType>::ParetoPointType ParetoCache<ValueType>::getBestLowerBound(models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos) {
+    std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
+    auto lowerBoundPoints = lowerBounds.at(key);
 
     ParetoRational lbValue = storm::utility::zero<ValueType>();
     ParetoPointType lb;
@@ -256,11 +284,9 @@ std::pair<typename ParetoCache<ValueType>::ParetoPointType, typename ParetoCache
             lb = p;
         }
     }
-    auto ub = upperBoundPolytope->optimize(outputWeight);
+    STORM_LOG_ASSERT(lowerBoundPoints.size() > 0, "Empty lower bound");
 
-    STORM_LOG_ASSERT(ub.second, "optimizing in the upper bound should always be defined");
-
-    return std::make_pair(lb, ub.first);
+    return lb;
 }
 
 template<typename ValueType>
