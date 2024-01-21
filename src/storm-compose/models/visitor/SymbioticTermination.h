@@ -10,7 +10,9 @@
 #include "storm-compose/models/SumModel.h"
 #include "storm-compose/models/TraceModel.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
+#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
+#include "storm-compose/storage/ParetoCache.h"
 #include "storm/environment/Environment.h"
 #include "storm/modelchecker/results/CheckResult.h"
 
@@ -20,13 +22,6 @@ namespace visitor {
 
 template<typename ValueType>
 class BidirectionalReachabilityResult;
-
-struct LowerUpperParetoSettings {
-    double precision = 1e-5;
-    std::string precisionType = "absolute";
-
-    boost::optional<size_t> steps;
-};
 
 /*
 Current workflow:
@@ -38,12 +33,12 @@ Similar for sum and trace.
 // The point of this visitor is that after visiting anything, we get pareto results back.
 // No intermediate ConcreteMdps need to be stored.
 template<typename ValueType>
-class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
+class SymbioticTermination : public OpenMdpVisitor<ValueType> {
     typedef std::pair<BidirectionalReachabilityResult<ValueType>, BidirectionalReachabilityResult<ValueType>> ParetoType;
 
    public:
-    LowerUpperParetoVisitor(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats,
-                            LowerUpperParetoSettings settings);
+    SymbioticTermination(std::shared_ptr<OpenMdpManager<ValueType>> manager, storm::compose::benchmark::BenchmarkStats<ValueType>& stats,
+                         LowerUpperParetoSettings settings, storage::ParetoCache<ValueType>& paretoCache);
 
     virtual void visitPrismModel(PrismModel<ValueType>& model) override;
     virtual void visitConcreteModel(ConcreteMdp<ValueType>& model) override;
@@ -53,11 +48,6 @@ class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
     virtual void visitTraceModel(TraceModel<ValueType>& model) override;
 
     ParetoType getCurrentPareto();
-
-    // TODO Functions below are public because it is also being used in PropertyDrivenVisitor
-    // Need to find some common place to store this instead.
-    static std::string getFormula(PrismModel<ValueType> const& model, bool rewards = false);
-    static std::string getFormula(ConcreteMdp<ValueType> const& model, bool rewards = false);
 
     std::unique_ptr<storm::modelchecker::CheckResult> performMultiObjectiveModelChecking(storm::Environment env,
                                                                                          storm::models::sparse::Mdp<ValueType> const& mdp,
@@ -74,6 +64,7 @@ class LowerUpperParetoVisitor : public OpenMdpVisitor<ValueType> {
 
     storm::Environment env;
     LowerUpperParetoSettings settings;
+    storage::ParetoCache<ValueType>& paretoCache;
 };
 
 }  // namespace visitor

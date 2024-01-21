@@ -162,6 +162,7 @@ void performModelChecking(ReachabilityCheckingOptions<ValueType>& options) {
             modelcheckerOptions.bottomUpInterval = composeSettings.getBottomUpInterval();
             modelcheckerOptions.iterationOrder = composeSettings.getIterationOrder();
             modelcheckerOptions.localOviEpsilon = composeSettings.getLocalOviEpsilon();
+            modelcheckerOptions.useRecursiveParetoComputation = composeSettings.isUseRecursiveParetoComputationSet();
 
             checker = std::make_unique<storm::modelchecker::CompositionalValueIteration<ValueType>>(options.omdpManager, stats, modelcheckerOptions);
             break;

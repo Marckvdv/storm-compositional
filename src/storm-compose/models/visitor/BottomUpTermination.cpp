@@ -63,7 +63,10 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
 
     stats.bottomUpTerminationTime.start();
     transformTimer.start();
-    LeafTransformer<ValueType> lowerBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *lowerBounds[&concreteMdp]; });
+    LeafTransformer<ValueType> lowerBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) {
+        // std::cout << "LB count: " << lowerBounds.count(&concreteMdp) << std::endl;
+        return *lowerBounds[&concreteMdp];
+    });
     LeafTransformer<ValueType> upperBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) { return *upperBounds[&concreteMdp]; });
     openMdp.accept(lowerBoundTransform);
     openMdp.accept(upperBoundTransform);

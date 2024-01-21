@@ -42,8 +42,9 @@ template<typename ValueType>
 ApproximateReachabilityResult<ValueType> MonolithicOpenMdpChecker<ValueType>::checkConcreteMdp(storm::models::ConcreteMdp<ValueType> const& concreteMdp,
                                                                                                OpenMdpReachabilityTask task) {
     auto mdp = concreteMdp.getMdp();
+    STORM_LOG_ASSERT(mdp->getTransitionMatrix().isProbabilistic(), "MDP supplied is not probabilistic:\n" << mdp->getTransitionMatrix());
 
-    if (false) {
+    if (true) {
         std::ofstream f("out.drn");
         storm::exporter::explicitExportSparseModel<ValueType>(f, mdp, {});
         f.close();

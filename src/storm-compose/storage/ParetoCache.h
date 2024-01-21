@@ -32,6 +32,16 @@ class ParetoCache : public AbstractCache<ValueType> {
                                                                                    storm::models::ConcreteMdp<ValueType>* model);
     size_t getLowerParetoPointCount();
     size_t getUpperParetoPointCount();
+    void clearLowerBounds();
+    void clearUpperBounds();
+    void clear();
+    bool isValid() const;
+    bool containsLeaf(models::ConcreteMdp<ValueType>* ptr) const;
+
+    storm::models::visitor::BidirectionalReachabilityResult<ValueType> getLowerBoundReachabilityResult(storm::models::ConcreteMdp<ValueType>* model);
+    storm::models::visitor::BidirectionalReachabilityResult<ValueType> getUpperBoundReachabilityResult(storm::models::ConcreteMdp<ValueType>* model);
+
+    void initializeParetoCurves(std::vector<models::ConcreteMdp<ValueType>*>& leaves);
 
    private:
     void initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr);
@@ -42,9 +52,6 @@ class ParetoCache : public AbstractCache<ValueType> {
     ParetoRational getError(ParetoPointType lower, ParetoPointType upper) const;
     void updateLowerUpperBounds(KeyType key, ParetoPointType point, ParetoPointType weight);
     bool isInitialized(models::ConcreteMdp<ValueType>* ptr) const;
-
-    storm::models::visitor::BidirectionalReachabilityResult<ValueType> getLowerBoundReachabilityResult(storm::models::ConcreteMdp<ValueType>* model);
-    storm::models::visitor::BidirectionalReachabilityResult<ValueType> getUpperBoundReachabilityResult(storm::models::ConcreteMdp<ValueType>* model);
 
     std::map<KeyType, LowerBoundType> lowerBounds;
     std::map<KeyType, UpperBoundType> upperBounds;

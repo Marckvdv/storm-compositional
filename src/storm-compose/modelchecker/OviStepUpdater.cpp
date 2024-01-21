@@ -121,13 +121,13 @@ typename OviStepUpdater<ValueType>::WeightType OviStepUpdater<ValueType>::perfor
             auto newResult = models::visitor::CVIVisitor<ValueType>::weightedReachability(weights, *model, cache->needScheduler(), env);
             stats.reachabilityComputationTime.stop();
             std::vector<ValueType> weight(newResult.first);
-            //std::vector<ValueType> weight(newResult.first);
-            //  std::cout << "UB WEIGHT:" << std::endl;
+            // std::vector<ValueType> weight(newResult.first);
+            //   std::cout << "UB WEIGHT:" << std::endl;
             if (!options.exactOvi) {
                 std::vector<ValueType> upperboundWeight(newResult.first);
                 for (auto& v : upperboundWeight) {
                     v = storm::utility::min<ValueType>(v + options.localOviEpsilon, storm::utility::one<ValueType>());
-                // std::cout << v << " ";
+                    // std::cout << v << " ";
                 }
                 inputWeights = upperboundWeight;
             } else {

@@ -2422,12 +2422,14 @@ bool SparseMatrix<ValueType>::isProbabilistic() const {
     for (index_type row = 0; row < this->rowCount; ++row) {
         auto rowSum = getRowSum(row);
         if (!comparator.isOne(rowSum)) {
+            std::cout << "Row " << row << " summed to " << rowSum << " instead of 1." << std::endl;
             return false;
         }
     }
     for (auto const& entry : *this) {
         if (comparator.isConstant(entry.getValue())) {
             if (comparator.isLess(entry.getValue(), storm::utility::zero<ValueType>())) {
+                std::cout << "Matrix has negative value." << std::endl;
                 return false;
             }
         }

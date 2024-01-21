@@ -33,6 +33,7 @@ const std::string ComposeIOSettings::oviIntervalName = "oviInterval";
 const std::string ComposeIOSettings::bottomUpIntervalName = "bottomUpInterval";
 const std::string ComposeIOSettings::iterationOrderName = "iterationOrder";
 const std::string ComposeIOSettings::localOviEpsilonName = "localOviEpsilon";
+const std::string ComposeIOSettings::useRecursiveParetoComputationName = "useRecursiveParetoComputation";
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
@@ -60,6 +61,7 @@ ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
 
     addFlag(useOviName, "use OVI termination");
     addFlag(useBottomUpName, "use bottom-up termination");
+    addFlag(useRecursiveParetoComputationName, "use recursive Pareto computation");
 }
 
 bool ComposeIOSettings::check() const {
@@ -142,6 +144,10 @@ bool ComposeIOSettings::isIterationOrderSet() const {
 
 bool ComposeIOSettings::isLocalOviEpsilonSet() const {
     return this->getOption(localOviEpsilonName).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isUseRecursiveParetoComputationSet() const {
+    return this->getOption(useRecursiveParetoComputationName).getHasOptionBeenSet();
 }
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {

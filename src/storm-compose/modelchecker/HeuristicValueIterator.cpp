@@ -127,7 +127,7 @@ typename HeuristicValueIterator<ValueType>::WeightType HeuristicValueIterator<Va
                 ++stats.cacheHits;
             } else {
                 // Check gap
-                result = queryCacheLowerBound(model, weights);
+                // result = queryCacheLowerBound(model, weights);
             }
         }
 
@@ -236,8 +236,8 @@ void HeuristicValueIterator<ValueType>::updateLeafScores(WeightType const& input
 }
 
 template<typename ValueType>
-boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheLowerBound(models::ConcreteMdp<ValueType>* ptr,
-                                                                                                                      WeightType outputWeight) {
+boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheLowerBound(
+    models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
     auto result = cache->getLowerBound(ptr, outputWeight);
     stats.cacheRetrievalTime.stop();
@@ -246,8 +246,8 @@ boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> Heuristi
 }
 
 template<typename ValueType>
-boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheUpperBound(models::ConcreteMdp<ValueType>* ptr,
-                                                                                                                      WeightType outputWeight) {
+boost::optional<typename HeuristicValueIterator<ValueType>::WeightType> HeuristicValueIterator<ValueType>::queryCacheUpperBound(
+    models::ConcreteMdp<ValueType>* ptr, WeightType outputWeight) {
     stats.cacheRetrievalTime.start();
     auto result = cache->getUpperBound(ptr, outputWeight);
     stats.cacheRetrievalTime.stop();

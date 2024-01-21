@@ -42,6 +42,7 @@ class ComposeIOSettings : public ModuleSettings {
     bool isBottomUpIntervalSet() const;
     bool isIterationOrderSet() const;
     bool isLocalOviEpsilonSet() const;
+    bool isUseRecursiveParetoComputationSet() const;
 
     std::string getStringDiagramFilename() const;
     std::string getEntrance() const;
@@ -82,6 +83,7 @@ class ComposeIOSettings : public ModuleSettings {
     static const std::string bottomUpIntervalName;
     static const std::string iterationOrderName;
     static const std::string localOviEpsilonName;
+    static const std::string useRecursiveParetoComputationName;
 
    private:
     void addStringOption(std::string optionName, std::string description, std::string fieldName, std::string fieldDescription);

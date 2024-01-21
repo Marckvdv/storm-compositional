@@ -6,9 +6,11 @@
 #include "storm-compose/models/visitor/BottomUpTermination.h"
 #include "storm-compose/models/visitor/EntranceExitMappingVisitor.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
+#include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
 #include "storm-compose/models/visitor/MappingVisitor.h"
 #include "storm-compose/models/visitor/OuterEntranceExitVisitor.h"
 #include "storm-compose/models/visitor/ParetoInitializerVisitor.h"
+#include "storm-compose/models/visitor/SymbioticTermination.h"
 #include "storm-compose/storage/EntranceExit.h"
 #include "storm-compose/storage/ExactCache.h"
 #include "storm-compose/storage/NoCache.h"
@@ -72,10 +74,10 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
             upperBound.addConstant(options.epsilon);
             size_t iter = 0;
             while (upperBound.comparable(lowerBound)) {
-                std::cout << "OVI iteration " << iter << std::endl;
+                std::cout << "OVI iteration " << iter << " current value: " << lowerBound.getValues()[0] << std::endl;
                 // TODO change caching behaviour:
                 // OviStepUpdater<ValueType> oviLowerBoundIterator(oviOptions, this->manager, lowerBound, noCache, this->stats);
-                //auto& oviCache = oviOptions.exactOvi ? noCache : cache;
+                // auto& oviCache = oviOptions.exactOvi ? noCache : cache;
                 auto& oviCache = noCache;
                 OviStepUpdater<ValueType> upperBoundIterator(oviOptions, this->manager, upperBound, oviCache, this->stats);
 
@@ -93,6 +95,11 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
                 upperBound = newUpperBound;
                 ++iter;
+            }
+
+            storage::ParetoCache<ValueType>* paretoCache = dynamic_cast<storage::ParetoCache<ValueType>*>(&*cache);
+            if (paretoCache) {
+                paretoCache->clearUpperBounds();
             }
         }
 
@@ -139,16 +146,40 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
             std::cout << "Cache has " << paretoCache.getLowerParetoPointCount() << " lower pareto points, and" << std::endl;
             std::cout << paretoCache.getUpperParetoPointCount() << " upper pareto points" << std::endl;
 
-            models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
-            root->accept(bottomUpVisitor);
-            auto result = bottomUpVisitor.getReachabilityResult(task, *root);
+            ValueType gap;
 
-            if (result.getError() < options.epsilon) {
-                lowerValue = result.getLowerBound();
-                upperValue = result.getUpperBound();
+            if (options.useRecursiveParetoComputation) {
+                models::visitor::LowerUpperParetoSettings symbioticSettings;
+                models::visitor::SymbioticTermination<ValueType> symbioticTermination(this->manager, this->stats, symbioticSettings, paretoCache);
+                root->accept(symbioticTermination);
+                auto paretoCurve = symbioticTermination.getCurrentPareto();
 
-                break;
+                ValueType paretoLowerBound = paretoCurve.first.getLowerBound(task.getEntranceId(), task.isLeftEntrance(), task.getExitId(), task.isLeftExit());
+                ValueType paretoUpperBound = paretoCurve.second.getLowerBound(task.getEntranceId(), task.isLeftEntrance(), task.getExitId(), task.isLeftExit());
+
+                gap = paretoUpperBound - paretoLowerBound;
+
+                if (gap < options.epsilon) {
+                    lowerValue = paretoLowerBound;
+                    upperValue = paretoUpperBound;
+
+                    break;
+                }
+            } else {
+                models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
+                root->accept(bottomUpVisitor);
+                auto result = bottomUpVisitor.getReachabilityResult(task, *root);
+                gap = result.getError();
+
+                if (gap < options.epsilon) {
+                    lowerValue = result.getLowerBound();
+                    upperValue = result.getUpperBound();
+
+                    break;
+                }
             }
+
+            paretoCache.clearUpperBounds();
         }
 
         ++currentStep;
@@ -208,8 +239,10 @@ void CompositionalValueIteration<ValueType>::initializeCache() {
     } else if (options.cacheMethod == EXACT_CACHE) {
         cache = std::make_shared<storm::storage::ExactCache<ValueType>>(options.localOviEpsilon);
     } else if (options.cacheMethod == PARETO_CACHE) {
-        cache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
-        cache->setErrorTolerance(options.cacheErrorTolerance);
+        auto paretoCache = std::make_shared<storm::storage::ParetoCache<ValueType>>();
+        paretoCache->setErrorTolerance(options.cacheErrorTolerance);
+        paretoCache->initializeParetoCurves(lowerBound.getMapping().getLeaves());
+        cache = std::move(paretoCache);
     }
 }
 
