@@ -97,12 +97,11 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                 upperBound = newUpperBound;
                 ++iter;
             }
-
-            storage::ParetoCache<ValueType>* paretoCache = dynamic_cast<storage::ParetoCache<ValueType>*>(&*cache);
-            if (paretoCache) {
-                // paretoCache->clearUpperBounds();
-            }
         }
+        // storage::ParetoCache<ValueType>* paretoCache = dynamic_cast<storage::ParetoCache<ValueType>*>(&*cache);
+        // if (paretoCache) {
+        //     paretoCache->clearUpperBounds();
+        // }
 
         ++currentStep;
     } while (!shouldTerminate());

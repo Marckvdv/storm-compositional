@@ -1,5 +1,6 @@
 #include "storm/storage/geometry/NativePolytope.h"
 
+#include "solver/SoplexLpSolver.h"
 #include "storm/solver/SmtSolver.h"
 #include "storm/solver/Z3LpSolver.h"
 #include "storm/storage/expressions/ExpressionManager.h"
@@ -323,7 +324,8 @@ std::pair<typename NativePolytope<ValueType>::Point, bool> NativePolytope<ValueT
         return std::make_pair(Point(), false);
     }
 
-    storm::solver::Z3LpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
+    // storm::solver::Z3LpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
+    storm::solver::SoplexLpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
     std::vector<storm::expressions::Variable> variables;
     variables.reserve(A.cols());
     for (Eigen::Index i = 0; i < A.cols(); ++i) {

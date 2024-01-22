@@ -11,6 +11,7 @@
 #include "storm/solver/SolveGoal.h"
 #include "storm/utility/constants.h"
 #include "storm/utility/vector.h"
+#include "utility/Stopwatch.h"
 
 namespace storm {
 namespace storage {
@@ -224,7 +225,14 @@ std::pair<typename ParetoCache<ValueType>::ParetoPointType, typename ParetoCache
     auto upperBoundPolytope = upperBounds.at(key);
 
     ParetoPointType lb = getBestLowerBound(ptr, outputWeight, pos);
+
+    static storm::utility::Stopwatch optimizeTimer;
+    optimizeTimer.start();
     auto ub = upperBoundPolytope->optimize(outputWeight);
+    optimizeTimer.stop();
+
+    // std::cout << "UB hs: " << upperBoundPolytope->getHalfspaces().size() << std::endl;
+    // std::cout << "Total itme Took: " << optimizeTimer << std::endl;
 
     STORM_LOG_ASSERT(ub.second, "optimizing in the upper bound should always be defined as it is (supposedly) bounded and non-empty");
 
