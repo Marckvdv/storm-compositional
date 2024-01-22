@@ -47,6 +47,7 @@ class ParetoCache : public AbstractCache<ValueType> {
     void initializeParetoCurve(models::ConcreteMdp<ValueType>* ptr);
     std::pair<ParetoPointType, ParetoPointType> getLowerUpper(models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos);
     ParetoPointType getBestLowerBound(models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos);
+    ParetoPointType getBestUpperBound(models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight, Position pos);
 
     // computes the inf-norm of upper-lower
     ParetoRational getError(ParetoPointType lower, ParetoPointType upper) const;

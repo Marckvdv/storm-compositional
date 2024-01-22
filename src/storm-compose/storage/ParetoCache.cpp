@@ -1,4 +1,5 @@
 #include "ParetoCache.h"
+#include "exceptions/BaseException.h"
 #include "exceptions/InvalidArgumentException.h"
 #include "modelchecker/prctl/SparseDtmcPrctlModelChecker.h"
 #include "storage/geometry/Halfspace.h"
@@ -52,18 +53,12 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
     auto processEntrances = [&](const auto& entrances, storage::EntranceExit entrance) {
         for (size_t i = 0; i < entrances.size(); ++i) {
             Position pos = {entrance, i};
-            auto paretoEntry = getLowerUpper(ptr, convertedOutputWeight, pos);
-
-            const auto& lb = paretoEntry.first;
-            const auto& ub = paretoEntry.second;
-
-            ParetoRational error = getError(lb, ub);
-            // std::cout << "error in cache: " << storm::utility::convertNumber<double>(error) << std::endl;
-            // if (error > this->errorTolerance) {
-            //     return false;
-            // }
-            upperBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(ub, convertedOutputWeight));
-
+            try {
+                const auto& ub = getBestUpperBound(ptr, convertedOutputWeight, pos);
+                upperBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(ub, convertedOutputWeight));
+            } catch (storm::exceptions::BaseException e) {
+                return false;
+            }
             ++weightIndex;
         }
         return true;
@@ -258,6 +253,16 @@ typename ParetoCache<ValueType>::ParetoPointType ParetoCache<ValueType>::getBest
     }
 
     return lb;
+}
+
+template<typename ValueType>
+typename ParetoCache<ValueType>::ParetoPointType ParetoCache<ValueType>::getBestUpperBound(models::ConcreteMdp<ValueType>* ptr, ParetoPointType outputWeight,
+                                                                                           Position pos) {
+    std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
+    auto upperBoundPolytope = upperBounds.at(key);
+    auto result = upperBoundPolytope->optimize(outputWeight);
+
+    return result.first;
 }
 
 template<typename ValueType>
