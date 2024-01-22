@@ -110,6 +110,11 @@ cviLoopBreak:
     std::cout << "WARN for now assuming we are only interested in the first left entrance" << std::endl;
     std::cout << "WARN assuming first entrance is the one of interest" << std::endl;
 
+    storage::ParetoCache<ValueType>* paretoCache = dynamic_cast<storage::ParetoCache<ValueType>*>(&*cache);
+    if (paretoCache) {
+        this->stats.lowerParetoPoints = paretoCache->getLowerParetoPointCount();
+    }
+
     if (lowerValue && upperValue) {
         return ApproximateReachabilityResult<ValueType>(*lowerValue, *upperValue);
     } else if (lowerValue) {

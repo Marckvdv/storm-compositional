@@ -12,6 +12,7 @@
 #include "storm/exceptions/InvalidArgumentException.h"
 #include "storm/exceptions/NotImplementedException.h"
 #include "storm/exceptions/UnexpectedException.h"
+#include "utility/Stopwatch.h"
 
 namespace storm {
 namespace storage {
@@ -336,7 +337,12 @@ std::pair<typename NativePolytope<ValueType>::Point, bool> NativePolytope<ValueT
         solver.addConstraint("", constraint);
     }
     solver.update();
+
+    // static utility::Stopwatch t;
+    // t.start();
     solver.optimize();
+    // t.stop();
+    // std::cout << "T: " << t.getTimeInNanoseconds() * 1e-9 << std::endl;
     if (solver.isOptimal()) {
         auto result = std::make_pair(Point(), true);
         result.first.reserve(variables.size());

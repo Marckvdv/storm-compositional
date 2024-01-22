@@ -5,6 +5,7 @@
 #include "storm/adapters/EigenAdapter.h"
 #include "storm/storage/expressions/Expression.h"
 #include "storm/storage/geometry/Polytope.h"
+#include "utility/Stopwatch.h"
 
 namespace storm {
 namespace storage {
@@ -139,6 +140,7 @@ class NativePolytope : public Polytope<ValueType> {
 
     virtual std::shared_ptr<Polytope<ValueType>> clean() override;
 
+    // static utility::Stopwatch optimizeTimer;
    private:
     // returns the vertices of this polytope as EigenVectors
     std::vector<EigenVector> getEigenVertices() const;

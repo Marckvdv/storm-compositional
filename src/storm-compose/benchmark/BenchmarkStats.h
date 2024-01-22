@@ -1,5 +1,6 @@
 #pragma once
 
+#include "storage/geometry/NativePolytope.h"
 #include "storm/adapters/JsonAdapter.h"
 #include "storm/utility/Stopwatch.h"
 
@@ -62,6 +63,8 @@ struct BenchmarkStats {
         result["cacheRetrievalTime"] = cacheRetrievalTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
         result["cacheInsertionTime"] = cacheInsertionTime.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
         result["cacheHitRatio"] = (double)cacheHits / (double)weightedReachabilityQueries;
+
+        // result["optimizeTime"] = storage::geometry::NativePolytope<ValueType>::optimizeTimer.getTimeInNanoseconds() * NANOSECONDS_TO_SECONDS;
 
         return result;
     }
