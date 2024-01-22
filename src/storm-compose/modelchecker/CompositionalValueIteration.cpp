@@ -58,6 +58,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     typename HeuristicValueIterator<ValueType>::Options hviOptions;
     hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
     hviOptions.localOviEpsilon = options.localOviEpsilon;
+    hviOptions.cacheErrorTolerance = options.cacheErrorTolerance;
 
     typename HeuristicValueIterator<ValueType>::Options oviOptions;
     oviOptions.exactOvi = options.localOviEpsilon == 0;
@@ -99,7 +100,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
             storage::ParetoCache<ValueType>* paretoCache = dynamic_cast<storage::ParetoCache<ValueType>*>(&*cache);
             if (paretoCache) {
-                paretoCache->clearUpperBounds();
+                // paretoCache->clearUpperBounds();
             }
         }
 
@@ -132,6 +133,7 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
     hviOptions.iterationOrder = HeuristicValueIterator<ValueType>::orderFromString(options.iterationOrder);
     hviOptions.localOviEpsilon = options.localOviEpsilon;
     hviOptions.stepsPerIteration = 100;
+    hviOptions.cacheErrorTolerance = options.cacheErrorTolerance;
 
     HeuristicValueIterator<ValueType> hvi(hviOptions, this->manager, lowerBound, cache, this->stats);
     do {

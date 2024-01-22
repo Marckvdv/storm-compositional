@@ -22,6 +22,7 @@ class HeuristicValueIterator {
         enum IterationOrder { FORWARD, BACKWARD, HEURISTIC } iterationOrder = BACKWARD;
         ValueType localOviEpsilon = 1e-4;
         bool exactOvi = true;
+        ValueType cacheErrorTolerance = 1e-3;
     };
 
     HeuristicValueIterator(Options options, std::shared_ptr<models::OpenMdpManager<ValueType>> manager, storage::ValueVector<ValueType>& valueVector,

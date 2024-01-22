@@ -18,6 +18,8 @@ namespace storage {
 template<typename ValueType>
 boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueType>::getLowerBound(models::ConcreteMdp<ValueType>* ptr,
                                                                                                    WeightType outputWeight) {
+    // std::cout << "Cache context, model " << ptr->getName() << " weight " << storm::utility::vector::toString(outputWeight) << std::endl;;
+
     ParetoPointType convertedOutputWeight = storm::utility::vector::convertNumericVector<ParetoRational>(outputWeight);
     WeightType lowerBound(ptr->getEntranceCount());
 
@@ -55,9 +57,10 @@ boost::optional<typename ParetoCache<ValueType>::WeightType> ParetoCache<ValueTy
             const auto& ub = paretoEntry.second;
 
             ParetoRational error = getError(lb, ub);
-            if (error > this->errorTolerance) {
-                return false;
-            }
+            // std::cout << "error in cache: " << storm::utility::convertNumber<double>(error) << std::endl;
+            // if (error > this->errorTolerance) {
+            //     return false;
+            // }
             upperBound[weightIndex] = storm::utility::convertNumber<ValueType>(storm::utility::vector::dotProduct(ub, convertedOutputWeight));
 
             ++weightIndex;
@@ -136,6 +139,16 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
 
         ++entranceIndex;
     }
+
+    // auto lb = *getLowerBound(ptr, outputWeight);
+    // auto ub = *getUpperBound(ptr, outputWeight);
+
+    // std::cout << "CHECK: lb, ub, input" << std::endl;
+    // std::cout << storm::utility::vector::toString<ValueType>(lb) << std::endl;
+    // std::cout << storm::utility::vector::toString<ValueType>(ub) << std::endl;
+    // std::cout << storm::utility::vector::toString<ValueType>(inputWeight) << std::endl;
+
+    // getBestLowerBound(ptr, outputWeight, Position pos)
 }
 
 template<typename ValueType>
@@ -223,6 +236,7 @@ typename ParetoCache<ValueType>::ParetoPointType ParetoCache<ValueType>::getBest
                                                                                            Position pos) {
     std::pair<models::ConcreteMdp<ValueType>*, Position> key = {ptr, pos};
     auto lowerBoundPoints = lowerBounds.at(key);
+    STORM_LOG_ASSERT(lowerBoundPoints.size() > 0, "Empty lower bound");
 
     ParetoRational lbValue = storm::utility::zero<ValueType>();
     ParetoPointType lb;
@@ -231,9 +245,9 @@ typename ParetoCache<ValueType>::ParetoPointType ParetoCache<ValueType>::getBest
         ParetoRational weightedSum = storm::utility::vector::dotProduct(p, outputWeight);
         if (weightedSum >= lbValue) {
             lb = p;
+            lbValue = weightedSum;
         }
     }
-    STORM_LOG_ASSERT(lowerBoundPoints.size() > 0, "Empty lower bound");
 
     return lb;
 }

@@ -9,6 +9,7 @@
 #include "storm/environment/solver/SolverEnvironment.h"
 #include "utility/constants.h"
 #include "utility/macros.h"
+#include "utility/vector.h"
 
 namespace storm {
 namespace modelchecker {
@@ -93,43 +94,67 @@ void HeuristicValueIterator<ValueType>::storeInputWeights(size_t leafId, WeightT
 template<typename ValueType>
 typename HeuristicValueIterator<ValueType>::WeightType HeuristicValueIterator<ValueType>::performStep(size_t leafId, WeightType const& weights) {
     models::ConcreteMdp<ValueType>* model = mapping.getLeaves()[leafId];
-    bool allZero = std::all_of(weights.begin(), weights.end(), [](ValueType v) { return v == storm::utility::zero<ValueType>(); });
+
+    // std::cout << std::endl;
+    // std::cout << "Current step on model " << leafId << "(" << model->getName() << ", " << model << ") with weight " <<
+    // storm::utility::vector::toString<ValueType>(weights) << std::endl;
+
     std::vector<ValueType> inputWeights;
+
+    bool allZero = std::all_of(weights.begin(), weights.end(), [](ValueType v) { return v == storm::utility::zero<ValueType>(); });
     if (allZero) {
         inputWeights = std::vector<ValueType>(model->getEntranceCount(), 0);
     } else {
-        boost::optional<std::vector<ValueType>> result;
-        result = queryCacheLowerBound(model, weights);
+        boost::optional<std::vector<ValueType>> lbResult, ubResult;
+
+        lbResult = queryCacheLowerBound(model, weights);
+        ubResult = queryCacheUpperBound(model, weights);
+
+        // std::cout << "LB from cache: " << storm::utility::vector::toString(*lbResult) << std::endl;
+        // if (ubResult) {
+        //     std::cout << "UB from cache: " << storm::utility::vector::toString(*ubResult) << std::endl;
+        // }
 
         bool cacheUsed = false;
-        ++stats.weightedReachabilityQueries;
-        if (result) {
-            // Check if the result returned by the cache is actually better.
-            const auto& result2 = *result;
-            auto oldInputWeights = valueVector.getInputWeights(leafId);
-            STORM_LOG_ASSERT(oldInputWeights.size() == result2.size(), "size mismatch");
+        if (lbResult && ubResult) {
+            ValueType gap = storm::utility::vector::maximumElementDiff<ValueType>(*lbResult, *ubResult);
+            // std::cout << "gap: " << gap << std::endl;
 
-            ValueType cacheTolerance = 1e-3;
-            bool goodEnough = false;
-            for (size_t i = 0; i < oldInputWeights.size(); ++i) {
-                ValueType difference = result2[i] - oldInputWeights[i];
-                if (difference > cacheTolerance) {
-                    goodEnough = true;
-                } else if (difference < 0) {
-                    goodEnough = false;
-                    break;
-                }
-            }
-
-            if (goodEnough) {
-                inputWeights = result2;
+            ++stats.weightedReachabilityQueries;
+            if (gap < options.cacheErrorTolerance) {
                 cacheUsed = true;
-                ++stats.cacheHits;
-            } else {
-                // Check gap
-                // result = queryCacheLowerBound(model, weights);
+                stats.cacheHits++;
+                inputWeights = *lbResult;
             }
         }
+        // std::cout << " cache used: " << (cacheUsed ? "yes" : "no") << std::endl;
+        // if (lbResult) {
+        //     // Check if the result returned by the cache is actually better.
+        //     const auto& result2 = *lbResult;
+        //     auto oldInputWeights = valueVector.getInputWeights(leafId);
+        //     STORM_LOG_ASSERT(oldInputWeights.size() == result2.size(), "size mismatch");
+
+        //    ValueType cacheTolerance = 1e-3;
+        //    bool goodEnough = false;
+        //    for (size_t i = 0; i < oldInputWeights.size(); ++i) {
+        //        ValueType difference = result2[i] - oldInputWeights[i];
+        //        if (difference > cacheTolerance) {
+        //            goodEnough = true;
+        //        } else if (difference < 0) {
+        //            goodEnough = false;
+        //            break;
+        //        }
+        //    }
+
+        //    if (goodEnough) {
+        //        inputWeights = result2;
+        //        cacheUsed = true;
+        //        ++stats.cacheHits;
+        //    } else {
+        //        // Check gap
+        //        // result = queryCacheLowerBound(model, weights);
+        //    }
+        //}
 
         if (!cacheUsed) {
             stats.reachabilityComputationTime.start();
@@ -137,6 +162,8 @@ typename HeuristicValueIterator<ValueType>::WeightType HeuristicValueIterator<Va
             stats.reachabilityComputationTime.stop();
             auto weight = newResult.first;
             auto scheduler = newResult.second;
+
+            // std::cout << "inserting value " << storm::utility::vector::toString<ValueType>(weight) << std::endl;
 
             inputWeights = weight;
             addToCache(model, weights, inputWeights, scheduler);
