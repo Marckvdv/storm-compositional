@@ -46,8 +46,8 @@ SoplexLpSolver<ValueType, RawMode>::SoplexLpSolver(std::string const& name, Opti
         solver.setRealParam(SoPlex::FEASTOL, 1e-4);
         solver.setRealParam(SoPlex::OPTTOL, 1e-4);
 
-        //solver.setRealParam(SoPlex::FEASTOL, 0.0);
-        //solver.setRealParam(SoPlex::OPTTOL, 0.0);
+        // solver.setRealParam(SoPlex::FEASTOL, 0.0);
+        // solver.setRealParam(SoPlex::OPTTOL, 0.0);
     }
     solver.setIntParam(SoPlex::VERBOSITY, 0);
 }

@@ -149,9 +149,6 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
 
             // Cache is guaranteed to be a Pareto cache at this point.
             storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
-            std::cout << "Cache has " << paretoCache.getLowerParetoPointCount() << " lower pareto points, and" << std::endl;
-            std::cout << paretoCache.getUpperParetoPointCount() << " upper pareto points" << std::endl;
-
             ValueType gap;
 
             if (options.useRecursiveParetoComputation) {
@@ -184,8 +181,6 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                     break;
                 }
             }
-
-            paretoCache.clearUpperBounds();
         }
 
         ++currentStep;
