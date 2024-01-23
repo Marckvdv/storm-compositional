@@ -190,6 +190,9 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
         ++currentStep;
     } while (!shouldTerminate());
 
+    storm::storage::ParetoCache<ValueType>& paretoCache = static_cast<storm::storage::ParetoCache<ValueType>&>(*cache);
+    this->stats.lowerParetoPoints = paretoCache.getLowerParetoPointCount();
+
     if (lowerValue && upperValue) {
         return ApproximateReachabilityResult<ValueType>(*lowerValue, *upperValue);
     } else if (lowerValue) {
