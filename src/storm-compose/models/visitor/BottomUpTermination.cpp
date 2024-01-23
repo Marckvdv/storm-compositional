@@ -61,7 +61,6 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
     storm::modelchecker::OpenMdpReachabilityTask task, storm::models::OpenMdp<ValueType>& openMdp) {
     storm::utility::Stopwatch transformTimer, reachabilityTimer;
 
-    stats.bottomUpTerminationTime.start();
     transformTimer.start();
     LeafTransformer<ValueType> lowerBoundTransform([&](ConcreteMdp<ValueType>& concreteMdp) {
         // std::cout << "LB count: " << lowerBounds.count(&concreteMdp) << std::endl;
@@ -79,7 +78,6 @@ storm::modelchecker::ApproximateReachabilityResult<ValueType> BottomUpTerminatio
     auto lowerResult = lowerChecker.check(task);
     auto upperResult = upperChecker.check(task);
     reachabilityTimer.stop();
-    stats.bottomUpTerminationTime.stop();
 
     std::cout << "Transform time: " << transformTimer.getTimeInNanoseconds() * 1e-9 << std::endl;
     std::cout << "Reachability time: " << reachabilityTimer.getTimeInNanoseconds() * 1e-9 << std::endl;

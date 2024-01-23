@@ -80,9 +80,11 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                 // OviStepUpdater<ValueType> oviLowerBoundIterator(oviOptions, this->manager, lowerBound, noCache, this->stats);
                 // auto& oviCache = oviOptions.exactOvi ? noCache : cache;
                 auto& oviCache = noCache;
+                this->stats.terminationTime.start();
                 OviStepUpdater<ValueType> upperBoundIterator(oviOptions, this->manager, upperBound, oviCache, this->stats);
 
                 upperBoundIterator.performIteration();
+                this->stats.terminationTime.stop();
                 lowerBoundIterator.performIteration();
                 auto newUpperBound = upperBoundIterator.getNewValueVector();
 
@@ -169,10 +171,12 @@ ApproximateReachabilityResult<ValueType> CompositionalValueIteration<ValueType>:
                     break;
                 }
             } else {
+                this->stats.terminationTime.start();
                 models::visitor::BottomUpTermination<ValueType> bottomUpVisitor(this->manager, this->stats, env, paretoCache);
                 root->accept(bottomUpVisitor);
                 auto result = bottomUpVisitor.getReachabilityResult(task, *root);
                 gap = result.getError();
+                this->stats.terminationTime.stop();
 
                 if (gap < options.epsilon) {
                     lowerValue = result.getLowerBound();

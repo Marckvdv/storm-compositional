@@ -1,7 +1,10 @@
 #include "ParetoCache.h"
+#include "environment/solver/MinMaxSolverEnvironment.h"
+#include "environment/solver/SolverEnvironment.h"
 #include "exceptions/BaseException.h"
 #include "exceptions/InvalidArgumentException.h"
 #include "modelchecker/prctl/SparseDtmcPrctlModelChecker.h"
+#include "solver/SolverSelectionOptions.h"
 #include "storage/geometry/Halfspace.h"
 #include "storage/geometry/Polytope.h"
 #include "storm-compose/models/ConcreteMdp.h"
@@ -90,7 +93,11 @@ void ParetoCache<ValueType>::addToCache(models::ConcreteMdp<ValueType>* ptr, std
     size_t stateCount = ptr->getMdp()->getTransitionMatrix().getRowGroupCount();
     storage::BitVector phi(stateCount, true);
 
-    storm::Environment env;  // TODO optimistic?
+    storm::Environment env;
+
+    // TODO make configurable:
+    env.solver().minMax().setMethod(solver::MinMaxMethod::OptimisticValueIteration);
+    env.solver().minMax().setPrecision(1e-5);
     // Store point for each entrance
     std::vector<ParetoPointType> points(ptr->getEntranceCount());
 

@@ -67,7 +67,7 @@ bool ValueVector<ValueType>::dominates(ValueVector<ValueType> const& other) cons
 
         if (values[i] < other.values[i]) {
             dominates = false;
-            std::cout << ", no OVI, difference " << other.values[i] - values[i] << std::endl;
+            // std::cout << ", no OVI, difference " << other.values[i] - values[i] << std::endl;
             break;
         }
         // std::cout << std::endl;

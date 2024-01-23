@@ -56,18 +56,6 @@ bool OviStepUpdater<ValueType>::performIteration() {
         WeightType weights = originalValueVector.getOutputWeights(leaf);
         WeightType inputWeights = performStep(leaf, weights);
         storeInputWeights(leaf, inputWeights);
-
-        // auto originalInputWeights = originalValueVector.getInputWeights(leaf);
-
-        // for (size_t i = 0; i < inputWeights.size(); ++i) {
-        //     //if (inputWeights[i] > originalInputWeights[i] + 1e-6) {
-        //     if (inputWeights[i] > originalInputWeights[i]) {
-        //         std::cout << "No OVI: " << inputWeights[i] << " vs " << originalInputWeights[i] << ": difference " << inputWeights[i] -
-        //         originalInputWeights[i]
-        //                   << std::endl;
-        //         return false;
-        //     }
-        // }
     }
 
     return true;
