@@ -16,7 +16,7 @@ MAINTAINER Matthias Volk <m.volk@utwente.nl>
 # CMake build type
 ARG build_type=Release
 # Specify number of threads to use for parallel compilation
-ARG no_threads=1
+ARG no_threads=4
 # Specify CMake arguments for Storm
 ARG cmake_args="-DSTORM_PORTABLE=ON -DSTORM_USE_SPOT_SHIPPED=ON"
 
@@ -68,3 +68,4 @@ RUN make binaries -j $no_threads
 
 # Set path
 ENV PATH="/opt/storm/build/bin:$PATH"
+WORKDIR /opt/storm/compose-benchmark
