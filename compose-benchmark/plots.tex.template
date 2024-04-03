@@ -1,0 +1,90 @@
+{% raw %}
+\documentclass{article}
+
+\usepackage[a4paper]{geometry}
+\usepackage{pgfplots}
+\usepgfplotslibrary{external}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary {arrows.meta,automata,positioning}
+\usetikzlibrary{plotmarks}
+% \tikzexternalize
+\usepackage{tikz-cd}
+%\usepackage[all]{xy}
+\tikzstyle{point}=[circle,  inner sep=2pt, fill]
+\usepackage{nicematrix}
+\usepackage{adjustbox}
+\usepackage{booktabs}
+\usepackage{stmaryrd}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{csvsimple}
+
+\newcommand{\sd}[1]{\mathbb{#1}}
+\newcommand{\mdp}[1]{\mathcal{#1}}
+\newcommand{\semantics}[1]{\llbracket #1 \rrbracket}
+
+\input{macros.tex}
+
+\begin{document}
+
+\begin{figure}[t]
+    \centering
+%    
+    \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time Novel}{\approachnovel}{Total time Baseline}{\approachbaseline}
+    %\subcaption{Novel vs Baseline}%
+    \end{minipage}%
+    \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time ALGORITHM_A1}{\approachocviexact}{Total time Monolithic}{\approachmonolithic}
+    %\subcaption{OCVI vs monolithic}%
+    \end{minipage}%
+    \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time ALGORITHM_B}{\approachsymbiosis}{Total time Pareto4}{\approachbottomup}
+    %\subcaption{Symbiosis vs Bottom-up}%
+    \end{minipage}%
+    
+    \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time ALGORITHM_B}{\approachsymbiosis}{Total time ALGORITHM_A1}{\approachocviexact}
+    %\subcaption{Symbiosis vs Bottom-up}%
+    \end{minipage}%
+    \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time ALGORITHM_A2}{\approachocvipareto}{Total time ALGORITHM_A1}{\approachocviexact}
+    %\subcaption{Symbiosis vs Bottom-up}%
+    \end{minipage}%
+   \begin{minipage}[t]{0.33\textwidth}%
+    \centering
+    \scatterplot{plots/results_plot}{Total time ALGORITHM_A2}{\approachocvipareto}{Total time ALGORITHM_B}{\approachsymbiosis}
+    %\subcaption{Symbiosis vs Bottom-up}%
+    \end{minipage}%
+    \caption{Benchmark scatter plots, time in seconds, OoR=Out of Resources}
+    \label{fig:scatterplots}
+\end{figure}
+\clearpage
+
+{% endraw %}
+\begin{table}[h]
+    \caption{Benchmark details (time in s, MO=memory out, TO=time out)}
+    \begin{adjustbox}{width=\textwidth}
+        \centering
+        \begin{NiceTabular}{l l r r r || r r | r | r r r r | r r r r }
+            \toprule
+            \Block[C]{2-1}{$\sd{D}$} & \Block[C]{2-1}{$\mdp{M}$} & \Block[C]{2-1}{$|S_{\semantics{\sd{D}}}|$} & \Block[C]{2-1}{$\#\mdp{A}$} & \Block[C]{2-1}{$|S_\mdp{A}|$} & \Block{1-2}{\texttt{Mon}} & & \texttt{Prec} & \Block{1-4}{\texttt{rPareto} [$\eta = 10^{-2}$]} & & & & \Block{1-4}{\texttt{rPareto} [$\eta = 10^{-4}$]} \\
+            &  &  &  &  & $t$ & $t_m$ & $t$ & $t$ & $t_m$ & $E$ & \hspace{5mm}$p$ & $t$ & $t_m$ & $E$ & \hspace{5mm}$p$ \\\midrule
+            \\
+            \bottomrule
+        \end{NiceTabular}
+    \end{adjustbox}
+\end{table}
+
+%\begin{table}
+%  \resizebox{\textwidth}{!}{
+%  \csvautobooktabular{results_table.csv}
+%  }
+%\end{table}
+
+\end{document}

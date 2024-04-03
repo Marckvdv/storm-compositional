@@ -1,0 +1,70 @@
+{% raw %}
+%% PLOTS
+\newcommand{\scatterplotsize}[0]{0.9\textwidth}
+\newcommand{\marksize}{1.8}
+
+% Arguments:
+% 1) csv file
+% 2) csv column for data on x-axis
+% 3) x-axis label
+% 4) csv column for data on y-axis
+% 5) y-axis label
+\newcommand{\scatterplot}[5]{%
+	\begin{tikzpicture}
+	\begin{axis}[
+	width=\scatterplotsize,
+	height=\scatterplotsize,
+	axis equal image,
+	xmin=1,
+	ymin=1,
+	ymax=9000,
+	xmax=9000,
+	xmode=log,
+	ymode=log,
+	axis x line=bottom,
+	axis y line=left,
+	xtick={1,9,90,900},
+	xticklabels={1,9,90,900},
+	extra x ticks = {2700},
+	extra x tick labels = {OoR},
+	extra x tick style = {grid = major},
+	ytick={1,9,90,900},
+	yticklabels={1,9,90,900},
+	extra y ticks = {2700},
+	extra y tick labels = {OoR},
+	extra y tick style = {grid = major},
+	xlabel={\scriptsize #3},
+	xlabel style={yshift=0cm},
+	ylabel={\scriptsize #5},
+	ylabel style={yshift=-0.4cm},
+	yticklabel style={font=\tiny},
+	xticklabel style={rotate=290,anchor=west,font=\tiny},
+ legend pos=outer north east,
+ %legend cell align=left,
+	]
+{% endraw %}
+
+{% for plot in plots %}
+	\addplot[ % {{ plot.name }}
+	scatter,
+	only marks,
+	mark={{ plot.mark }},
+ mark size=\marksize,
+ fill opacity=0.5,
+	scatter/use mapped color={
+    draw=black,
+    fill=black,
+	}
+	]%
+	table [col sep=comma,x=#2,y=#4] {{ '{#1_' + plot.i + '.csv}' }};
+
+{% endfor %}
+
+{% raw %}
+	\addplot[no marks] coordinates {(0.01,0.01) (2700,2700) };
+	\addplot[no marks, densely dotted] coordinates {(0.01,0.1) (270,2700)};
+	\addplot[no marks, densely dotted] coordinates {(0.1,0.01) (2700,270)};
+	\end{axis}
+	\end{tikzpicture}
+}
+{% endraw %}

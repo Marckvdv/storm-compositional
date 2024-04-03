@@ -1,0 +1,11 @@
+mdp
+
+module initial
+    s : [ 0 .. 3 ];
+
+    [] s=0 -> 0.33:(s'=1) + 0.34:(s'=2) + 0.33:(s'=3);
+endmodule
+
+init
+    s=0
+endinit

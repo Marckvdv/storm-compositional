@@ -1,0 +1,10 @@
+mdp
+
+module initial
+    s : [ 0 .. 6 ];
+    [] s=0|s=6 -> 0.88:(s'=1) + 0.03:(s'=2) + 0.03:(s'=3) + 0.03:(s'=4) + 0.03:(s'=5);
+endmodule
+
+init
+    s=0|s=6
+endinit

@@ -1,0 +1,14 @@
+mdp
+
+module final
+    s : [ 1 .. 8 ];
+
+    [] s=1 -> 1:(s'=6);
+    [] s=2|s=3|s=4 -> 1:(s'=7); 
+    [] s=5 -> 1:(s'=8);
+    [] s=7 -> true;
+endmodule
+
+init
+    s=1|s=2|s=3|s=4|s=5
+endinit

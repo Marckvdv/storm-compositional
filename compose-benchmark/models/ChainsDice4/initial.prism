@@ -1,0 +1,10 @@
+mdp
+
+module initial
+    s : [ -1 .. 4 ];
+    [] s=-1|s=0 -> 0.91:(s'=1) + 0.03:(s'=2) + 0.03:(s'=3) + 0.03:(s'=4);
+endmodule
+
+init
+    s=-1|s=0
+endinit

@@ -1,0 +1,635 @@
+digraph model {
+	0 [ label = "0[x=3	& y=0	& norm_ent_exit=1]: {init, len0}" ];
+	1 [ label = "1[x=0	& y=3	& norm_ent_exit=1]: {init, len1}" ];
+	2 [ label = "2[x=3	& y=0	& norm_ent_exit=0]: {}" ];
+	3 [ label = "3[x=0	& y=3	& norm_ent_exit=0]: {}" ];
+	4 [ label = "4[x=3	& y=1	& norm_ent_exit=0]: {}" ];
+	5 [ label = "5[x=2	& y=1	& norm_ent_exit=0]: {}" ];
+	6 [ label = "6[x=4	& y=1	& norm_ent_exit=0]: {}" ];
+	7 [ label = "7[x=2	& y=0	& norm_ent_exit=0]: {}" ];
+	8 [ label = "8[x=4	& y=0	& norm_ent_exit=0]: {}" ];
+	9 [ label = "9[x=2	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	10 [ label = "10[x=4	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	11 [ label = "11[x=3	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	12 [ label = "12[x=0	& y=4	& norm_ent_exit=0]: {}" ];
+	13 [ label = "13[x=-1	& y=4	& norm_ent_exit=0]
+: {}" ];
+	14 [ label = "14[x=1	& y=4	& norm_ent_exit=0]: {}" ];
+	15 [ label = "15[x=-1	& y=3	& norm_ent_exit=0]
+: {}" ];
+	16 [ label = "16[x=1	& y=3	& norm_ent_exit=0]: {}" ];
+	17 [ label = "17[x=-1	& y=2	& norm_ent_exit=0]
+: {}" ];
+	18 [ label = "18[x=1	& y=2	& norm_ent_exit=0]: {}" ];
+	19 [ label = "19[x=0	& y=2	& norm_ent_exit=0]: {}" ];
+	20 [ label = "20[x=3	& y=2	& norm_ent_exit=0]: {}" ];
+	21 [ label = "21[x=2	& y=2	& norm_ent_exit=0]: {}" ];
+	22 [ label = "22[x=4	& y=2	& norm_ent_exit=0]: {}" ];
+	23 [ label = "23[x=1	& y=1	& norm_ent_exit=0]: {}" ];
+	24 [ label = "24[x=1	& y=0	& norm_ent_exit=0]: {}" ];
+	25 [ label = "25[x=5	& y=2	& norm_ent_exit=0]: {}" ];
+	26 [ label = "26[x=5	& y=1	& norm_ent_exit=0]: {}" ];
+	27 [ label = "27[x=5	& y=0	& norm_ent_exit=0]: {}" ];
+	28 [ label = "28[x=1	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	29 [ label = "29[x=5	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	30 [ label = "30[x=0	& y=5	& norm_ent_exit=0]: {}" ];
+	31 [ label = "31[x=-1	& y=5	& norm_ent_exit=0]
+: {}" ];
+	32 [ label = "32[x=1	& y=5	& norm_ent_exit=0]: {}" ];
+	33 [ label = "33[x=2	& y=5	& norm_ent_exit=0]: {}" ];
+	34 [ label = "34[x=2	& y=4	& norm_ent_exit=0]: {}" ];
+	35 [ label = "35[x=2	& y=3	& norm_ent_exit=0]: {}" ];
+	36 [ label = "36[x=0	& y=1	& norm_ent_exit=0]: {}" ];
+	37 [ label = "37[x=-1	& y=1	& norm_ent_exit=0]
+: {}" ];
+	38 [ label = "38[x=3	& y=3	& norm_ent_exit=0]: {}" ];
+	39 [ label = "39[x=4	& y=3	& norm_ent_exit=0]: {}" ];
+	40 [ label = "40[x=5	& y=3	& norm_ent_exit=0]: {}" ];
+	41 [ label = "41[x=0	& y=0	& norm_ent_exit=0]: {}" ];
+	42 [ label = "42[x=0	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	43 [ label = "43[x=6	& y=3	& norm_ent_exit=0]: {}" ];
+	44 [ label = "44[x=6	& y=2	& norm_ent_exit=0]: {}" ];
+	45 [ label = "45[x=6	& y=1	& norm_ent_exit=0]: {}" ];
+	46 [ label = "46[x=6	& y=0	& norm_ent_exit=0]: {}" ];
+	47 [ label = "47[x=6	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	48 [ label = "48[x=0	& y=6	& norm_ent_exit=0]: {}" ];
+	49 [ label = "49[x=-1	& y=6	& norm_ent_exit=0]
+: {}" ];
+	50 [ label = "50[x=1	& y=6	& norm_ent_exit=0]: {}" ];
+	51 [ label = "51[x=2	& y=6	& norm_ent_exit=0]: {}" ];
+	52 [ label = "52[x=3	& y=6	& norm_ent_exit=0]: {}" ];
+	53 [ label = "53[x=3	& y=5	& norm_ent_exit=0]: {}" ];
+	54 [ label = "54[x=3	& y=4	& norm_ent_exit=0]: {}" ];
+	55 [ label = "55[x=-1	& y=0	& norm_ent_exit=0]
+: {}" ];
+	56 [ label = "56[x=4	& y=4	& norm_ent_exit=0]: {}" ];
+	57 [ label = "57[x=5	& y=4	& norm_ent_exit=0]: {}" ];
+	58 [ label = "58[x=6	& y=4	& norm_ent_exit=0]: {}" ];
+	59 [ label = "59[x=-1	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	60 [ label = "60[x=6	& y=3	& norm_ent_exit=2]: {rex1}" ];
+	61 [ label = "61[x=7	& y=3	& norm_ent_exit=0]: {}" ];
+	62 [ label = "62[x=7	& y=2	& norm_ent_exit=0]: {}" ];
+	63 [ label = "63[x=7	& y=1	& norm_ent_exit=0]: {}" ];
+	64 [ label = "64[x=7	& y=0	& norm_ent_exit=0]: {}" ];
+	65 [ label = "65[x=7	& y=-1	& norm_ent_exit=0]
+: {}" ];
+	66 [ label = "66[x=0	& y=7	& norm_ent_exit=0]: {}" ];
+	67 [ label = "67[x=-1	& y=7	& norm_ent_exit=0]
+: {}" ];
+	68 [ label = "68[x=1	& y=7	& norm_ent_exit=0]: {}" ];
+	69 [ label = "69[x=2	& y=7	& norm_ent_exit=0]: {}" ];
+	70 [ label = "70[x=3	& y=7	& norm_ent_exit=0]: {}" ];
+	71 [ label = "71[x=3	& y=6	& norm_ent_exit=2]: {rex0}" ];
+	72 [ label = "72[x=4	& y=6	& norm_ent_exit=0]: {}" ];
+	73 [ label = "73[x=4	& y=5	& norm_ent_exit=0]: {}" ];
+	74 [ label = "74[x=5	& y=5	& norm_ent_exit=0]: {}" ];
+	75 [ label = "75[x=6	& y=5	& norm_ent_exit=0]: {}" ];
+	76 [ label = "76[x=7	& y=5	& norm_ent_exit=0]: {}" ];
+	77 [ label = "77[x=7	& y=4	& norm_ent_exit=0]: {}" ];
+	78 [ label = "78[x=4	& y=7	& norm_ent_exit=0]: {}" ];
+	79 [ label = "79[x=5	& y=7	& norm_ent_exit=0]: {}" ];
+	80 [ label = "80[x=5	& y=6	& norm_ent_exit=0]: {}" ];
+	81 [ label = "81[x=6	& y=6	& norm_ent_exit=0]: {}" ];
+	82 [ label = "82[x=7	& y=6	& norm_ent_exit=0]: {}" ];
+	83 [ label = "83[x=6	& y=7	& norm_ent_exit=0]: {}" ];
+	84 [ label = "84[x=7	& y=7	& norm_ent_exit=0]: {}" ];
+	"0c" [shape = "point"]
+	0 -> "0c" [label= "{}"];
+	"0c" -> 2 [ label= "1" ];
+	"1c" [shape = "point"]
+	1 -> "1c" [label= "{}"];
+	"1c" -> 3 [ label= "1" ];
+	"2c" [shape = "point"]
+	2 -> "2c" [label= "{north}"];
+	"2c" -> 4 [ label= "0.94" ];
+	"2c" -> 5 [ label= "0.015" ];
+	"2c" -> 6 [ label= "0.015" ];
+	"2c" -> 7 [ label= "0.01" ];
+	"2c" -> 8 [ label= "0.01" ];
+	"2c" -> 9 [ label= "0.005" ];
+	"2c" -> 10 [ label= "0.005" ];
+	"3c" [shape = "point"]
+	3 -> "3c" [label= "{east}"];
+	"3c" -> 12 [ label= "0.01" ];
+	"3c" -> 13 [ label= "0.005" ];
+	"3c" -> 14 [ label= "0.015" ];
+	"3c" -> 16 [ label= "0.94" ];
+	"3c" -> 17 [ label= "0.005" ];
+	"3c" -> 18 [ label= "0.015" ];
+	"3c" -> 19 [ label= "0.01" ];
+	"4c" [shape = "point"]
+	4 -> "4c" [label= "{east}"];
+	"4c" -> 2 [ label= "0.01" ];
+	"4c" -> 6 [ label= "0.94" ];
+	"4c" -> 7 [ label= "0.005" ];
+	"4c" -> 8 [ label= "0.015" ];
+	"4c" -> 20 [ label= "0.01" ];
+	"4c" -> 21 [ label= "0.005" ];
+	"4c" -> 22 [ label= "0.015" ];
+	"5c" [shape = "point"]
+	5 -> "5c" [label= "{east}"];
+	"5c" -> 2 [ label= "0.015" ];
+	"5c" -> 4 [ label= "0.94" ];
+	"5c" -> 7 [ label= "0.01" ];
+	"5c" -> 18 [ label= "0.005" ];
+	"5c" -> 20 [ label= "0.015" ];
+	"5c" -> 21 [ label= "0.01" ];
+	"5c" -> 24 [ label= "0.005" ];
+	"6c" [shape = "point"]
+	6 -> "6c" [label= "{north}"];
+	"6c" -> 2 [ label= "0.005" ];
+	"6c" -> 4 [ label= "0.01" ];
+	"6c" -> 20 [ label= "0.015" ];
+	"6c" -> 22 [ label= "0.94" ];
+	"6c" -> 25 [ label= "0.015" ];
+	"6c" -> 26 [ label= "0.01" ];
+	"6c" -> 27 [ label= "0.005" ];
+	"7c" [shape = "point"]
+	7 -> "7c" [label= "{north}"];
+	"7c" -> 2 [ label= "0.01" ];
+	"7c" -> 4 [ label= "0.015" ];
+	"7c" -> 5 [ label= "0.94" ];
+	"7c" -> 11 [ label= "0.005" ];
+	"7c" -> 23 [ label= "0.015" ];
+	"7c" -> 24 [ label= "0.01" ];
+	"7c" -> 28 [ label= "0.005" ];
+	"8c" [shape = "point"]
+	8 -> "8c" [label= "{north}"];
+	"8c" -> 2 [ label= "0.01" ];
+	"8c" -> 4 [ label= "0.015" ];
+	"8c" -> 6 [ label= "0.94" ];
+	"8c" -> 11 [ label= "0.005" ];
+	"8c" -> 26 [ label= "0.015" ];
+	"8c" -> 27 [ label= "0.01" ];
+	"8c" -> 29 [ label= "0.005" ];
+	"9c" [shape = "point"]
+	9 -> "9c" [label= "{}"];
+	"9c" -> 9 [ label= "1" ];
+	"10c" [shape = "point"]
+	10 -> "10c" [label= "{}"];
+	"10c" -> 10 [ label= "1" ];
+	"11c" [shape = "point"]
+	11 -> "11c" [label= "{}"];
+	"11c" -> 11 [ label= "1" ];
+	"12c" [shape = "point"]
+	12 -> "12c" [label= "{east}"];
+	"12c" -> 3 [ label= "0.01" ];
+	"12c" -> 14 [ label= "0.94" ];
+	"12c" -> 15 [ label= "0.005" ];
+	"12c" -> 16 [ label= "0.015" ];
+	"12c" -> 30 [ label= "0.01" ];
+	"12c" -> 31 [ label= "0.005" ];
+	"12c" -> 32 [ label= "0.015" ];
+	"13c" [shape = "point"]
+	13 -> "13c" [label= "{}"];
+	"13c" -> 13 [ label= "1" ];
+	"14c" [shape = "point"]
+	14 -> "14c" [label= "{east}"];
+	"14c" -> 3 [ label= "0.005" ];
+	"14c" -> 16 [ label= "0.01" ];
+	"14c" -> 30 [ label= "0.005" ];
+	"14c" -> 32 [ label= "0.01" ];
+	"14c" -> 33 [ label= "0.015" ];
+	"14c" -> 34 [ label= "0.94" ];
+	"14c" -> 35 [ label= "0.015" ];
+	"15c" [shape = "point"]
+	15 -> "15c" [label= "{}"];
+	"15c" -> 15 [ label= "1" ];
+	"16c" [shape = "point"]
+	16 -> "16c" [label= "{north}"];
+	"16c" -> 3 [ label= "0.01" ];
+	"16c" -> 12 [ label= "0.015" ];
+	"16c" -> 14 [ label= "0.94" ];
+	"16c" -> 19 [ label= "0.005" ];
+	"16c" -> 21 [ label= "0.005" ];
+	"16c" -> 34 [ label= "0.015" ];
+	"16c" -> 35 [ label= "0.01" ];
+	"17c" [shape = "point"]
+	17 -> "17c" [label= "{}"];
+	"17c" -> 17 [ label= "1" ];
+	"18c" [shape = "point"]
+	18 -> "18c" [label= "{north}"];
+	"18c" -> 3 [ label= "0.015" ];
+	"18c" -> 5 [ label= "0.005" ];
+	"18c" -> 16 [ label= "0.94" ];
+	"18c" -> 19 [ label= "0.01" ];
+	"18c" -> 21 [ label= "0.01" ];
+	"18c" -> 35 [ label= "0.015" ];
+	"18c" -> 36 [ label= "0.005" ];
+	"19c" [shape = "point"]
+	19 -> "19c" [label= "{east}"];
+	"19c" -> 3 [ label= "0.01" ];
+	"19c" -> 15 [ label= "0.005" ];
+	"19c" -> 16 [ label= "0.015" ];
+	"19c" -> 18 [ label= "0.94" ];
+	"19c" -> 23 [ label= "0.015" ];
+	"19c" -> 36 [ label= "0.01" ];
+	"19c" -> 37 [ label= "0.005" ];
+	"20c" [shape = "point"]
+	20 -> "20c" [label= "{east}"];
+	"20c" -> 4 [ label= "0.01" ];
+	"20c" -> 5 [ label= "0.005" ];
+	"20c" -> 6 [ label= "0.015" ];
+	"20c" -> 22 [ label= "0.94" ];
+	"20c" -> 35 [ label= "0.005" ];
+	"20c" -> 38 [ label= "0.01" ];
+	"20c" -> 39 [ label= "0.015" ];
+	"21c" [shape = "point"]
+	21 -> "21c" [label= "{}"];
+	"21c" -> 21 [ label= "1" ];
+	"22c" [shape = "point"]
+	22 -> "22c" [label= "{north}"];
+	"22c" -> 4 [ label= "0.005" ];
+	"22c" -> 20 [ label= "0.01" ];
+	"22c" -> 25 [ label= "0.01" ];
+	"22c" -> 26 [ label= "0.005" ];
+	"22c" -> 38 [ label= "0.015" ];
+	"22c" -> 39 [ label= "0.94" ];
+	"22c" -> 40 [ label= "0.015" ];
+	"23c" [shape = "point"]
+	23 -> "23c" [label= "{east}"];
+	"23c" -> 5 [ label= "0.94" ];
+	"23c" -> 7 [ label= "0.015" ];
+	"23c" -> 18 [ label= "0.01" ];
+	"23c" -> 19 [ label= "0.005" ];
+	"23c" -> 21 [ label= "0.015" ];
+	"23c" -> 24 [ label= "0.01" ];
+	"23c" -> 41 [ label= "0.005" ];
+	"24c" [shape = "point"]
+	24 -> "24c" [label= "{north}"];
+	"24c" -> 5 [ label= "0.015" ];
+	"24c" -> 7 [ label= "0.01" ];
+	"24c" -> 9 [ label= "0.005" ];
+	"24c" -> 23 [ label= "0.94" ];
+	"24c" -> 36 [ label= "0.015" ];
+	"24c" -> 41 [ label= "0.01" ];
+	"24c" -> 42 [ label= "0.005" ];
+	"25c" [shape = "point"]
+	25 -> "25c" [label= "{north}"];
+	"25c" -> 6 [ label= "0.005" ];
+	"25c" -> 22 [ label= "0.01" ];
+	"25c" -> 39 [ label= "0.015" ];
+	"25c" -> 40 [ label= "0.94" ];
+	"25c" -> 43 [ label= "0.015" ];
+	"25c" -> 44 [ label= "0.01" ];
+	"25c" -> 45 [ label= "0.005" ];
+	"26c" [shape = "point"]
+	26 -> "26c" [label= "{north}"];
+	"26c" -> 6 [ label= "0.01" ];
+	"26c" -> 8 [ label= "0.005" ];
+	"26c" -> 22 [ label= "0.015" ];
+	"26c" -> 25 [ label= "0.94" ];
+	"26c" -> 44 [ label= "0.015" ];
+	"26c" -> 45 [ label= "0.01" ];
+	"26c" -> 46 [ label= "0.005" ];
+	"27c" [shape = "point"]
+	27 -> "27c" [label= "{north}"];
+	"27c" -> 6 [ label= "0.015" ];
+	"27c" -> 8 [ label= "0.01" ];
+	"27c" -> 10 [ label= "0.005" ];
+	"27c" -> 26 [ label= "0.94" ];
+	"27c" -> 45 [ label= "0.015" ];
+	"27c" -> 46 [ label= "0.01" ];
+	"27c" -> 47 [ label= "0.005" ];
+	"28c" [shape = "point"]
+	28 -> "28c" [label= "{}"];
+	"28c" -> 28 [ label= "1" ];
+	"29c" [shape = "point"]
+	29 -> "29c" [label= "{}"];
+	"29c" -> 29 [ label= "1" ];
+	"30c" [shape = "point"]
+	30 -> "30c" [label= "{east}"];
+	"30c" -> 12 [ label= "0.01" ];
+	"30c" -> 13 [ label= "0.005" ];
+	"30c" -> 14 [ label= "0.015" ];
+	"30c" -> 32 [ label= "0.94" ];
+	"30c" -> 48 [ label= "0.01" ];
+	"30c" -> 49 [ label= "0.005" ];
+	"30c" -> 50 [ label= "0.015" ];
+	"31c" [shape = "point"]
+	31 -> "31c" [label= "{}"];
+	"31c" -> 31 [ label= "1" ];
+	"32c" [shape = "point"]
+	32 -> "32c" [label= "{east}"];
+	"32c" -> 12 [ label= "0.005" ];
+	"32c" -> 14 [ label= "0.01" ];
+	"32c" -> 33 [ label= "0.94" ];
+	"32c" -> 34 [ label= "0.015" ];
+	"32c" -> 48 [ label= "0.005" ];
+	"32c" -> 50 [ label= "0.01" ];
+	"32c" -> 51 [ label= "0.015" ];
+	"33c" [shape = "point"]
+	33 -> "33c" [label= "{east}"];
+	"33c" -> 14 [ label= "0.005" ];
+	"33c" -> 34 [ label= "0.01" ];
+	"33c" -> 50 [ label= "0.005" ];
+	"33c" -> 51 [ label= "0.01" ];
+	"33c" -> 52 [ label= "0.015" ];
+	"33c" -> 53 [ label= "0.94" ];
+	"33c" -> 54 [ label= "0.015" ];
+	"34c" [shape = "point"]
+	34 -> "34c" [label= "{east}"];
+	"34c" -> 16 [ label= "0.005" ];
+	"34c" -> 32 [ label= "0.005" ];
+	"34c" -> 33 [ label= "0.01" ];
+	"34c" -> 35 [ label= "0.01" ];
+	"34c" -> 38 [ label= "0.015" ];
+	"34c" -> 53 [ label= "0.015" ];
+	"34c" -> 54 [ label= "0.94" ];
+	"35c" [shape = "point"]
+	35 -> "35c" [label= "{north}"];
+	"35c" -> 14 [ label= "0.015" ];
+	"35c" -> 16 [ label= "0.01" ];
+	"35c" -> 18 [ label= "0.005" ];
+	"35c" -> 20 [ label= "0.005" ];
+	"35c" -> 34 [ label= "0.94" ];
+	"35c" -> 38 [ label= "0.01" ];
+	"35c" -> 54 [ label= "0.015" ];
+	"36c" [shape = "point"]
+	36 -> "36c" [label= "{east}"];
+	"36c" -> 17 [ label= "0.005" ];
+	"36c" -> 18 [ label= "0.015" ];
+	"36c" -> 19 [ label= "0.01" ];
+	"36c" -> 23 [ label= "0.94" ];
+	"36c" -> 24 [ label= "0.015" ];
+	"36c" -> 41 [ label= "0.01" ];
+	"36c" -> 55 [ label= "0.005" ];
+	"37c" [shape = "point"]
+	37 -> "37c" [label= "{}"];
+	"37c" -> 37 [ label= "1" ];
+	"38c" [shape = "point"]
+	38 -> "38c" [label= "{east}"];
+	"38c" -> 20 [ label= "0.01" ];
+	"38c" -> 21 [ label= "0.005" ];
+	"38c" -> 22 [ label= "0.015" ];
+	"38c" -> 34 [ label= "0.005" ];
+	"38c" -> 39 [ label= "0.94" ];
+	"38c" -> 54 [ label= "0.01" ];
+	"38c" -> 56 [ label= "0.015" ];
+	"39c" [shape = "point"]
+	39 -> "39c" [label= "{east}"];
+	"39c" -> 20 [ label= "0.005" ];
+	"39c" -> 22 [ label= "0.01" ];
+	"39c" -> 25 [ label= "0.015" ];
+	"39c" -> 40 [ label= "0.94" ];
+	"39c" -> 54 [ label= "0.005" ];
+	"39c" -> 56 [ label= "0.01" ];
+	"39c" -> 57 [ label= "0.015" ];
+	"40c" [shape = "point"]
+	40 -> "40c" [label= "{east}"];
+	"40c" -> 22 [ label= "0.005" ];
+	"40c" -> 25 [ label= "0.01" ];
+	"40c" -> 43 [ label= "0.94" ];
+	"40c" -> 44 [ label= "0.015" ];
+	"40c" -> 56 [ label= "0.005" ];
+	"40c" -> 57 [ label= "0.01" ];
+	"40c" -> 58 [ label= "0.015" ];
+	"41c" [shape = "point"]
+	41 -> "41c" [label= "{east}"];
+	"41c" -> 23 [ label= "0.015" ];
+	"41c" -> 24 [ label= "0.94" ];
+	"41c" -> 28 [ label= "0.015" ];
+	"41c" -> 36 [ label= "0.01" ];
+	"41c" -> 37 [ label= "0.005" ];
+	"41c" -> 42 [ label= "0.01" ];
+	"41c" -> 59 [ label= "0.005" ];
+	"42c" [shape = "point"]
+	42 -> "42c" [label= "{}"];
+	"42c" -> 42 [ label= "1" ];
+	"43c" [shape = "point"]
+	43 -> "43c" [label= "{}"];
+	"43c" -> 60 [ label= "1" ];
+	"44c" [shape = "point"]
+	44 -> "44c" [label= "{west}"];
+	"44c" -> 25 [ label= "0.94" ];
+	"44c" -> 26 [ label= "0.015" ];
+	"44c" -> 40 [ label= "0.015" ];
+	"44c" -> 43 [ label= "0.01" ];
+	"44c" -> 45 [ label= "0.01" ];
+	"44c" -> 61 [ label= "0.005" ];
+	"44c" -> 63 [ label= "0.005" ];
+	"45c" [shape = "point"]
+	45 -> "45c" [label= "{west}"];
+	"45c" -> 25 [ label= "0.015" ];
+	"45c" -> 26 [ label= "0.94" ];
+	"45c" -> 27 [ label= "0.015" ];
+	"45c" -> 44 [ label= "0.01" ];
+	"45c" -> 46 [ label= "0.01" ];
+	"45c" -> 62 [ label= "0.005" ];
+	"45c" -> 64 [ label= "0.005" ];
+	"46c" [shape = "point"]
+	46 -> "46c" [label= "{north}"];
+	"46c" -> 26 [ label= "0.015" ];
+	"46c" -> 27 [ label= "0.01" ];
+	"46c" -> 29 [ label= "0.005" ];
+	"46c" -> 45 [ label= "0.94" ];
+	"46c" -> 63 [ label= "0.015" ];
+	"46c" -> 64 [ label= "0.01" ];
+	"46c" -> 65 [ label= "0.005" ];
+	"47c" [shape = "point"]
+	47 -> "47c" [label= "{}"];
+	"47c" -> 47 [ label= "1" ];
+	"48c" [shape = "point"]
+	48 -> "48c" [label= "{east}"];
+	"48c" -> 30 [ label= "0.01" ];
+	"48c" -> 31 [ label= "0.005" ];
+	"48c" -> 32 [ label= "0.015" ];
+	"48c" -> 50 [ label= "0.94" ];
+	"48c" -> 66 [ label= "0.01" ];
+	"48c" -> 67 [ label= "0.005" ];
+	"48c" -> 68 [ label= "0.015" ];
+	"49c" [shape = "point"]
+	49 -> "49c" [label= "{}"];
+	"49c" -> 49 [ label= "1" ];
+	"50c" [shape = "point"]
+	50 -> "50c" [label= "{south}"];
+	"50c" -> 30 [ label= "0.015" ];
+	"50c" -> 32 [ label= "0.94" ];
+	"50c" -> 33 [ label= "0.015" ];
+	"50c" -> 48 [ label= "0.01" ];
+	"50c" -> 51 [ label= "0.01" ];
+	"50c" -> 66 [ label= "0.005" ];
+	"50c" -> 69 [ label= "0.005" ];
+	"51c" [shape = "point"]
+	51 -> "51c" [label= "{south}"];
+	"51c" -> 32 [ label= "0.015" ];
+	"51c" -> 33 [ label= "0.94" ];
+	"51c" -> 50 [ label= "0.01" ];
+	"51c" -> 52 [ label= "0.01" ];
+	"51c" -> 53 [ label= "0.015" ];
+	"51c" -> 68 [ label= "0.005" ];
+	"51c" -> 70 [ label= "0.005" ];
+	"52c" [shape = "point"]
+	52 -> "52c" [label= "{}"];
+	"52c" -> 71 [ label= "1" ];
+	"53c" [shape = "point"]
+	53 -> "53c" [label= "{north}"];
+	"53c" -> 33 [ label= "0.01" ];
+	"53c" -> 34 [ label= "0.005" ];
+	"53c" -> 51 [ label= "0.015" ];
+	"53c" -> 52 [ label= "0.94" ];
+	"53c" -> 56 [ label= "0.005" ];
+	"53c" -> 72 [ label= "0.015" ];
+	"53c" -> 73 [ label= "0.01" ];
+	"54c" [shape = "point"]
+	54 -> "54c" [label= "{north}"];
+	"54c" -> 33 [ label= "0.015" ];
+	"54c" -> 34 [ label= "0.01" ];
+	"54c" -> 35 [ label= "0.005" ];
+	"54c" -> 39 [ label= "0.005" ];
+	"54c" -> 53 [ label= "0.94" ];
+	"54c" -> 56 [ label= "0.01" ];
+	"54c" -> 73 [ label= "0.015" ];
+	"55c" [shape = "point"]
+	55 -> "55c" [label= "{}"];
+	"55c" -> 55 [ label= "1" ];
+	"56c" [shape = "point"]
+	56 -> "56c" [label= "{south}"];
+	"56c" -> 38 [ label= "0.015" ];
+	"56c" -> 39 [ label= "0.94" ];
+	"56c" -> 40 [ label= "0.015" ];
+	"56c" -> 53 [ label= "0.005" ];
+	"56c" -> 54 [ label= "0.01" ];
+	"56c" -> 57 [ label= "0.01" ];
+	"56c" -> 74 [ label= "0.005" ];
+	"57c" [shape = "point"]
+	57 -> "57c" [label= "{west}"];
+	"57c" -> 39 [ label= "0.015" ];
+	"57c" -> 40 [ label= "0.01" ];
+	"57c" -> 43 [ label= "0.005" ];
+	"57c" -> 56 [ label= "0.94" ];
+	"57c" -> 73 [ label= "0.015" ];
+	"57c" -> 74 [ label= "0.01" ];
+	"57c" -> 75 [ label= "0.005" ];
+	"58c" [shape = "point"]
+	58 -> "58c" [label= "{west}"];
+	"58c" -> 40 [ label= "0.015" ];
+	"58c" -> 43 [ label= "0.01" ];
+	"58c" -> 57 [ label= "0.94" ];
+	"58c" -> 61 [ label= "0.005" ];
+	"58c" -> 74 [ label= "0.015" ];
+	"58c" -> 75 [ label= "0.01" ];
+	"58c" -> 76 [ label= "0.005" ];
+	"59c" [shape = "point"]
+	59 -> "59c" [label= "{}"];
+	"59c" -> 59 [ label= "1" ];
+	"60c" [shape = "point"]
+	60 -> "60c" [label= "{}"];
+	"60c" -> 60 [ label= "1" ];
+	"61c" [shape = "point"]
+	61 -> "61c" [label= "{}"];
+	"61c" -> 61 [ label= "1" ];
+	"62c" [shape = "point"]
+	62 -> "62c" [label= "{}"];
+	"62c" -> 62 [ label= "1" ];
+	"63c" [shape = "point"]
+	63 -> "63c" [label= "{}"];
+	"63c" -> 63 [ label= "1" ];
+	"64c" [shape = "point"]
+	64 -> "64c" [label= "{}"];
+	"64c" -> 64 [ label= "1" ];
+	"65c" [shape = "point"]
+	65 -> "65c" [label= "{}"];
+	"65c" -> 65 [ label= "1" ];
+	"66c" [shape = "point"]
+	66 -> "66c" [label= "{}"];
+	"66c" -> 66 [ label= "1" ];
+	"67c" [shape = "point"]
+	67 -> "67c" [label= "{}"];
+	"67c" -> 67 [ label= "1" ];
+	"68c" [shape = "point"]
+	68 -> "68c" [label= "{}"];
+	"68c" -> 68 [ label= "1" ];
+	"69c" [shape = "point"]
+	69 -> "69c" [label= "{}"];
+	"69c" -> 69 [ label= "1" ];
+	"70c" [shape = "point"]
+	70 -> "70c" [label= "{}"];
+	"70c" -> 70 [ label= "1" ];
+	"71c" [shape = "point"]
+	71 -> "71c" [label= "{}"];
+	"71c" -> 71 [ label= "1" ];
+	"72c" [shape = "point"]
+	72 -> "72c" [label= "{south}"];
+	"72c" -> 52 [ label= "0.01" ];
+	"72c" -> 53 [ label= "0.015" ];
+	"72c" -> 70 [ label= "0.005" ];
+	"72c" -> 73 [ label= "0.94" ];
+	"72c" -> 74 [ label= "0.015" ];
+	"72c" -> 79 [ label= "0.005" ];
+	"72c" -> 80 [ label= "0.01" ];
+	"73c" [shape = "point"]
+	73 -> "73c" [label= "{south}"];
+	"73c" -> 52 [ label= "0.005" ];
+	"73c" -> 53 [ label= "0.01" ];
+	"73c" -> 54 [ label= "0.015" ];
+	"73c" -> 56 [ label= "0.94" ];
+	"73c" -> 57 [ label= "0.015" ];
+	"73c" -> 74 [ label= "0.01" ];
+	"73c" -> 80 [ label= "0.005" ];
+	"74c" [shape = "point"]
+	74 -> "74c" [label= "{south}"];
+	"74c" -> 56 [ label= "0.015" ];
+	"74c" -> 57 [ label= "0.94" ];
+	"74c" -> 58 [ label= "0.015" ];
+	"74c" -> 72 [ label= "0.005" ];
+	"74c" -> 73 [ label= "0.01" ];
+	"74c" -> 75 [ label= "0.01" ];
+	"74c" -> 81 [ label= "0.005" ];
+	"75c" [shape = "point"]
+	75 -> "75c" [label= "{west}"];
+	"75c" -> 57 [ label= "0.015" ];
+	"75c" -> 58 [ label= "0.01" ];
+	"75c" -> 74 [ label= "0.94" ];
+	"75c" -> 77 [ label= "0.005" ];
+	"75c" -> 80 [ label= "0.015" ];
+	"75c" -> 81 [ label= "0.01" ];
+	"75c" -> 82 [ label= "0.005" ];
+	"76c" [shape = "point"]
+	76 -> "76c" [label= "{}"];
+	"76c" -> 76 [ label= "1" ];
+	"77c" [shape = "point"]
+	77 -> "77c" [label= "{}"];
+	"77c" -> 77 [ label= "1" ];
+	"78c" [shape = "point"]
+	78 -> "78c" [label= "{}"];
+	"78c" -> 78 [ label= "1" ];
+	"79c" [shape = "point"]
+	79 -> "79c" [label= "{}"];
+	"79c" -> 79 [ label= "1" ];
+	"80c" [shape = "point"]
+	80 -> "80c" [label= "{south}"];
+	"80c" -> 72 [ label= "0.01" ];
+	"80c" -> 73 [ label= "0.015" ];
+	"80c" -> 74 [ label= "0.94" ];
+	"80c" -> 75 [ label= "0.015" ];
+	"80c" -> 78 [ label= "0.005" ];
+	"80c" -> 81 [ label= "0.01" ];
+	"80c" -> 83 [ label= "0.005" ];
+	"81c" [shape = "point"]
+	81 -> "81c" [label= "{south}"];
+	"81c" -> 74 [ label= "0.015" ];
+	"81c" -> 75 [ label= "0.94" ];
+	"81c" -> 76 [ label= "0.015" ];
+	"81c" -> 79 [ label= "0.005" ];
+	"81c" -> 80 [ label= "0.01" ];
+	"81c" -> 82 [ label= "0.01" ];
+	"81c" -> 84 [ label= "0.005" ];
+	"82c" [shape = "point"]
+	82 -> "82c" [label= "{}"];
+	"82c" -> 82 [ label= "1" ];
+	"83c" [shape = "point"]
+	83 -> "83c" [label= "{}"];
+	"83c" -> 83 [ label= "1" ];
+	"84c" [shape = "point"]
+	84 -> "84c" [label= "{}"];
+	"84c" -> 84 [ label= "1" ];
+}

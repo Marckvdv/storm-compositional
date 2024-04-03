@@ -1,0 +1,103 @@
+{
+    "root": "chain",
+    "components": {
+        "windy_safe": {
+            "type": "prism",
+            "path": "windy_safe.prism",
+            ">|": ["x=3&y=0&norm_ent_exit=1", "x=0&y=3&norm_ent_exit=1"],
+            "|>": ["x=3&y=6&norm_ent_exit=2", "x=6&y=3&norm_ent_exit=2"]
+        },
+
+        "windy_unsafe": {
+            "type": "prism",
+            "path": "windy_unsafe.prism",
+            ">|": ["x=3&y=0&norm_ent_exit=1", "x=0&y=3&norm_ent_exit=1"],
+            "|>": ["x=3&y=6&norm_ent_exit=2", "x=6&y=3&norm_ent_exit=2"]
+        },
+
+        "calm_safe": {
+            "type": "prism",
+            "path": "calm_safe.prism",
+            ">|": ["x=3&y=0&norm_ent_exit=1", "x=0&y=3&norm_ent_exit=1"],
+            "|>": ["x=3&y=6&norm_ent_exit=2", "x=6&y=3&norm_ent_exit=2"]
+        },
+
+        "calm_unsafe": {
+            "type": "prism",
+            "path": "calm_unsafe.prism",
+            ">|": ["x=3&y=0&norm_ent_exit=1", "x=0&y=3&norm_ent_exit=1"],
+            "|>": ["x=3&y=6&norm_ent_exit=2", "x=6&y=3&norm_ent_exit=2"]
+        },
+
+        "initial": {
+            "type": "prism",
+            "path": "initial.prism",
+            ">|": ["s=0", "s=-1"],
+            "|>": ["s=1", "s=2"]
+        },
+
+        "final": {
+            "type": "prism",
+            "path": "final.prism",
+            ">|": ["s=1", "s=2"],
+            "|>": ["s=4"]
+        },
+
+        "chain": {
+            "type": "sequence",
+            "values": [
+                "initial",
+                "calm_unsafe",
+                "calm_unsafe",
+                "windy_safe",
+                "calm_safe",
+                "calm_unsafe",
+                "calm_unsafe",
+                "calm_safe",
+                "calm_unsafe",
+                "calm_safe",
+                "windy_unsafe",
+                "windy_unsafe",
+                "calm_safe",
+                "windy_unsafe",
+                "windy_safe",
+                "calm_safe",
+                "windy_unsafe",
+                "calm_safe",
+                "windy_safe",
+                "windy_safe",
+                "calm_safe",
+                "calm_unsafe",
+                "windy_safe",
+                "calm_safe",
+                "calm_unsafe",
+                "calm_safe",
+                "windy_unsafe",
+                "calm_unsafe",
+                "calm_unsafe",
+                "calm_safe",
+                "windy_safe",
+                "windy_safe",
+                "windy_safe",
+                "calm_unsafe",
+                "windy_safe",
+                "calm_unsafe",
+                "calm_safe",
+                "windy_unsafe",
+                "calm_safe",
+                "windy_safe",
+                "windy_unsafe",
+                "windy_unsafe",
+                "windy_unsafe",
+                "windy_unsafe",
+                "calm_unsafe",
+                "windy_safe",
+                "windy_safe",
+                "calm_safe",
+                "calm_unsafe",
+                "windy_safe",
+                "calm_safe",
+                "final" ]
+        }
+    }
+}

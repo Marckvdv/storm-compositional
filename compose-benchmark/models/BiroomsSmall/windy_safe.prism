@@ -1,0 +1,97 @@
+mdp
+
+// DIM should be 1 greater than a multiple of 10
+const int DIM = 7; 
+
+// Weights below determine probability of going , e.g. when going north:
+// BAB
+// C^C
+// D D
+
+const bool WINDY = true;
+const bool SAFE = true;
+
+// Calm constants
+const int WEIGHT_A = WINDY ? 38 : 188;
+const int WEIGHT_B = 3;
+const int WEIGHT_C = 2;
+const int WEIGHT_D = 1;
+
+const int TOTAL_WEIGHT = WEIGHT_A + 2*WEIGHT_B + 2*WEIGHT_C + 2*WEIGHT_D;
+
+const double PA = WEIGHT_A / TOTAL_WEIGHT;
+const double PB = WEIGHT_B / TOTAL_WEIGHT;
+const double PC = WEIGHT_C / TOTAL_WEIGHT;
+const double PD = WEIGHT_D / TOTAL_WEIGHT;
+
+module grid
+    x : [-1 .. DIM];
+    y : [-1 .. DIM];
+
+    // specifies if the current move is the first
+    first : [0 .. 1]; 
+
+    [] !playing -> true;
+
+    [north] playing ->
+        PA:(y'=up)                 & (first'=0) +
+        PB:(x'=left)  & (y'=up)    & (first'=0) +
+        PB:(x'=right) & (y'=up)    & (first'=0) +
+        PC:(x'=left)               & (first'=0) +
+        PC:(x'=right)              & (first'=0) +
+        PD:(y'=down)  & (x'=left)  & (first'=0) +
+        PD:(y'=down)  & (x'=right) & (first'=0);
+
+    [south] playing ->
+        PA:(y'=down)               & (first'=0) +
+        PB:(x'=left)  & (y'=down)  & (first'=0) +
+        PB:(x'=right) & (y'=down)  & (first'=0) +
+        PC:(x'=right)              & (first'=0) +
+        PC:(x'=left)               & (first'=0) +
+        PD:(y'=up)    & (x'=right) & (first'=0) +
+        PD:(y'=up)    & (x'=left)  & (first'=0);
+
+    [east] playing ->
+        PA:(x'=right)              & (first'=0) +
+        PB:(y'=up)    & (x'=right) & (first'=0) +
+        PB:(y'=down)  & (x'=right) & (first'=0) +
+        PC:(y'=up)                 & (first'=0) +
+        PC:(y'=down)               & (first'=0) +
+        PD:(x'=left)  & (y'=up)    & (first'=0) +
+        PD:(x'=left)  & (y'=down)  & (first'=0);
+
+    [west] playing ->
+        PA:(x'=left)              & (first'=0) +
+        PB:(y'=up)    & (x'=left) & (first'=0) +
+        PB:(y'=down)  & (x'=left) & (first'=0) +
+        PC:(y'=down)              & (first'=0) +
+        PC:(y'=up)                & (first'=0) +
+        PD:(x'=right) & (y'=down) & (first'=0) +
+        PD:(x'=right) & (y'=up)   & (first'=0);
+endmodule
+
+formula door_one = x=(DIM-1)/2&y=0;
+formula door_two = x=0&y=(DIM-1)/2;
+formula door_three = x=(DIM-1)/2&y=DIM-1;
+formula door_four = x=DIM-1&y=(DIM-1)/2;
+formula on_door = door_one | door_two | door_three | door_four;
+formula valid = x>=0 & y >= 0 & x < DIM & y < DIM;
+formula playing = (first=1|!on_door)&valid&!in_hole;
+
+formula in_hole = SAFE ? 
+    (mod(x,5)=2 & mod(y,5)=2) :
+    (mod(x,5)=1 & mod(y,5)=1)|(mod(x,5)=2 & mod(y,5)=2)|(mod(x,5)=3 & mod(y,5)=3);
+
+formula left = x-1;
+formula right = x+1;
+formula up = y+1;
+formula down = y-1;
+
+init
+    //first=1 & door_one   // door 1
+    //first=1 & door_two   // door 2
+    //first=1 & door_three // door 3
+    //first=1 & door_four  // door 4
+
+    on_door & first=1 // door 1, 2, 3 or 4
+endinit

@@ -1,0 +1,58 @@
+{
+    "comment": "This file was automatically generated with parameters: {'N': 10}",
+    "root": "root",
+    "components": {
+        "middle": {
+            "type": "prism",
+            "path": "middle.prism",
+            ">|": ["round=0&level=0&at_end=0", "round=0&level=25&at_end=0", "round=0&level=50&at_end=0", "round=0&level=75&at_end=0"],
+            "|>": ["round=100&level=3&at_end=1", "round=100&level=2&at_end=1", "round=100&level=1&at_end=1", "round=100&level=0&at_end=1"]
+        },
+
+        "initial": {
+            "type": "prism",
+            "path": "initial.prism",
+            ">|": ["s=0"],
+            "|>": ["s=1", "s=2", "s=3", "s=4"],
+            "|<": ["s=5"]
+        },
+
+        "final": {
+            "type": "prism",
+            "path": "final.prism",
+            ">|": ["s=0", "s=1", "s=2", "s=3"],
+            "|>": ["s=4"],
+            "<|": ["s=5"]
+        },
+
+        "id": {
+            "type": "prism",
+            "path": "id.prism",
+            "|<": ["s=0"],
+            "<|": ["s=1"]
+        },
+
+        "chain": {
+            "type": "sequence",
+            "values": [
+                "middle",                "middle",                "middle",                "middle",                "middle",                "middle",                "middle",                "middle",                "middle",                "middle"            ]
+        },
+
+        "stacked": {
+            "type": "sum",
+            "values": [
+                "id",
+                "chain"
+            ]
+        },
+
+        "root": {
+            "type": "sequence",
+            "values": [
+                "initial",
+                "stacked",
+                "final"
+            ]
+        }
+    }
+}

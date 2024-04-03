@@ -1,0 +1,62 @@
+mdp
+
+// DIM should be 1 greater than a multiple of 10
+const int DIM = 7; 
+
+module grid
+    x : [-1 .. DIM];
+    y : [-1 .. DIM];
+
+    // specifies if the current state is normal, entry or exit
+    norm_ent_exit : [0 .. 2]; 
+
+    // Leave the entrance
+    [] norm_ent_exit=1 -> 1:(norm_ent_exit'=0);
+
+    // Enter the exit
+    [] on_exit -> 1:(norm_ent_exit'=2);
+    [] !playing & norm_ent_exit != 1 -> true;
+
+    // Windy
+    [north] playing -> 0.76:(y'=up)    + 0.06:(x'=left) & (y'=up)    + 0.06:(x'=right) & (y'=up)    + 0.04:(x'=left)  + 0.04:(x'=right) + 0.02:(y'=down)  & (x'=left)  + 0.02:(y'=down)  & (x'=right);
+    [south] playing -> 0.76:(y'=down)  + 0.06:(x'=left) & (y'=down)  + 0.06:(x'=right) & (y'=down)  + 0.04:(x'=right) + 0.04:(x'=left)  + 0.02:(y'=up)    & (x'=right) + 0.02:(y'=up)    & (x'=left);
+    [east]  playing -> 0.76:(x'=right) + 0.06:(y'=up)   & (x'=right) + 0.06:(y'=down)  & (x'=right) + 0.04:(y'=up)    + 0.04:(y'=down)  + 0.02:(x'=left)  & (y'=up)    + 0.02:(x'=left)  & (y'=down);
+    [west]  playing -> 0.76:(x'=left)  + 0.06:(y'=up)   & (x'=left)  + 0.06:(y'=down)  & (x'=left)  + 0.04:(y'=down)  + 0.04:(y'=up)    + 0.02:(x'=right) & (y'=down)  + 0.02:(x'=right) & (y'=up);
+
+    // Calm
+    //[north] playing -> 0.94:(y'=up)    + 0.015:(x'=left) & (y'=up)    + 0.015:(x'=right) & (y'=up)    + 0.01:(x'=left)  + 0.01:(x'=right) + 0.005:(y'=down)  & (x'=left)  + 0.005:(y'=down)  & (x'=right);
+    //[south] playing -> 0.94:(y'=down)  + 0.015:(x'=left) & (y'=down)  + 0.015:(x'=right) & (y'=down)  + 0.01:(x'=right) + 0.01:(x'=left)  + 0.005:(y'=up)    & (x'=right) + 0.005:(y'=up)    & (x'=left);
+    //[east]  playing -> 0.94:(x'=right) + 0.015:(y'=up)   & (x'=right) + 0.015:(y'=down)  & (x'=right) + 0.01:(y'=up)    + 0.01:(y'=down)  + 0.005:(x'=left)  & (y'=up)    + 0.005:(x'=left)  & (y'=down);
+    //[west]  playing -> 0.94:(x'=left)  + 0.015:(y'=up)   & (x'=left)  + 0.015:(y'=down)  & (x'=left)  + 0.01:(y'=down)  + 0.01:(y'=up)    + 0.005:(x'=right) & (y'=down)  + 0.005:(x'=right) & (y'=up);
+endmodule
+
+formula entrance_one = x=(DIM-1)/2&y=0;
+formula entrance_two = x=0&y=(DIM-1)/2;
+formula on_entrance = entrance_one | entrance_two;
+
+formula exit_one = x=(DIM-1)/2&y=DIM-1;
+formula exit_two = x=DIM-1&y=(DIM-1)/2;
+formula on_exit = exit_one | exit_two;
+
+formula on_grid = !on_exit & norm_ent_exit=0;
+formula valid = x>=0 & y >= 0 & x < DIM & y < DIM;
+
+formula playing = on_grid & valid & !in_hole & norm_ent_exit != 2 & norm_ent_exit != 1;
+
+// Safe
+formula in_hole = mod(x,5)=2 & mod(y,5)=2;
+
+// Unsafe
+//formula in_hole = (mod(x,5)=1 & mod(y,5)=1)|(mod(x,5)=3 & mod(y,5)=3)|(mod(x,5)=3 & mod(y,5)=3);
+
+formula left = x-1;
+formula right = x+1;
+formula up = y+1;
+formula down = y-1;
+
+init
+    //norm_ent_exit=1 & entrance_one
+    //norm_ent_exit=1 & entrance_two   // entrance 2
+
+    on_entrance & norm_ent_exit=1 // entrances 1 or 2
+endinit
