@@ -3,6 +3,20 @@
 \newcommand{\scatterplotsize}[0]{0.9\textwidth}
 \newcommand{\marksize}{1.8}
 
+\newcommand{\approachfont}[1]{\textsc{#1}}
+\newcommand{\approachmonolithic}{\approachfont{Mono}}
+\newcommand{\approachbottomup}{\approachfont{BU}}
+\newcommand{\approachocvi}{\approachfont{OCVI}}
+\newcommand{\approachocviexact}{\approachocvi{}$^e$}
+\newcommand{\approachocvipareto}{\approachocvi{}$^p$}
+\newcommand{\approachsymbiosis}{\approachfont{Symb}}
+\newcommand{\approachbaseline}{\approachfont{Baseline}}
+\newcommand{\approachnovel}{\approachfont{Novel}}
+
+\newcommand{\plotslocation}{results_plot}
+\newcommand{\tableonelocation}{table1.csv}
+\newcommand{\tabletwolocation}{table2.csv}
+
 % Arguments:
 % 1) csv file
 % 2) csv column for data on x-axis

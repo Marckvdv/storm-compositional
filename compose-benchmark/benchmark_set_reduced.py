@@ -15,7 +15,7 @@ approaches = [
     ("OCVIp", DEFAULT_OCVI_OPTIONS + ["--useOvi", "--cacheMethod", "pareto", "--localOviEpsilon", "0"]),
     ("Symb",  DEFAULT_OCVI_OPTIONS + ["--useBottomUp", "--cacheMethod", "pareto"]),
 
-    ("Pareto4", ["--approach", "naive", "--paretoPrecision", "1e-4"]),
+    ("BU", ["--approach", "naive", "--paretoPrecision", "1e-4"]),
     ("Mono", ["--approach", "monolithic", "--precision", "1e-4"]),
 ]
 

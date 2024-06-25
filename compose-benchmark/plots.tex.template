@@ -32,33 +32,33 @@
 %    
     \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time Novel}{\approachnovel}{Total time Baseline}{\approachbaseline}
+    \scatterplot{\plotslocation}{Total time Novel}{\approachnovel}{Total time Baseline}{\approachbaseline}
     %\subcaption{Novel vs Baseline}%
     \end{minipage}%
     \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time ALGORITHM_A1}{\approachocviexact}{Total time Monolithic}{\approachmonolithic}
+    \scatterplot{\plotslocation}{Total time OCVIe}{\approachocviexact}{Total time Mono}{\approachmonolithic}
     %\subcaption{OCVI vs monolithic}%
     \end{minipage}%
     \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time ALGORITHM_B}{\approachsymbiosis}{Total time Pareto4}{\approachbottomup}
+    \scatterplot{\plotslocation}{Total time Symb}{\approachsymbiosis}{Total time BU}{\approachbottomup}
     %\subcaption{Symbiosis vs Bottom-up}%
     \end{minipage}%
     
     \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time ALGORITHM_B}{\approachsymbiosis}{Total time ALGORITHM_A1}{\approachocviexact}
+    \scatterplot{\plotslocation}{Total time Symb}{\approachsymbiosis}{Total time OCVIe}{\approachocviexact}
     %\subcaption{Symbiosis vs Bottom-up}%
     \end{minipage}%
     \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time ALGORITHM_A2}{\approachocvipareto}{Total time ALGORITHM_A1}{\approachocviexact}
+    \scatterplot{\plotslocation}{Total time OCVIp}{\approachocvipareto}{Total time OCVIe}{\approachocviexact}
     %\subcaption{Symbiosis vs Bottom-up}%
     \end{minipage}%
    \begin{minipage}[t]{0.33\textwidth}%
     \centering
-    \scatterplot{plots/results_plot}{Total time ALGORITHM_A2}{\approachocvipareto}{Total time ALGORITHM_B}{\approachsymbiosis}
+    \scatterplot{\plotslocation}{Total time OCVIp}{\approachocvipareto}{Total time Symb}{\approachsymbiosis}
     %\subcaption{Symbiosis vs Bottom-up}%
     \end{minipage}%
     \caption{Benchmark scatter plots, time in seconds, OoR=Out of Resources}
@@ -67,24 +67,112 @@
 \clearpage
 
 {% endraw %}
-\begin{table}[h]
-    \caption{Benchmark details (time in s, MO=memory out, TO=time out)}
-    \begin{adjustbox}{width=\textwidth}
-        \centering
-        \begin{NiceTabular}{l l r r r || r r | r | r r r r | r r r r }
-            \toprule
-            \Block[C]{2-1}{$\sd{D}$} & \Block[C]{2-1}{$\mdp{M}$} & \Block[C]{2-1}{$|S_{\semantics{\sd{D}}}|$} & \Block[C]{2-1}{$\#\mdp{A}$} & \Block[C]{2-1}{$|S_\mdp{A}|$} & \Block{1-2}{\texttt{Mon}} & & \texttt{Prec} & \Block{1-4}{\texttt{rPareto} [$\eta = 10^{-2}$]} & & & & \Block{1-4}{\texttt{rPareto} [$\eta = 10^{-4}$]} \\
-            &  &  &  &  & $t$ & $t_m$ & $t$ & $t$ & $t_m$ & $E$ & \hspace{5mm}$p$ & $t$ & $t_m$ & $E$ & \hspace{5mm}$p$ \\\midrule
-            \\
-            \bottomrule
-        \end{NiceTabular}
-    \end{adjustbox}
-\end{table}
+\newcommand{\btime}{$t$}
+\newcommand{\btimestop}{$t_s$}
+\newcommand{\bpareto}{$|P|$}
+\newcommand{\bhit}{$H$}
+\newcommand{\bquery}{$Q$}
+\newcommand{\bcache}{$t_c$}
+\newcommand{\bcacheinsert}{$t_i$}
+\newcommand{\bcacheretrieve}{$t_r$}
+\newcommand{\cacheexact}{\textsc{Exact}}
+\newcommand{\cachepareto}{\textsc{Pareto}}
+\newcommand{\benchmark}[1]{\texttt{#1}}
 
-%\begin{table}
-%  \resizebox{\textwidth}{!}{
-%  \csvautobooktabular{results_table.csv}
-%  }
-%\end{table}
+\begin{table}[t]
+    \centering
+     \caption{Performance for different algorithms. See \textbf{Results} for explanations.}
+{    \scriptsize
+    \begin{NiceTabular}{rrrr  r  rr  rrr rrr  rrr}
+\toprule
+%\Block[c]{3-1}{$\sd{D}$} &
+%\Block[c]{3-1}{$\mdp{M}$} &
+%\Block[c]{3-1}{$|S|$} &
+& & & &
+\multicolumn{3}{c}{\approachbaseline} & 
+\multicolumn{8}{c}{\approachnovel}\\
+\cmidrule(lr){5-7}\cmidrule(lr){8-15}
+
+& & & &
+\multicolumn{1}{c}{\approachmonolithic{}} &
+\multicolumn{2}{c}{\approachbottomup{}} &
+\multicolumn{2}{c}{\approachocviexact{}} &
+\multicolumn{3}{c}{\approachocvipareto{}} &
+\multicolumn{3}{c}{\approachsymbiosis{}} \\
+\cmidrule(lr){5-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-12}\cmidrule(lr){13-15}
+
+\multicolumn{1}{c}{$\sd{D}$} &
+\multicolumn{1}{c}{$\mdp{M}$} &
+\multicolumn{1}{c}{$|S|$} &
+\multicolumn{1}{c}{$|L|$} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\bpareto} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\btimestop} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\btimestop} &
+\multicolumn{1}{c}{\bpareto} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\btimestop} &
+\multicolumn{1}{c}{\bpareto}\\
+\midrule
+
+\csvreader[late after line = \\, head to column names]{\tableonelocation}{}{\csvlinetotablerow}
+\bottomrule
+    \end{NiceTabular}
+    }
+   \label{tab:runtimesetc}
+\end{table}
+%\todo{Something in this table is broken, I think we give the number of pareto points for BU and not for ocvi-exact}
+%
+%
+%
+\begin{table}[t]
+    \centering
+     \caption{Cache access times for CVI algorithms. See \textbf{Results} for explanations. }
+%\resizebox{\textwidth}{!}{
+{\scriptsize
+    \begin{NiceTabular}{rr rrrrr rrrrrr rrrrrrrr}
+\toprule
+%& &
+%\multicolumn{10}{c}{\approachocvi{}} &
+%\multicolumn{5}{c}{\approachsymbiosis{}}\\
+%\cmidrule(lr){2-11}\cmidrule(lr){12-16}
+
+& &
+\multicolumn{5}{c}{\approachocviexact{}} &
+\multicolumn{5}{c}{\approachocvipareto{}} &
+\multicolumn{5}{c}{\approachsymbiosis{}} \\
+\cmidrule(lr){3-7}\cmidrule(lr){8-12}\cmidrule(lr){13-17}
+
+\multicolumn{1}{c}{$\mathbb{D}$} &
+\multicolumn{1}{c}{$\mdp{M}$} &
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\bcacheinsert} &
+\multicolumn{1}{c}{\bcacheretrieve} &
+\multicolumn{1}{c}{\bhit} &
+\multicolumn{1}{c}{\bquery} &
+
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\bcacheinsert} &
+\multicolumn{1}{c}{\bcacheretrieve} &
+\multicolumn{1}{c}{\bhit} &
+\multicolumn{1}{c}{\bquery} &
+
+\multicolumn{1}{c}{\btime} &
+\multicolumn{1}{c}{\bcacheinsert} &
+\multicolumn{1}{c}{\bcacheretrieve} &
+\multicolumn{1}{c}{\bhit} &
+\multicolumn{1}{c}{\bquery}
+\\
+\midrule
+\csvreader[late after line = \\, head to column names]{\tabletwolocation}{}{\csvlinetotablerow}
+  
+\bottomrule
+    \end{NiceTabular}
+}
+    \label{tab:caches}
+\end{table}
 
 \end{document}
