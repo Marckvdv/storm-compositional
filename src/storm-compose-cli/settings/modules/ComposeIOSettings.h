@@ -43,8 +43,10 @@ class ComposeIOSettings : public ModuleSettings {
     bool isIterationOrderSet() const;
     bool isLocalOviEpsilonSet() const;
     bool isUseRecursiveParetoComputationSet() const;
+    bool isDfaPropSet() const;
 
     std::string getStringDiagramFilename() const;
+    std::string getDfaPropFilename() const;
     std::string getEntrance() const;
     std::string getExit() const;
     std::string getApproach() const;
@@ -65,6 +67,7 @@ class ComposeIOSettings : public ModuleSettings {
     // The name of the module.
     static const std::string moduleName;
     static const std::string stringDiagramOption;
+    static const std::string dfaPropOption;
     static const std::string entranceName;
     static const std::string exitName;
     static const std::string approachName;

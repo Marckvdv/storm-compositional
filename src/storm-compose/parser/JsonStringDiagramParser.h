@@ -1,4 +1,5 @@
-#pragma once
+#ifndef JSONSTRINGDIAGRAMPARSER_H
+#define JSONSTRINGDIAGRAMPARSER_H
 
 #include "storm-compose/models/OpenMdp.h"
 #include "storm-compose/models/OpenMdpManager.h"
@@ -44,3 +45,5 @@ class JsonStringDiagramParser {
 
 }  // namespace parser
 }  // namespace storm
+
+#endif /* JSONSTRINGDIAGRAMPARSER_H */

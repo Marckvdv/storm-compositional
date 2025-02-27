@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MONOLITHICOPENMDPCHECKER_H
+#define MONOLITHICOPENMDPCHECKER_H
 
 #include "AbstractOpenMdpChecker.h"
 
@@ -16,3 +17,5 @@ class MonolithicOpenMdpChecker : public AbstractOpenMdpChecker<ValueType> {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* MONOLITHICOPENMDPCHECKER_H */

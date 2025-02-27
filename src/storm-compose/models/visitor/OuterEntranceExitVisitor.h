@@ -1,8 +1,9 @@
-#pragma once
+#ifndef OUTERENTRANCEEXITVISITOR_H
+#define OUTERENTRANCEEXITVISITOR_H
 
 #include "OpenMdpVisitor.h"
-#include "exceptions/InvalidOperationException.h"
-#include "exceptions/NotSupportedException.h"
+#include "storm/exceptions/InvalidOperationException.h"
+#include "storm/exceptions/NotSupportedException.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SumModel.h"
@@ -103,3 +104,5 @@ template class OuterEntranceExitVisitor<storm::RationalNumber>;
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* OUTERENTRANCEEXITVISITOR_H */

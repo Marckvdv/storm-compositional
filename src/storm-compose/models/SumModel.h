@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SUMMODEL_H
+#define SUMMODEL_H
 
 #include <vector>
 #include "OpenMdp.h"
@@ -22,3 +23,5 @@ class SumModel : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* SUMMODEL_H */

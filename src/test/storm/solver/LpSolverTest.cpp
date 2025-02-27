@@ -20,6 +20,10 @@ class DefaultEnvironment {
     static const bool IntegerSupport = true;
     static const bool IncrementalSupport = true;
     static const bool strictRelationSupport = true;
+
+    static bool skip() {
+        return false;
+    }
 };
 
 class GlpkEnvironment {
@@ -30,8 +34,13 @@ class GlpkEnvironment {
     static const bool IntegerSupport = true;
     static const bool IncrementalSupport = true;
     static const bool strictRelationSupport = true;
+
+    static bool skip() {
+        return false;
+    }
 };
 
+#ifdef STORM_HAVE_GUROBI
 class GurobiEnvironment {
    public:
     typedef double ValueType;
@@ -40,7 +49,12 @@ class GurobiEnvironment {
     static const bool IntegerSupport = true;
     static const bool IncrementalSupport = true;
     static const bool strictRelationSupport = true;
+
+    static bool skip() {
+        return storm::test::noGurobi;
+    }
 };
+#endif
 
 class Z3Environment {
    public:
@@ -50,8 +64,13 @@ class Z3Environment {
     static const bool IntegerSupport = true;
     static const bool IncrementalSupport = true;
     static const bool strictRelationSupport = true;
+
+    static bool skip() {
+        return false;
+    }
 };
 
+#ifdef STORM_HAVE_SOPLEX
 class SoplexEnvironment {
    public:
     typedef double ValueType;
@@ -60,6 +79,10 @@ class SoplexEnvironment {
     static const bool IntegerSupport = false;
     static const bool IncrementalSupport = false;
     static const bool strictRelationSupport = false;
+
+    static bool skip() {
+        return false;
+    }
 };
 
 class SoplexExactEnvironment {
@@ -70,12 +93,23 @@ class SoplexExactEnvironment {
     static const bool IntegerSupport = false;
     static const bool IncrementalSupport = false;
     static const bool strictRelationSupport = false;
+
+    static bool skip() {
+        return false;
+    }
 };
+#endif
 
 template<typename TestType>
 class LpSolverTest : public ::testing::Test {
    public:
     typedef typename TestType::ValueType ValueType;
+
+    void SetUp() override {
+        if (skipped()) {
+            GTEST_SKIP();
+        }
+    }
 
     storm::solver::LpSolverTypeSelection solverSelection() const {
         return TestType::solverSelection;
@@ -103,6 +137,10 @@ class LpSolverTest : public ::testing::Test {
 
     bool supportsStrictRelation() const {
         return TestType::strictRelationSupport;
+    }
+
+    bool skipped() const {
+        return TestType::skip();
     }
 };
 

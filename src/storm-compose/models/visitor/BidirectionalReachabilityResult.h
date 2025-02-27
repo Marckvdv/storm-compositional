@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BIDIRECTIONALREACHABILITYRESULT_H
+#define BIDIRECTIONALREACHABILITYRESULT_H
 
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm/modelchecker/multiobjective/Objective.h"
@@ -46,3 +47,5 @@ class BidirectionalReachabilityResult {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* BIDIRECTIONALREACHABILITYRESULT_H */

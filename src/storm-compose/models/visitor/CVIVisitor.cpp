@@ -1,11 +1,11 @@
 #include "CVIVisitor.h"
 #include <vector>
 
-#include "exceptions/IllegalArgumentValueException.h"
-#include "modelchecker/prctl/helper/SparseMdpPrctlHelper.h"
-#include "models/sparse/StandardRewardModel.h"
-#include "storage/BitVector.h"
-#include "storage/SparseMatrix.h"
+#include "storm/exceptions/IllegalArgumentValueException.h"
+#include "storm/modelchecker/prctl/helper/SparseMdpPrctlHelper.h"
+#include "storm/models/sparse/StandardRewardModel.h"
+#include "storm/storage/BitVector.h"
+#include "storm/storage/SparseMatrix.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
@@ -19,7 +19,7 @@
 #include "storm/modelchecker/multiobjective/preprocessing/SparseMultiObjectivePreprocessor.h"
 #include "storm/models/sparse/StandardRewardModel.h"
 #include "storm/utility/constants.h"
-#include "utility/vector.h"
+#include "storm/utility/vector.h"
 
 namespace storm {
 namespace models {

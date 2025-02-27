@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REFERENCE_H
+#define REFERENCE_H
 
 #include "OpenMdp.h"
 
@@ -33,3 +34,5 @@ class Reference : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* REFERENCE_H */

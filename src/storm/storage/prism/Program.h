@@ -380,6 +380,12 @@ class Program : public LocatedInformation {
     std::map<std::string, uint_fast64_t> const& getActionNameToIndexMapping() const;
 
     /*!
+     * Sets a new initial states expression.
+     * May only be called if the program already has an initial states expression.
+     */
+    void updateInitialStatesExpression(expressions::Expression const& newExpression);
+
+    /*!
      * Retrieves whether the program specifies an initial construct.
      */
     bool hasInitialConstruct() const;
@@ -697,6 +703,24 @@ class Program : public LocatedInformation {
      * @return The resulting program that only contains expressions over variables of the program.
      */
     Program substituteConstantsFormulas(bool substituteConstants = true, bool substituteFormulas = true) const;
+
+    /*!
+     * Replace the initialization in variables by an init-expression. This should not change the semantics of the program and can be a preprocessing step.
+     *
+     * @return
+     */
+    Program replaceVariableInitializationByInitExpression() const;
+
+    /**
+     * Substitutes the given constant by a fresh global variable that is bound between lowerBound and upperBound.
+     * The provided lowerBound and upperBound are not considered if the constant is Boolean.
+     * If the constant is defined by an expression, that expression is used as initial value for the created variable.
+     * @note If the given constant appears at positions where a variable would be invalid (e.g. variable bounds
+         or the definition of another constant), the resulting program is malformed.
+     * @return
+     */
+    Program replaceConstantByVariable(Constant const& c, expressions::Expression const& lowerBound, expressions::Expression const& upperBound,
+                                      bool observable = true) const;
 
     /**
      * Entry point for static analysis for simplify. As we use the same expression manager, we recommend to not use the original program any further.

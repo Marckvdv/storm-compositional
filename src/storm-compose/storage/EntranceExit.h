@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENTRANCEEXIT_H
+#define ENTRANCEEXIT_H
 
 #include "storm/exceptions/InvalidOperationException.h"
 
@@ -15,3 +16,5 @@ std::string positionToString(Position position);
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* ENTRANCEEXIT_H */

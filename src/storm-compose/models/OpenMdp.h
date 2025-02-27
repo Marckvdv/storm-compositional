@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENMDP_H
+#define OPENMDP_H
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -6,7 +7,7 @@
 #include <vector>
 
 #include "OpenMdpManager.h"
-#include "storage/geometry/Polytope.h"
+#include "storm/storage/geometry/Polytope.h"
 #include "storm-compose/models/visitor/BidirectionalReachabilityResult.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
 #include "storm/adapters/RationalNumberAdapter.h"
@@ -86,3 +87,5 @@ class OpenMdp : public std::enable_shared_from_this<OpenMdp<ValueType>> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* OPENMDP_H */

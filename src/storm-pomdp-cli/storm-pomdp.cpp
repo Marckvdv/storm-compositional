@@ -36,8 +36,6 @@
 #include "storm/exceptions/NotSupportedException.h"
 #include "storm/exceptions/UnexpectedException.h"
 
-#include "storm-pars/transformer/ParametricTransformer.h"
-
 #include <typeinfo>
 
 namespace storm {
@@ -263,9 +261,9 @@ bool performAnalysis(std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> co
         auto result = checker.check(formula);
         checker.printStatisticsToStream(std::cout);
         if (storm::utility::resources::isTerminate()) {
-            STORM_PRINT_AND_LOG("\nResult till abort: ")
+            STORM_PRINT_AND_LOG("\nResult till abort: ");
         } else {
-            STORM_PRINT_AND_LOG("\nResult: ")
+            STORM_PRINT_AND_LOG("\nResult: ");
         }
         printResult(result.lowerBound, result.upperBound);
         STORM_PRINT_AND_LOG('\n');
@@ -283,9 +281,9 @@ bool performAnalysis(std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> co
             auto result = resultPtr->template asExplicitQuantitativeCheckResult<ValueType>();
             result.filter(storm::modelchecker::ExplicitQualitativeCheckResult(pomdp->getInitialStates()));
             if (storm::utility::resources::isTerminate()) {
-                STORM_PRINT_AND_LOG("\nResult till abort: ")
+                STORM_PRINT_AND_LOG("\nResult till abort: ");
             } else {
-                STORM_PRINT_AND_LOG("\nResult: ")
+                STORM_PRINT_AND_LOG("\nResult: ");
             }
             printResult(result.getMin(), result.getMax());
             STORM_PRINT_AND_LOG('\n');
@@ -355,12 +353,6 @@ bool performTransformation(std::shared_ptr<storm::models::sparse::Pomdp<ValueTyp
             pmc = storm::api::performBisimulationMinimization<storm::RationalFunction>(pmc->template as<storm::models::sparse::Dtmc<storm::RationalFunction>>(),
                                                                                        {formula.asSharedPointer()}, storm::storage::BisimulationType::Strong)
                       ->template as<storm::models::sparse::Dtmc<storm::RationalFunction>>();
-            STORM_PRINT_AND_LOG(" done.\n");
-            pmc->printModelInformationToStream(std::cout);
-        }
-        if (pmc->hasRewardModel() && transformSettings.isConstantRewardsSet()) {
-            STORM_PRINT_AND_LOG("Ensuring constant rewards...");
-            pmc = storm::transformer::makeRewardsConstant(*(pmc->template as<storm::models::sparse::Dtmc<storm::RationalFunction>>()));
             STORM_PRINT_AND_LOG(" done.\n");
             pmc->printModelInformationToStream(std::cout);
         }
@@ -491,28 +483,7 @@ void processOptions() {
  */
 int main(const int argc, const char** argv) {
     // try {
-    storm::utility::setUp();
-    storm::cli::printHeader("Storm-pomdp", argc, argv);
-    storm::settings::initializePomdpSettings("Storm-POMDP", "storm-pomdp");
-
-    bool optionsCorrect = storm::cli::parseOptions(argc, argv);
-    if (!optionsCorrect) {
-        return -1;
-    }
-    storm::utility::Stopwatch totalTimer(true);
-    storm::cli::setUrgentOptions();
-
-    // Invoke storm-pomdp with obtained settings
-    storm::pomdp::cli::processOptions();
-
-    totalTimer.stop();
-    if (storm::settings::getModule<storm::settings::modules::ResourceSettings>().isPrintTimeAndMemorySet()) {
-        storm::cli::printTimeAndMemoryStatistics(totalTimer.getTimeInMilliseconds());
-    }
-
-    // All operations have now been performed, so we clean up everything and terminate.
-    storm::utility::cleanUp();
-    return 0;
+    return storm::cli::process("Storm-POMDP", "storm-pomdp", storm::settings::initializePomdpSettings, storm::pomdp::cli::processOptions, argc, argv);
     // } catch (storm::exceptions::BaseException const &exception) {
     //    STORM_LOG_ERROR("An exception caused Storm-pomdp to terminate. The message of the exception is: " << exception.what());
     //    return 1;

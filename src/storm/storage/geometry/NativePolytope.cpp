@@ -1,6 +1,6 @@
 #include "storm/storage/geometry/NativePolytope.h"
 
-#include "solver/SoplexLpSolver.h"
+//#include "solver/SoplexLpSolver.h"
 #include "storm/solver/SmtSolver.h"
 #include "storm/solver/Z3LpSolver.h"
 #include "storm/storage/expressions/ExpressionManager.h"
@@ -12,7 +12,6 @@
 #include "storm/exceptions/InvalidArgumentException.h"
 #include "storm/exceptions/NotImplementedException.h"
 #include "storm/exceptions/UnexpectedException.h"
-#include "utility/Stopwatch.h"
 
 namespace storm {
 namespace storage {
@@ -325,8 +324,9 @@ std::pair<typename NativePolytope<ValueType>::Point, bool> NativePolytope<ValueT
         return std::make_pair(Point(), false);
     }
 
-    // storm::solver::Z3LpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
-    storm::solver::SoplexLpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
+    // TODO FIXME @Marck
+    storm::solver::Z3LpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
+    //storm::solver::SoplexLpSolver<ValueType> solver(storm::solver::OptimizationDirection::Maximize);
     std::vector<storm::expressions::Variable> variables;
     variables.reserve(A.cols());
     for (Eigen::Index i = 0; i < A.cols(); ++i) {
@@ -338,11 +338,7 @@ std::pair<typename NativePolytope<ValueType>::Point, bool> NativePolytope<ValueT
     }
     solver.update();
 
-    // static utility::Stopwatch t;
-    // t.start();
     solver.optimize();
-    // t.stop();
-    // std::cout << "T: " << t.getTimeInNanoseconds() * 1e-9 << std::endl;
     if (solver.isOptimal()) {
         auto result = std::make_pair(Point(), true);
         result.first.reserve(variables.size());

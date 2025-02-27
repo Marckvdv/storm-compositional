@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENMDPMANAGER_H
+#define OPENMDPMANAGER_H
 
 #include "OpenMdp.h"
 #include "storm/models/sparse/Mdp.h"
@@ -30,3 +31,5 @@ class OpenMdpManager {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* OPENMDPMANAGER_H */

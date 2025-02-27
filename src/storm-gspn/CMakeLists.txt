@@ -2,20 +2,19 @@ file(GLOB_RECURSE ALL_FILES ${PROJECT_SOURCE_DIR}/src/storm-gspn/*.h ${PROJECT_S
 
 register_source_groups_from_filestructure("${ALL_FILES}" storm-gspn)
 
-
-
 file(GLOB_RECURSE STORM_GSPN_SOURCES ${PROJECT_SOURCE_DIR}/src/storm-gspn/*/*.cpp)
 file(GLOB_RECURSE STORM_GSPN_HEADERS ${PROJECT_SOURCE_DIR}/src/storm-gspn/*/*.h)
 
 
 # Create storm-gspn.
 add_library(storm-gspn SHARED ${STORM_GSPN_SOURCES} ${STORM_GSPN_HEADERS})
+target_precompile_headers(storm-gspn REUSE_FROM storm)
 
 # Remove define symbol for shared libstorm.
 set_target_properties(storm-gspn PROPERTIES DEFINE_SYMBOL "")
-#add_dependencies(storm resources)
 list(APPEND STORM_TARGETS storm-gspn)
 set(STORM_TARGETS ${STORM_TARGETS} PARENT_SCOPE)
+
 target_link_libraries(storm-gspn PUBLIC storm storm-conv storm-parsers ${STORM_GSPN_LINK_LIBRARIES})
 
 # Install storm headers to include directory.
@@ -36,3 +35,4 @@ add_dependencies(storm-gspn copy_storm_gspn_headers)
 
 # installation
 install(TARGETS storm-gspn EXPORT storm_Targets RUNTIME DESTINATION bin LIBRARY DESTINATION lib OPTIONAL)
+

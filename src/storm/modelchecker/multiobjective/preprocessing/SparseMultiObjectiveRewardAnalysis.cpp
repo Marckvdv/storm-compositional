@@ -3,24 +3,22 @@
 #include <algorithm>
 #include <set>
 
+#include "storm/adapters/RationalNumberAdapter.h"
+#include "storm/exceptions/InvalidPropertyException.h"
+#include "storm/exceptions/NotImplementedException.h"
+#include "storm/exceptions/UnexpectedException.h"
 #include "storm/modelchecker/prctl/helper/BaierUpperRewardBoundsComputer.h"
 #include "storm/modelchecker/propositional/SparsePropositionalModelChecker.h"
 #include "storm/modelchecker/results/ExplicitQualitativeCheckResult.h"
 #include "storm/models/sparse/MarkovAutomaton.h"
 #include "storm/models/sparse/Mdp.h"
 #include "storm/models/sparse/StandardRewardModel.h"
-#include "storm/settings/SettingsManager.h"
-#include "storm/settings/modules/GeneralSettings.h"
 #include "storm/storage/MaximalEndComponentDecomposition.h"
 #include "storm/storage/expressions/ExpressionManager.h"
 #include "storm/transformer/EndComponentEliminator.h"
 #include "storm/utility/graph.h"
 #include "storm/utility/macros.h"
 #include "storm/utility/vector.h"
-
-#include "storm/exceptions/InvalidPropertyException.h"
-#include "storm/exceptions/NotImplementedException.h"
-#include "storm/exceptions/UnexpectedException.h"
 
 namespace storm {
 namespace modelchecker {

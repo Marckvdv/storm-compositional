@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENTRANCEEXITVISITOR_H
+#define ENTRANCEEXITVISITOR_H
 
 #include "OpenMdpVisitor.h"
 #include "storm-compose/models/PrismModel.h"
@@ -169,3 +170,5 @@ template class EntranceExitVisitor<storm::RationalNumber>;
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* ENTRANCEEXITVISITOR_H */

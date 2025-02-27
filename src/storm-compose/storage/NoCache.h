@@ -1,3 +1,6 @@
+#ifndef NOCACHE_H
+#define NOCACHE_H
+
 #include "AbstractCache.h"
 #include "storm-compose/models/ConcreteMdp.h"
 
@@ -20,3 +23,5 @@ class NoCache : public AbstractCache<ValueType> {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* NOCACHE_H */

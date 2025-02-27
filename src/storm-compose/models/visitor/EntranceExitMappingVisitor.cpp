@@ -1,5 +1,5 @@
 #include "EntranceExitMappingVisitor.h"
-#include "exceptions/InvalidOperationException.h"
+#include "storm/exceptions/InvalidOperationException.h"
 #include "storm-compose/storage/EntranceExit.h"
 
 namespace storm {

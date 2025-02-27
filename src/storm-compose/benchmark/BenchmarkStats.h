@@ -1,6 +1,6 @@
 #pragma once
 
-#include "storage/geometry/NativePolytope.h"
+#include "storm/storage/geometry/NativePolytope.h"
 #include "storm/adapters/JsonAdapter.h"
 #include "storm/utility/Stopwatch.h"
 

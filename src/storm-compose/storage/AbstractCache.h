@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ABSTRACTCACHE_H
+#define ABSTRACTCACHE_H
 
 #include <boost/optional.hpp>
 #include "storm-compose/models/OpenMdp.h"
@@ -29,3 +30,5 @@ class AbstractCache {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* ABSTRACTCACHE_H */

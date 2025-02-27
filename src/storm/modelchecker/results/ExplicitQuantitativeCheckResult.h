@@ -1,24 +1,22 @@
-#ifndef STORM_MODELCHECKER_EXPLICITQUANTITATIVECHECKRESULT_H_
-#define STORM_MODELCHECKER_EXPLICITQUANTITATIVECHECKRESULT_H_
-
+#pragma once
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <map>
 #include <optional>
 #include <vector>
 
+#include "storm/adapters/JsonForward.h"
 #include "storm/modelchecker/results/QuantitativeCheckResult.h"
 #include "storm/models/sparse/StateLabeling.h"
 #include "storm/storage/Scheduler.h"
 #include "storm/storage/sparse/StateType.h"
 #include "storm/storage/sparse/StateValuations.h"
-
-#include "storm/adapters/JsonAdapter.h"
 #include "storm/utility/OsDetection.h"
 
 namespace storm {
+
 namespace modelchecker {
-// fwd
+// Forward declaration
 class ExplicitQualitativeCheckResult;
 
 template<typename ValueType>
@@ -93,5 +91,3 @@ class ExplicitQuantitativeCheckResult : public QuantitativeCheckResult<ValueType
 };
 }  // namespace modelchecker
 }  // namespace storm
-
-#endif /* STORM_MODELCHECKER_EXPLICITQUANTITATIVECHECKRESULT_H_ */

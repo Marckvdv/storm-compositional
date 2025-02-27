@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARETOINITIALIZERVISITOR_H
+#define PARETOINITIALIZERVISITOR_H
 
 #include "OpenMdpVisitor.h"
 
@@ -44,3 +45,5 @@ class ParetoInitializerVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* PARETOINITIALIZERVISITOR_H */

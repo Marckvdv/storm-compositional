@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROPERTYDRIVENVISITOR_H
+#define PROPERTYDRIVENVISITOR_H
 
 #include "OpenMdpVisitor.h"
 #include "storm/environment/Environment.h"
@@ -37,3 +38,5 @@ class PropertyDrivenVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* PROPERTYDRIVENVISITOR_H */

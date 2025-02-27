@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HEURISTICVALUEITERATOR_H
+#define HEURISTICVALUEITERATOR_H
 
 #include <queue>
 
@@ -59,3 +60,5 @@ class HeuristicValueIterator {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* HEURISTICVALUEITERATOR_H */

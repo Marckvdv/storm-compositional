@@ -1,7 +1,7 @@
 #include "ExactCache.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm/adapters/RationalNumberAdapter.h"
-#include "utility/constants.h"
+#include "storm/utility/constants.h"
 
 namespace storm {
 namespace storage {

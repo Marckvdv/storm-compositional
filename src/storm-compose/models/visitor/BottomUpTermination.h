@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BOTTOMUPTERMINATION_H
+#define BOTTOMUPTERMINATION_H
 
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/AbstractOpenMdpChecker.h"
@@ -37,3 +38,5 @@ class BottomUpTermination : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* BOTTOMUPTERMINATION_H */

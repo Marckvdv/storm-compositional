@@ -1,11 +1,11 @@
 #include "ProperOviTermination.h"
 
 #include <memory>
-#include "exceptions/InvalidArgumentException.h"
-#include "exceptions/NotSupportedException.h"
-#include "exceptions/OutOfRangeException.h"
-#include "io/DirectEncodingExporter.h"
-#include "solver/SolverSelectionOptions.h"
+#include "storm/exceptions/InvalidArgumentException.h"
+#include "storm/exceptions/NotSupportedException.h"
+#include "storm/exceptions/OutOfRangeException.h"
+#include "storm/io/DirectEncodingExporter.h"
+#include "storm/solver/SolverSelectionOptions.h"
 #include "storm-compose/modelchecker/HeuristicValueIterator.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/CVIVisitor.h"
@@ -13,8 +13,8 @@
 #include "storm-compose/storage/ExactCache.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
-#include "utility/constants.h"
-#include "utility/macros.h"
+#include "storm/utility/constants.h"
+#include "storm/utility/macros.h"
 
 namespace storm {
 namespace modelchecker {

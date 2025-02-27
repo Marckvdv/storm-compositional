@@ -1,8 +1,9 @@
-#pragma once
+#ifndef ENTRANCEEXITMAPPINGVISITOR_H
+#define ENTRANCEEXITMAPPINGVISITOR_H
 
 #include "EntranceExitVisitor.h"
 #include "OpenMdpVisitor.h"
-#include "exceptions/InvalidOperationException.h"
+#include "storm/exceptions/InvalidOperationException.h"
 #include "storm-compose/models/PrismModel.h"
 #include "storm-compose/models/Reference.h"
 #include "storm-compose/models/SumModel.h"
@@ -41,3 +42,5 @@ template class EntranceExitMappingVisitor<storm::RationalNumber>;
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* ENTRANCEEXITMAPPINGVISITOR_H */

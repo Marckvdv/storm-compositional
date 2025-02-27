@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SEQUENCEMODEL_H
+#define SEQUENCEMODEL_H
 
 #include <vector>
 #include "OpenMdp.h"
@@ -27,3 +28,5 @@ class SequenceModel : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* SEQUENCEMODEL_H */

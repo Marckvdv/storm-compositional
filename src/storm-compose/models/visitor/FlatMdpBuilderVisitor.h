@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLATMDPBUILDERVISITOR_H
+#define FLATMDPBUILDERVISITOR_H
 
 #include "OpenMdpVisitor.h"
 #include "storm-compose/models/ConcreteMdp.h"
@@ -35,3 +36,5 @@ class FlatMdpBuilderVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* FLATMDPBUILDERVISITOR_H */

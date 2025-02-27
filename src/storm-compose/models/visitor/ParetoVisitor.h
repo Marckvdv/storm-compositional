@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARETOVISITOR_H
+#define PARETOVISITOR_H
 
 #include "OpenMdpVisitor.h"
 
@@ -62,3 +63,5 @@ class ParetoVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* PARETOVISITOR_H */

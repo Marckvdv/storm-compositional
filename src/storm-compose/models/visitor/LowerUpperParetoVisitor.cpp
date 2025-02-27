@@ -1,7 +1,6 @@
 #include "LowerUpperParetoVisitor.h"
 
-#include "storage/prism/Program.h"
-#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm/storage/prism/Program.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-parsers/api/storm-parsers.h"

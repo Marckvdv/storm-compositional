@@ -1,15 +1,15 @@
 #include "HeuristicValueIterator.h"
-#include "exceptions/NotSupportedException.h"
-#include "exceptions/OutOfRangeException.h"
-#include "solver/SolverSelectionOptions.h"
+#include "storm/exceptions/NotSupportedException.h"
+#include "storm/exceptions/OutOfRangeException.h"
+#include "storm/solver/SolverSelectionOptions.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/CVIVisitor.h"
 #include "storm-compose/storage/EntranceExit.h"
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
-#include "utility/constants.h"
-#include "utility/macros.h"
-#include "utility/vector.h"
+#include "storm/utility/constants.h"
+#include "storm/utility/macros.h"
+#include "storm/utility/vector.h"
 
 namespace storm {
 namespace modelchecker {

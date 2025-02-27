@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENMDPTODOTVISITOR_H
+#define OPENMDPTODOTVISITOR_H
 
 #include <utility>
 #include "OpenMdpVisitor.h"
@@ -237,3 +238,5 @@ template class OpenMdpToDotVisitor<storm::RationalNumber>;
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* OPENMDPTODOTVISITOR_H */

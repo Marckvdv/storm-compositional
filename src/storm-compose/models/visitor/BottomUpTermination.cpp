@@ -1,12 +1,12 @@
 #include "BottomUpTermination.h"
-#include "exceptions/UnexpectedException.h"
+#include "storm/exceptions/UnexpectedException.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/ApproximateReachabilityResult.h"
 #include "storm-compose/modelchecker/MonolithicOpenMdpChecker.h"
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/visitor/LeafTransformer.h"
 #include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
-#include "utility/Stopwatch.h"
+#include "storm/utility/Stopwatch.h"
 
 namespace storm {
 namespace models {

@@ -6,9 +6,10 @@
 # --build-arg BASE_IMG=<new_base_image>
 
 # Set base image
-ARG BASE_IMG=movesrwth/storm-basesystem:latest
-FROM $BASE_IMG
-MAINTAINER Matthias Volk <m.volk@utwente.nl>
+ARG BASE_IMG=movesrwth/storm-dependencies:latest
+ARG BASE_PLATFORM=linux/amd64
+FROM --platform=$BASE_PLATFORM  $BASE_IMG
+MAINTAINER Matthias Volk <m.volk@tue.nl>
 
 # Specify configurations
 # These configurations can be set from the commandline with:
@@ -17,28 +18,18 @@ MAINTAINER Matthias Volk <m.volk@utwente.nl>
 ARG build_type=Release
 # Specify number of threads to use for parallel compilation
 ARG no_threads=1
-# Specify CMake arguments for Storm
-ARG cmake_args="-DSTORM_PORTABLE=ON -DSTORM_USE_SPOT_SHIPPED=ON"
 
+# Specify Storm configuration (ON/OFF)
+ARG gurobi_support="ON"
+ARG soplex_support="ON"
+ARG spot_support="ON"
+ARG developer="OFF"
+ARG cln_exact="OFF"
+ARG cln_ratfunc="ON"
+ARG all_sanitizers="OFF"
 
-# Build Carl
-############
-# Explicitly build the Carl library
-# This is needed when using pycarl/stormpy later on
-WORKDIR /opt/
-
-# Obtain Carl from public repository
-RUN git clone https://github.com/moves-rwth/carl-storm.git carl
-
-# Switch to build directory
-RUN mkdir -p /opt/carl/build
-WORKDIR /opt/carl/build
-
-# Configure Carl
-RUN cmake .. -DCMAKE_BUILD_TYPE=$build_type
-
-# Build Carl library
-RUN make lib_carl -j $no_threads
+# Specify additional CMake arguments for Storm
+ARG cmake_args=""
 
 
 # Build Storm
@@ -54,7 +45,15 @@ RUN mkdir -p /opt/storm/build
 WORKDIR /opt/storm/build
 
 # Configure Storm
-RUN cmake .. -DCMAKE_BUILD_TYPE=$build_type $cmake_args
+RUN cmake .. -DCMAKE_BUILD_TYPE=$build_type \
+             -DSTORM_PORTABLE=ON \
+             -DSTORM_USE_GUROBI=$gurobi_support \
+             -DSTORM_USE_SOPLEX=$soplex_support \
+             -DSTORM_USE_SPOT_SYSTEM=$spot_support \
+             -DSTORM_DEVELOPER=$developer \
+             -DSTORM_USE_CLN_EA=$cln_exact \
+             -DSTORM_USE_CLN_RF=$cln_ratfunc \
+             $cmake_args
 
 # Build external dependencies of Storm
 RUN make resources -j $no_threads

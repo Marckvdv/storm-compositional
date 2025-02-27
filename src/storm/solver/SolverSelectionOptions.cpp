@@ -20,10 +20,10 @@ std::string toString(MinMaxMethod m) {
             return "soundvalueiteration";
         case MinMaxMethod::OptimisticValueIteration:
             return "optimisticvalueiteration";
-        case MinMaxMethod::TopologicalCuda:
-            return "topologicalcuda";
         case MinMaxMethod::ViToPi:
             return "vi-to-pi";
+        case MinMaxMethod::ViToLp:
+            return "vi-to-lp";
         case MinMaxMethod::Acyclic:
             return "vi-to-pi";
     }

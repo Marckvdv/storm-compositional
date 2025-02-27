@@ -1,5 +1,8 @@
+#include "storm/adapters/RationalNumberAdapter.h"  // Must come first
+
 #include "storm/modelchecker/results/ExplicitQualitativeCheckResult.h"
 
+#include "storm/adapters/JsonAdapter.h"
 #include "storm/exceptions/InvalidOperationException.h"
 #include "storm/utility/macros.h"
 

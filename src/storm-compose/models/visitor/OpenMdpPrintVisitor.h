@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENMDPPRINTVISITOR_H
+#define OPENMDPPRINTVISITOR_H
 
 #include "OpenMdpVisitor.h"
 #include "storm-compose/models/PrismModel.h"
@@ -85,3 +86,5 @@ template class OpenMdpPrintVisitor<storm::RationalNumber>;
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* OPENMDPPRINTVISITOR_H */

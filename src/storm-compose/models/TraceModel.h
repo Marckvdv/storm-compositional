@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TRACEMODEL_H
+#define TRACEMODEL_H
 
 #include <vector>
 #include "OpenMdp.h"
@@ -43,3 +44,5 @@ class TraceModel : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* TRACEMODEL_H */

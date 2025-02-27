@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OVISTEPUPDATER_H
+#define OVISTEPUPDATER_H
 
 #include <queue>
 
@@ -45,3 +46,5 @@ class OviStepUpdater {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* OVISTEPUPDATER_H */

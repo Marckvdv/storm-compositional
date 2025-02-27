@@ -1,7 +1,7 @@
 #include "MappingVisitor.h"
-#include "exceptions/InvalidArgumentException.h"
-#include "exceptions/InvalidOperationException.h"
-#include "exceptions/NotSupportedException.h"
+#include "storm/exceptions/InvalidArgumentException.h"
+#include "storm/exceptions/InvalidOperationException.h"
+#include "storm/exceptions/NotSupportedException.h"
 #include "storm-compose/storage/EntranceExit.h"
 
 namespace storm {

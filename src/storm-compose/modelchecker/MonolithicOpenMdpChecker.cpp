@@ -1,6 +1,6 @@
 #include "MonolithicOpenMdpChecker.h"
 
-#include "io/DirectEncodingExporter.h"
+#include "storm/io/DirectEncodingExporter.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-parsers/api/storm-parsers.h"
 #include "storm-parsers/parser/FormulaParser.h"

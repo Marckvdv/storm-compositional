@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COMPOSITIONALVALUEITERATION_H
+#define COMPOSITIONALVALUEITERATION_H
 
 #include "AbstractOpenMdpChecker.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
@@ -76,3 +77,5 @@ class CompositionalValueIteration : public AbstractOpenMdpChecker<ValueType> {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* COMPOSITIONALVALUEITERATION_H */

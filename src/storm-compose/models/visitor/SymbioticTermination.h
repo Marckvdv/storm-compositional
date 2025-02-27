@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SYMBIOTICTERMINATION_H
+#define SYMBIOTICTERMINATION_H
 
 #include "OpenMdpVisitor.h"
 
@@ -70,3 +71,5 @@ class SymbioticTermination : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* SYMBIOTICTERMINATION_H */

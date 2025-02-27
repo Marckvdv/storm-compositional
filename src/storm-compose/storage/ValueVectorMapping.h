@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VALUEVECTORMAPPING_H
+#define VALUEVECTORMAPPING_H
 
 #include <set>
 
@@ -48,3 +49,5 @@ class ValueVectorMapping {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* VALUEVECTORMAPPING_H */

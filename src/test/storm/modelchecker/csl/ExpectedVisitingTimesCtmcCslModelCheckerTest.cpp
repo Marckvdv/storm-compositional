@@ -33,6 +33,19 @@ class SparseGmmxxGmresIluEnvironment {
     }
 };
 
+class SparseSoundEnvironment {
+   public:
+    static const CtmcEngine engine = CtmcEngine::JaniSparse;
+    static const bool isExact = false;
+    typedef double ValueType;
+    typedef storm::models::sparse::Ctmc<ValueType> ModelType;
+    static storm::Environment createEnvironment() {
+        storm::Environment env;
+        env.solver().setForceSoundness(true);
+        return env;
+    }
+};
+
 class SparseEigenRationalLuEnvironment {
    public:
     static const CtmcEngine engine = CtmcEngine::JaniSparse;
@@ -55,6 +68,13 @@ class ExpectedVisitingTimesCtmcCslModelCheckerTest : public ::testing::Test {
     typedef typename storm::models::sparse::Ctmc<ValueType> SparseModelType;
 
     ExpectedVisitingTimesCtmcCslModelCheckerTest() : _environment(TestType::createEnvironment()) {}
+
+    void SetUp() override {
+#ifndef STORM_HAVE_Z3
+        GTEST_SKIP() << "Z3 not available.";
+#endif
+    }
+
     storm::Environment const& env() const {
         return _environment;
     }
@@ -92,7 +112,7 @@ class ExpectedVisitingTimesCtmcCslModelCheckerTest : public ::testing::Test {
     storm::Environment _environment;
 };
 
-typedef ::testing::Types<SparseGmmxxGmresIluEnvironment, SparseEigenRationalLuEnvironment> TestingTypes;
+typedef ::testing::Types<SparseGmmxxGmresIluEnvironment, SparseSoundEnvironment, SparseEigenRationalLuEnvironment> TestingTypes;
 
 TYPED_TEST_SUITE(ExpectedVisitingTimesCtmcCslModelCheckerTest, TestingTypes, );
 

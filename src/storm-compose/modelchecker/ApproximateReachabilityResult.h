@@ -1,7 +1,8 @@
-#pragma once
+#ifndef APPROXIMATEREACHABILITYRESULT_H
+#define APPROXIMATEREACHABILITYRESULT_H
 
 #include <iostream>
-#include "utility/constants.h"
+#include "storm/utility/constants.h"
 
 namespace storm {
 namespace modelchecker {
@@ -41,3 +42,5 @@ std::ostream& operator<<(std::ostream& os, ApproximateReachabilityResult<ValueTy
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* APPROXIMATEREACHABILITYRESULT_H */

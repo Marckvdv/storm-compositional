@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LEAFTRANSFORMER_H
+#define LEAFTRANSFORMER_H
 
 #include <functional>
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
@@ -31,3 +32,5 @@ class LeafTransformer : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* LEAFTRANSFORMER_H */

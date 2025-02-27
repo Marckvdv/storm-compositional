@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VALUEVECTOR_H
+#define VALUEVECTOR_H
 
 #include <map>
 #include <vector>
@@ -41,3 +42,5 @@ class ValueVector {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* VALUEVECTOR_H */

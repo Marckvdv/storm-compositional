@@ -1,13 +1,12 @@
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.22)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Set project name
 project (storm CXX C)
 
 # Add base folder for better inclusion paths
-include_directories("${PROJECT_SOURCE_DIR}/src")
-include_directories("${PROJECT_SOURCE_DIR}/src/storm")
+#  include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # Add the resources/cmake folder to Module Search Path for FindTBB.cmake
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/resources/cmake/find_modules" "${PROJECT_SOURCE_DIR}/resources/cmake/macros")
@@ -44,8 +43,6 @@ option(STORM_FORCE_SHIPPED_CARL "Sets whether the shipped version of carl is to 
 MARK_AS_ADVANCED(STORM_FORCE_SHIPPED_CARL)
 option(USE_SMTRAT "Sets whether SMT-RAT should be included." OFF)
 mark_as_advanced(USE_SMTRAT)
-option(USE_HYPRO "Sets whether HyPro should be included." OFF)
-mark_as_advanced(USE_HYPRO)
 option(STORM_USE_SPOT_SYSTEM "Sets whether the system version of Spot should be included (if found)." ON)
 option(STORM_USE_SPOT_SHIPPED "Sets whether Spot should be downloaded and installed (if system version is not available or not used)." OFF)
 option(XML_SUPPORT "Sets whether xml based format parsing should be included." ON)
@@ -67,7 +64,6 @@ MARK_AS_ADVANCED(STORM_EXCLUDE_TESTS_FROM_ALL)
 set(BOOST_ROOT "" CACHE STRING "A hint to the root directory of Boost (optional).")
 set(GUROBI_ROOT "" CACHE STRING "A hint to the root directory of Gurobi (optional).")
 set(Z3_ROOT "" CACHE STRING "A hint to the root directory of Z3 (optional).")
-set(CUDA_ROOT "" CACHE STRING "The hint to the root directory of CUDA (optional).")
 set(MSAT_ROOT "" CACHE STRING "The hint to the root directory of MathSAT (optional).")
 set(SPOT_ROOT "" CACHE STRING "The hint to the root directory of Spot (optional).")
 MARK_AS_ADVANCED(SPOT_ROOT)
@@ -164,39 +160,42 @@ set(STORM_TEST_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/examples/testfiles
 # Auto-detect operating system.
 set(MACOSX 0)
 set(LINUX 0)
+set(APPLE_SILICON 0)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	# Mac OS
 	set(OPERATING_SYSTEM "Mac OS")
         set(MACOSX 1)
+	if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm64)
+		set(APPLE_SILICON 1)
+	endif()
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # Linux
+	# Linux
 	set(OPERATING_SYSTEM "Linux")
         set(LINUX 1)
 elseif(WIN32)
-    # Assuming Windows.
-    set(OPERATING_SYSTEM "Windows")
+	# Assuming Windows.
+	set(OPERATING_SYSTEM "Windows")
 else()
-    message(WARNING "We are unsure about your operating system.")
-    set(OPERATING_SYSTEM "Linux")
-    set(LINUX 1)
+	message(WARNING "We are unsure about your operating system.")
+	set(OPERATING_SYSTEM "Linux")
+	set(LINUX 1)
 ENDIF()
 message(STATUS "Storm - Detected operating system ${OPERATING_SYSTEM}.")
 
-set(SHIPPED_CARL_USE_CLN_NUMBERS ON)
-set(SHIPPED_CARL_USE_GINAC ON)
-# Detect Apple Silicon and adjust settings
-if(APPLE AND ${CMAKE_SYSTEM_PROCESSOR} MATCHES arm64)
-	message(STATUS "Storm - Detected that target system uses Apple Silicon.")
-	message(WARNING "Compiling natively on Apple Silicon is experimental. Please report issues to support@stormchecker.org. For more information visit https://www.stormchecker.org/documentation/obtain-storm/apple-silicon.html")
-	set(APPLE_SILICON 1)
-	if(STORM_USE_CLN_EA OR STORM_USE_CLN_RF)
-		message(WARNING "CLN and GiNaC are currently not supported on Apple Silicon-based architectures. Disabling Storm and carl usage of the libraries.")
-		set(STORM_USE_CLN_EA OFF)
-		set(STORM_USE_CLN_RF OFF)
-	endif()
+# Set compile flags for dependencies
+if(STORM_USE_CLN_EA OR STORM_USE_CLN_RF)
+	set(SHIPPED_CARL_USE_CLN_NUMBERS ON)
+	set(SHIPPED_CARL_USE_GINAC ON)
+else()
 	set(SHIPPED_CARL_USE_CLN_NUMBERS OFF)
 	set(SHIPPED_CARL_USE_GINAC OFF)
 endif()
+
+# Warning for Apple Silicon
+if(APPLE_SILICON)
+	message(WARNING "Compiling natively on Apple Silicon is experimental. Please report any issues to support@stormchecker.org.")
+endif()
+
 
 set(DYNAMIC_EXT ".so")
 set(STATIC_EXT ".a")
@@ -381,6 +380,51 @@ if (STORM_DEVELOPER)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-float-equal")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedef")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-variable-declarations")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-func-template")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-double-promotion")
+
+			# Reenable soon
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-virtual-dtor")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-conditional-uninitialized")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-float-conversion")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unreachable-code-break")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ctad-maybe-unsupported")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-template")
+
+			# Requires adapter
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-comma")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-used-but-marked-unused")
+
+			# Requires adapter for gmock
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undef")
+
+
+			# Conflicts with warnings in gcc
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unreachable-code-return")
+
+            # ?? unclear semantics
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ctad-maybe-unsupported")
+
+			# Potentially useful, but just too many right now
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-exception-parameter")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-zero-as-null-pointer-constant")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-shadow-field-in-constructor")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-destructor-override")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-destructor-override")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-dynamic-exception-spec")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extra-semi")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-shorten-64-to-32")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-conversion")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy-with-dtor")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-shadow-field")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-shadow")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-documentation-unknown-command")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-noreturn")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes")
+
+
+
 		endif ()
 	else ()
 	    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -390,6 +434,24 @@ if (STORM_DEVELOPER)
 else()
 	set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 endif()
+
+#############################################################
+##
+##	Set precompiled headers
+##
+#############################################################
+
+# Selection is based on (relatively extensive, but ad-hoc) compilation profiling in late 2023.
+# As changes mean recompilations of the complete code base, we only use std libraries and boost libraries here for now.
+SET(STORM_PRECOMPILED_HEADERS "<any>" "<map>" "<vector>" "<unordered_set>" "<forward_list>"
+		"<optional>" "<ostream>" "<istream>" "<list>" "<set>" "<fstream>" "<string>" "<boost/optional.hpp>" "<boost/variant.hpp>"
+		"<boost/container/flat_set.hpp>" "<boost/dynamic_bitset.hpp>" "<boost/range/irange.hpp>")
+
+#############################################################
+##
+##	Compiler tests during config
+##
+#############################################################
 
 # Test compiler by compiling small program.
 CHECK_C_SOURCE_COMPILES("
@@ -441,6 +503,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 #############################################################
 if ("${CMAKE_GENERATOR}" STREQUAL "Xcode")
+	message(WARNING "Using the XCode Project Generator has previously yielded problems. See https://github.com/moves-rwth/storm/issues/65. We recommend using the command line or an IDE with native CMAKE support, such as CLION.")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif()
@@ -548,7 +611,7 @@ message(STATUS "Storm - Version is ${STORM_VERSION_STRING} (version ${STORM_VERS
 
 # Configure a header file to pass some of the CMake settings to the source code
 configure_file (
-	"${PROJECT_SOURCE_DIR}/storm-config.h.in"
+	"${PROJECT_SOURCE_DIR}/src/storm-config.h.in"
 	"${PROJECT_BINARY_DIR}/include/storm-config.h"
 )
 

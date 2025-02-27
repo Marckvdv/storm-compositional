@@ -1,5 +1,5 @@
 #include "LeafTransformer.h"
-#include "exceptions/UnexpectedException.h"
+#include "storm/exceptions/UnexpectedException.h"
 #include "storm-compose/models/OpenMdpManager.h"
 
 namespace storm {

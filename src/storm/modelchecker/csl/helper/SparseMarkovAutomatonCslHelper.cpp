@@ -10,9 +10,6 @@
 #include "storm/exceptions/UncheckedRequirementException.h"
 #include "storm/modelchecker/prctl/helper/SparseMdpPrctlHelper.h"
 #include "storm/models/sparse/StandardRewardModel.h"
-#include "storm/settings/SettingsManager.h"
-#include "storm/settings/modules/GeneralSettings.h"
-#include "storm/settings/modules/MinMaxEquationSolverSettings.h"
 #include "storm/solver/LpSolver.h"
 #include "storm/solver/MinMaxLinearEquationSolver.h"
 #include "storm/solver/multiplier/Multiplier.h"
@@ -717,10 +714,11 @@ std::vector<ValueType> SparseMarkovAutomatonCslHelper::computeBoundedUntilProbab
 }
 
 template<typename ValueType, typename std::enable_if<!storm::NumberTraits<ValueType>::SupportsExponential, int>::type>
-std::vector<ValueType> SparseMarkovAutomatonCslHelper::computeBoundedUntilProbabilities(
-    Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix,
-    std::vector<ValueType> const& exitRateVector, storm::storage::BitVector const& markovianStates, storm::storage::BitVector const& phiStates,
-    storm::storage::BitVector const& psiStates, std::pair<double, double> const& boundsPair) {
+std::vector<ValueType> SparseMarkovAutomatonCslHelper::computeBoundedUntilProbabilities(Environment const&, storm::solver::SolveGoal<ValueType>&&,
+                                                                                        storm::storage::SparseMatrix<ValueType> const&,
+                                                                                        std::vector<ValueType> const&, storm::storage::BitVector const&,
+                                                                                        storm::storage::BitVector const&, storm::storage::BitVector const&,
+                                                                                        std::pair<double, double> const&) {
     STORM_LOG_THROW(false, storm::exceptions::InvalidOperationException, "Computing bounded until probabilities is unsupported for this value type.");
 }
 

@@ -22,12 +22,15 @@
 #include "storm/storage/dd/sylvan/utility.h"
 
 #include "storm/settings/SettingsManager.h"
+#include "storm/settings/modules/BisimulationSettings.h"
 
 #include "storm/exceptions/NotSupportedException.h"
 #include "storm/utility/macros.h"
 
 #include "storm/storage/BitVector.h"
 #include "storm/storage/SparseMatrix.h"
+
+#include "storm/adapters/RationalFunctionAdapter.h"
 
 #include <parallel_hashmap/phmap.h>
 

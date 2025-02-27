@@ -1,3 +1,6 @@
+#ifndef EXACTCACHE_H
+#define EXACTCACHE_H
+
 #include "AbstractCache.h"
 #include "storm-compose/models/ConcreteMdp.h"
 
@@ -26,3 +29,5 @@ class ExactCache : public AbstractCache<ValueType> {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* EXACTCACHE_H */

@@ -1,8 +1,7 @@
 #include "SymbioticTermination.h"
 
-#include "exceptions/NotSupportedException.h"
-#include "storage/prism/Program.h"
-#include "storm-compose-cli/settings/modules/ComposeIOSettings.h"
+#include "storm/exceptions/NotSupportedException.h"
+#include "storm/storage/prism/Program.h"
 #include "storm-compose/models/visitor/EntranceExitVisitor.h"
 #include "storm-compose/models/visitor/FlatMdpBuilderVisitor.h"
 #include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"

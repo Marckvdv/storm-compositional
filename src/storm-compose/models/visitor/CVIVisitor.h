@@ -1,7 +1,8 @@
-#pragma once
+#ifndef CVIVISITOR_H
+#define CVIVISITOR_H
 
 #include "OpenMdpVisitor.h"
-#include "storage/Scheduler.h"
+#include "storm/storage/Scheduler.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/modelchecker/CompositionalValueIteration.h"
 #include "storm-compose/storage/AbstractCache.h"
@@ -49,3 +50,5 @@ class CVIVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* CVIVISITOR_H */

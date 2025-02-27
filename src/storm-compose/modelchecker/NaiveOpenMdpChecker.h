@@ -1,4 +1,5 @@
-#pragma once
+#ifndef NAIVEOPENMDPCHECKER_H
+#define NAIVEOPENMDPCHECKER_H
 
 #include "AbstractOpenMdpChecker.h"
 #include "storm-compose/models/visitor/LowerUpperParetoVisitor.h"
@@ -19,3 +20,5 @@ class NaiveOpenMdpChecker : public AbstractOpenMdpChecker<ValueType> {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* NAIVEOPENMDPCHECKER_H */

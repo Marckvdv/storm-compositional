@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ABSTRACTPARETOCURVE_H
+#define ABSTRACTPARETOCURVE_H
 
 namespace storm {
 namespace storage {
@@ -11,3 +12,5 @@ class AbstractParetoCurve {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* ABSTRACTPARETOCURVE_H */

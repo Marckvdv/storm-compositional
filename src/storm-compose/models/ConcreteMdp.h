@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONCRETEMDP_H
+#define CONCRETEMDP_H
 
 #include "OpenMdp.h"
 #include "storm-compose/models/visitor/OpenMdpVisitor.h"
@@ -52,3 +53,5 @@ class ConcreteMdp : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* CONCRETEMDP_H */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ABSTRACTOPENMDPCHECKER_H
+#define ABSTRACTOPENMDPCHECKER_H
 
 #include "storm-compose/benchmark/BenchmarkStats.h"
 #include "storm-compose/models/OpenMdpManager.h"
@@ -70,3 +71,5 @@ class AbstractOpenMdpChecker {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* ABSTRACTOPENMDPCHECKER_H */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PRISMMODEL_H
+#define PRISMMODEL_H
 
 #include "ConcreteMdp.h"
 #include "OpenMdp.h"
@@ -44,3 +45,5 @@ class PrismModel : public OpenMdp<ValueType> {
 
 }  // namespace models
 }  // namespace storm
+
+#endif /* PRISMMODEL_H */

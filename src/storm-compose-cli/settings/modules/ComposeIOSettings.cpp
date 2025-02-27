@@ -15,6 +15,7 @@ namespace modules {
 
 const std::string ComposeIOSettings::moduleName = "compose";
 const std::string ComposeIOSettings::stringDiagramOption = "stringdiagram";
+const std::string ComposeIOSettings::dfaPropOption = "dfaProp";
 const std::string ComposeIOSettings::entranceName = "entrance";
 const std::string ComposeIOSettings::exitName = "exit";
 const std::string ComposeIOSettings::approachName = "approach";
@@ -37,6 +38,7 @@ const std::string ComposeIOSettings::useRecursiveParetoComputationName = "useRec
 
 ComposeIOSettings::ComposeIOSettings() : ModuleSettings(moduleName) {
     addStringOption(stringDiagramOption, "load the given string diagram", "filename", "The path of the file to load (json).");
+    addStringOption(dfaPropOption, "load the given DFA property", "filename", "The path of the file to load (dfa).");
     addStringOption(entranceName, "entrance to consider as the initial state of the string diagram", "entrance",
                     "<l|r><number> e.g. l5 is left entrance 5, default: l0");
     addStringOption(exitName, "exit to consider as the target state of the string diagram", "exit", "<l|r><number> e.g. r3 is right exit 3, default: r0");
@@ -72,6 +74,10 @@ void ComposeIOSettings::finalize() {}
 
 bool ComposeIOSettings::isStringDiagramSet() const {
     return this->getOption(stringDiagramOption).getHasOptionBeenSet();
+}
+
+bool ComposeIOSettings::isDfaPropSet() const {
+    return this->getOption(dfaPropOption).getHasOptionBeenSet();
 }
 
 bool ComposeIOSettings::isEntranceSet() const {
@@ -152,6 +158,10 @@ bool ComposeIOSettings::isUseRecursiveParetoComputationSet() const {
 
 std::string ComposeIOSettings::getStringDiagramFilename() const {
     return this->getOption(stringDiagramOption).getArgumentByName("filename").getValueAsString();
+}
+
+std::string ComposeIOSettings::getDfaPropFilename() const {
+    return this->getOption(dfaPropOption).getArgumentByName("filename").getValueAsString();
 }
 
 std::string ComposeIOSettings::getEntrance() const {

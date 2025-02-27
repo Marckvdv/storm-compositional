@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARETOCACHE_H
+#define PARETOCACHE_H
 
 #include "AbstractCache.h"
 #include "EntranceExit.h"
@@ -60,3 +61,5 @@ class ParetoCache : public AbstractCache<ValueType> {
 
 }  // namespace storage
 }  // namespace storm
+
+#endif /* PARETOCACHE_H */

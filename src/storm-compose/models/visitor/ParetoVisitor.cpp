@@ -1,7 +1,8 @@
 #include "ParetoVisitor.h"
 
-#include "storage/prism/Program.h"
+#include "storm/storage/prism/Program.h"
 #include "storm-parsers/api/storm-parsers.h"
+#include "storm-parsers/parser/ExpressionParser.h"
 #include "storm-parsers/parser/FormulaParser.h"
 #include "storm/api/storm.h"
 #include "storm/environment/modelchecker/MultiObjectiveModelCheckerEnvironment.h"

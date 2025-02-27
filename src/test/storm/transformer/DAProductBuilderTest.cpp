@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+
 #include "storm-config.h"
 #include "storm-parsers/parser/PrismParser.h"
 #include "storm/automata/DeterministicAutomaton.h"
@@ -8,6 +8,7 @@
 #include "storm/models/sparse/StandardRewardModel.h"
 #include "storm/settings/SettingMemento.h"
 #include "storm/settings/modules/IOSettings.h"
+#include "test/storm_gtest.h"
 
 #include "storm/storage/BitVector.h"
 #include "storm/transformer/DAProductBuilder.h"
@@ -17,6 +18,9 @@
 #include <string>
 
 TEST(DAProductBuilderTest_aUb, Dtmc) {
+#ifndef STORM_HAVE_Z3
+    GTEST_SKIP() << "Z3 not available.";
+#endif
     storm::prism::Program program = storm::parser::PrismParser::parse(STORM_TEST_RESOURCES_DIR "/dtmc/die.pm");
 
     std::shared_ptr<storm::models::sparse::Model<double>> model = storm::builder::ExplicitModelBuilder<double>(program).build();
@@ -83,6 +87,9 @@ TEST(DAProductBuilderTest_aUb, Dtmc) {
 }
 
 TEST(DAProductBuilderTest_aWb, Dtmc) {
+#ifndef STORM_HAVE_Z3
+    GTEST_SKIP() << "Z3 not available.";
+#endif
     storm::prism::Program program = storm::parser::PrismParser::parse(STORM_TEST_RESOURCES_DIR "/dtmc/die.pm");
 
     std::shared_ptr<storm::models::sparse::Model<double>> model = storm::builder::ExplicitModelBuilder<double>(program).build();

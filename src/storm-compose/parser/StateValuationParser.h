@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATEVALUATIONPARSER_H
+#define STATEVALUATIONPARSER_H
 
 #include "storm/storage/sparse/StateValuations.h"
 
@@ -19,3 +20,5 @@ class StateValuationParser {
 
 }  // namespace parser
 }  // namespace storm
+
+#endif /* STATEVALUATIONPARSER_H */

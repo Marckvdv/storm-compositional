@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BENCHMARKSTATSVISITOR_H
+#define BENCHMARKSTATSVISITOR_H
 
 #include "OpenMdpVisitor.h"
 #include "storm-compose/benchmark/BenchmarkStats.h"
@@ -34,3 +35,5 @@ class BenchmarkStatsVisitor : public OpenMdpVisitor<ValueType> {
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* BENCHMARKSTATSVISITOR_H */

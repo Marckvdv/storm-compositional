@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENMDPVISITOR_H
+#define OPENMDPVISITOR_H
 
 #include "storm-compose/models/ConcreteMdp.h"
 #include "storm-compose/models/OpenMdp.h"
@@ -73,3 +74,5 @@ OpenMdpVisitor<ValueType>::~OpenMdpVisitor() {}
 }  // namespace visitor
 }  // namespace models
 }  // namespace storm
+
+#endif /* OPENMDPVISITOR_H */

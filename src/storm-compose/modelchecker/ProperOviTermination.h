@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROPEROVITERMINATION_H
+#define PROPEROVITERMINATION_H
 
 #include <queue>
 
@@ -44,3 +45,5 @@ class ProperOviTermination {
 
 }  // namespace modelchecker
 }  // namespace storm
+
+#endif /* PROPEROVITERMINATION_H */
